@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
@@ -34,7 +35,7 @@
         }
     </style>
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEMllq0XFk6FLgaI1TCQRu8alHvLo3G8RCXhwi0CggzLgbkNVcKl1QUzUjEHIbxMoD4g/exec"; // আপনার Google Apps Script URL এখানে বসান (ফাঁকা থাকলে লোকাল মোডে চলবে)
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAs9zrzE8BvwbRNowUU741GBegCY9bK8mZNE_gSypKpErW58D3eOrT7YZ3htpY5T5zgQ/exec"; // আপনার Google Apps Script URL
     </script>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
@@ -124,21 +125,38 @@
             </form>
         </div>
 
-        <!-- TOP CENTERED USER PROFILE CARD -->
-        <div id="topProfileCard" class="hidden flex justify-center">
-            <div class="bg-white rounded-2xl border px-6 py-4 shadow-sm flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left max-w-lg w-full justify-center">
-                <div class="relative w-16 h-16 rounded-2xl bg-slate-200 overflow-hidden flex items-center justify-center font-bold text-slate-500 text-xl shrink-0 border-2 border-red-100 shadow-sm">
+        <!-- TOP PROFILE CARD & COMPACT WINNER OF HONOR CONTAINER -->
+        <div id="topProfileAndWinnerContainer" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+            <!-- TOP CENTERED USER PROFILE CARD -->
+            <div id="topProfileCard" class="bg-white rounded-2xl border px-5 py-3.5 shadow-sm flex items-center gap-4">
+                <div class="relative w-14 h-14 rounded-2xl bg-slate-200 overflow-hidden flex items-center justify-center font-bold text-slate-500 text-lg shrink-0 border-2 border-red-100 shadow-sm">
                     <span id="profileAvatarText">BM</span>
                     <img id="profileAvatarImg" class="w-full h-full object-cover hidden" alt="Profile">
                 </div>
                 <div class="space-y-0.5 overflow-hidden">
-                    <h3 id="headerUserName" class="text-base sm:text-lg font-bold text-slate-800 truncate">ইউজার নাম</h3>
-                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
-                        <span id="headerUserDept" class="text-[11px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-md font-semibold">ডিপার্টমেন্ট</span>
-                        <span id="headerUserRole" class="text-xs text-slate-600 font-semibold">পদবী</span>
+                    <h3 id="headerUserName" class="text-sm font-bold text-slate-800 truncate">ইউজার নাম</h3>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span id="headerUserDept" class="text-[10px] bg-red-50 text-red-700 border border-red-200 px-1.5 py-0.2 rounded font-semibold">ডিপার্টমেন্ট</span>
+                        <span id="headerUserRole" class="text-[11px] text-slate-600 font-semibold">পদবী</span>
                     </div>
-                    <p id="headerUserId" class="text-[11px] text-slate-400 font-mono">ID: --</p>
-                    <p id="headerUserOrg" class="text-[11px] text-slate-500 truncate">বাচ্চু মটরস</p>
+                    <p id="headerUserId" class="text-[10px] text-slate-400 font-mono">ID: --</p>
+                </div>
+            </div>
+
+            <!-- COMPACT WINNER OF HONOR (MONTH'S BEST WORKER) -->
+            <div id="trophyBanner" class="hidden bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-2xl p-3.5 shadow-sm flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white/20 w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-yellow-200 shadow-inner">
+                        <i class="fa-solid fa-trophy text-sm"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-[9px] font-bold uppercase tracking-wider text-amber-100">মাসের সেরা কর্মী (Honor)</p>
+                        <h4 id="winnerName" class="text-xs font-extrabold truncate">হিসাব করা হচ্ছে...</h4>
+                        <p id="winnerDept" class="text-[10px] text-amber-100 truncate"></p>
+                    </div>
+                </div>
+                <div>
+                    <img id="winnerPhoto" src="" alt="Winner" class="w-12 h-12 rounded-full border-2 border-white object-cover shadow hidden shrink-0">
                 </div>
             </div>
         </div>
@@ -171,31 +189,6 @@
                 </details>
             </div>
         </div>
-
-        <!-- TROPHY BANNER (WINNER OF HONOR WITH PHOTO, NAME & DEPARTMENT) -->
-        <!-- মাসের সেরা কর্মী ব্যানার -->
-<div id="trophyBanner" class="hidden bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-2xl p-4 md:p-5 flex justify-between items-center shadow-lg relative my-4">
-    
-    <!-- বাম পাশ: ট্রফি আইকন এবং নাম -->
-    <div class="flex items-center gap-4">
-        <!-- ট্রফি আইকন -->
-        <div class="bg-white/30 w-12 h-12 flex items-center justify-center rounded-full shadow-inner shrink-0">
-            <i class="fa-solid fa-trophy text-white text-xl"></i>
-        </div>
-        
-        <!-- টেক্সট ও নাম -->
-        <div class="text-left space-y-0.5">
-            <p class="text-[10px] text-amber-100 font-bold uppercase tracking-wider">মাসের সেরা কর্মী (Winner of Honor)</p>
-            <h3 id="winnerName" class="text-sm md:text-lg text-white font-extrabold">হিসাব করা হচ্ছে...</h3>
-            <p id="winnerDept" class="text-xs text-amber-100 font-medium"></p>
-        </div>
-    </div>
-
-    <!-- ডান পাশ: কর্মীর প্রফাইল ছবি -->
-    <div>
-        <img id="winnerPhoto" src="" alt="Winner Photo" class="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-white shadow-md hidden object-cover">
-    </div>
-</div>
 
         <!-- STAFF PANEL -->
         <div id="staffPanel" class="hidden space-y-5 sm:space-y-6">
@@ -991,33 +984,29 @@
             document.getElementById("userBadge").classList.remove("hidden");
             document.getElementById("noticeBoardsContainer").classList.remove("hidden");
             document.getElementById("roleTag").innerText = user.role;
-            document.getElementById("topProfileCard").classList.remove("hidden");
+            document.getElementById("topProfileAndWinnerContainer").classList.remove("hidden");
             
             document.getElementById("headerUserDept").innerText = user.department || "সাধারণ বিভাগ";
 
             if (user.type === "admin") {
                 document.getElementById("headerUserName").innerText = user.name || "জিয়াউল হাসান";
                 document.getElementById("headerUserRole").innerText = "ম্যানেজিং ডিরেক্টর";
-                document.getElementById("headerUserOrg").innerText = "বাচ্চু গ্রুপ, মাদারীপুর (টু হুইলার বিজনেস)";
                 document.getElementById("editAuthNoticeBtn").classList.remove("hidden");
                 document.getElementById("trophyBanner").classList.remove("hidden");
                 calculateWinnerOfHonor();
             } else if (user.type === "superadmin") {
                 document.getElementById("headerUserName").innerText = user.name || "সুপার অ্যাডমিন";
                 document.getElementById("headerUserRole").innerText = "ফিন্যান্স অ্যান্ড অডিট";
-                document.getElementById("headerUserOrg").innerText = "বাচ্চু গ্রুপ, মাদারীপুর (টু হুইলার বিজনেস)";
                 document.getElementById("editMgmtNoticeBtn").classList.remove("hidden");
                 document.getElementById("trophyBanner").classList.remove("hidden");
                 calculateWinnerOfHonor();
             } else if (user.type === "manager") {
                 document.getElementById("headerUserName").innerText = user.name;
                 document.getElementById("headerUserRole").innerText = user.role || "শোরুম ম্যানেজার";
-                document.getElementById("headerUserOrg").innerText = "বাচ্চু মটরস";
                 document.getElementById("editMgmtNoticeBtn").classList.remove("hidden");
             } else {
                 document.getElementById("headerUserName").innerText = user.name;
                 document.getElementById("headerUserRole").innerText = user.role;
-                document.getElementById("headerUserOrg").innerText = "বাচ্চু মটরস";
             }
             
             document.getElementById("headerUserId").innerText = `ID: ${user.id}`;
@@ -1865,708 +1854,5 @@
                     loadLeavesData();
                 } else if (tab === 'attAppTab') {
                     document.getElementById("superAdminAttApprovalSection").classList.remove("hidden");
-                    document.getElementById("ownerBtnAttAppTab").className = "bg-red-600 text-white px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-semibold shadow mobile-compact-btn";
-                    loadAttApplicationsData();
-                } else if (tab === 'auditTab') {
-                    document.getElementById("superAdminAuditSection").classList.remove("hidden");
-                    document.getElementById("ownerBtnAuditTab").className = "bg-red-600 text-white px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-semibold shadow mobile-compact-btn";
-                    loadAuditLogs();
-                } else if (tab === 'profileTab') {
-                    document.getElementById("superAdminProfileSection").classList.remove("hidden");
-                    document.getElementById("ownerBtnProfTab").className = "bg-red-600 text-white px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-semibold shadow mobile-compact-btn";
-                    document.getElementById("ownerProfPhone").value = currentUser.phone || "";
-                    document.getElementById("ownerProfAddress").value = currentUser.address || "";
-                    document.getElementById("ownerProfEmergency").value = currentUser.emergency || "";
-                }
-            }
-        }
-
-        async function updateProfile(e) {
-            e.preventDefault();
-            let btn, phone, address, emergency, newPass;
-            if (currentUser.type === 'staff') {
-                btn = document.getElementById("profUpdateBtn");
-                phone = document.getElementById("profPhone").value.trim();
-                address = document.getElementById("profAddress").value.trim();
-                emergency = document.getElementById("profEmergency").value.trim();
-                newPass = document.getElementById("profNewPass").value.trim();
-            } else if (currentUser.type === 'manager') {
-                btn = document.getElementById("mgrProfUpdateBtn");
-                phone = document.getElementById("mgrProfPhone").value.trim();
-                address = document.getElementById("mgrProfAddress").value.trim();
-                emergency = document.getElementById("mgrProfEmergency").value.trim();
-                newPass = document.getElementById("mgrProfNewPass").value.trim();
-            } else if (currentUser.type === 'admin') {
-                btn = document.getElementById("adminProfUpdateBtn");
-                phone = document.getElementById("adminProfPhone").value.trim();
-                address = document.getElementById("adminProfAddress").value.trim();
-                emergency = document.getElementById("adminProfEmergency").value.trim();
-                newPass = document.getElementById("adminProfNewPass").value.trim();
-            } else {
-                btn = document.getElementById("ownerProfUpdateBtn");
-                phone = document.getElementById("ownerProfPhone").value.trim();
-                address = document.getElementById("ownerProfAddress").value.trim();
-                emergency = document.getElementById("ownerProfEmergency").value.trim();
-                newPass = document.getElementById("ownerProfNewPass").value.trim();
-            }
-
-            btn.innerText = "আপডেট হচ্ছে...";
-            btn.disabled = true;
-
-            const payload = {
-                action: "updateUser", id: currentUser.id, phone: phone, address: address, emergency: emergency,
-                pass: newPass ? newPass : currentUser.pass, photo: uploadedProfilePhoto || currentUser.photo || ""
-            };
-
-            try {
-                if (SCRIPT_URL) {
-                    await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-                }
-                currentUser.phone = phone; currentUser.address = address; currentUser.emergency = emergency; currentUser.pass = payload.pass;
-                if (payload.photo) currentUser.photo = payload.photo;
-                localStorage.setItem('bachchu_logged_in_user', JSON.stringify(currentUser));
-                
-                // Update local user list too
-                let allU = getUsersFromLocal();
-                let idx = allU.findIndex(u => String(u.id) === String(currentUser.id));
-                if (idx !== -1) {
-                    allU[idx] = { ...allU[idx], ...currentUser };
-                    localStorage.setItem('bachchu_users', JSON.stringify(allU));
-                }
-
-                logAuditAction("Profile Update", `${currentUser.name} প্রফাইল আপডেট করেছেন`);
-                triggerSuccessTick("প্রফাইল সফলভাবে আপডেট হয়েছে!");
-            } catch (err) { showToast("ত্রুটি", "আপডেট করা সম্ভব হয়নি!", "error"); }
-            btn.innerText = "প্রফাইল আপডেট করুন";
-            btn.disabled = false;
-        }
-
-        async function recordAttendanceAction(type) {
-            await processAttendanceForUser(currentUser, type, capturedPhotoData);
-            capturedPhotoData = null;
-            document.getElementById("photoPreview").classList.add("hidden");
-            loadStaffData();
-        }
-
-        async function recordManagerAttendance(type) {
-            await processAttendanceForUser(currentUser, type, mgrCapturedPhoto);
-            mgrCapturedPhoto = null;
-            document.getElementById("mgrPhotoPreview").classList.add("hidden");
-            loadManagerView();
-        }
-
-        function format12Hour(timeStr) {
-            if (!timeStr) return '-';
-            let cleanStr = String(timeStr).trim();
-            if (cleanStr.toUpperCase().includes('AM') || cleanStr.toUpperCase().includes('PM')) {
-                return cleanStr;
-            }
-            let parts = cleanStr.split(':');
-            if (parts.length < 2) return cleanStr;
-            let h = parseInt(parts[0], 10);
-            let m = parts[1].substring(0, 2);
-            if (isNaN(h)) return cleanStr;
-            let ampm = h >= 12 ? 'PM' : 'AM';
-            h = h % 12;
-            h = h ? h : 12;
-            return `${h < 10 ? '0' + h : h}:${m} ${ampm}`;
-        }
-
-        async function processAttendanceForUser(user, type, photoData) {
-            const todayStr = new Date().toLocaleDateString();
-            const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-            try {
-                if (SCRIPT_URL) {
-                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-                    globalAttendance = await res.json();
-                } else {
-                    globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
-                }
-            } catch (e) {
-                globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
-            }
-            let todayRecord = globalAttendance.find(r => String(r.staffId) === String(user.id) && String(r.dateStr) === String(todayStr));
-
-            if (type === 'in') {
-                if (todayRecord) return showToast("ইনফরমেশন", "আজকের ইন-টাইম আগেই দেওয়া হয়েছে!", "info");
-                if (!photoData) return showToast("সতর্কতা", "ইন-টাইমের জন্য ছবি তুলুন!", "error");
-                let now = new Date();
-                let isLate = (now.getHours() > 9 || (now.getHours() === 9 && now.getMinutes() > 30));
-                let status = isLate ? "Late" : "Present";
-                const payload = {
-                    action: "addAttendance", staffId: user.id, staffName: user.name,
-                    dateStr: todayStr, inTime: nowTime, inPhoto: photoData, inStatus: status,
-                    lunchOut: "", lunchIn: "", outTime: "", outPhoto: "", totalDuty: "", diffDuty: "", location: currentGpsLocation
-                };
-                globalAttendance.push(payload);
-                localStorage.setItem('bachchu_attendance_cache', JSON.stringify(globalAttendance));
-                if (SCRIPT_URL) {
-                    try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) }); } catch (e) {}
-                }
-                logAuditAction("Attendance In", `${user.name} ইন-টাইম দিয়েছেন (${status})`);
-                triggerSuccessTick(`ইন-টাইম সফল (${status})!`);
-            } else {
-                if (!todayRecord) return showToast("সতর্কতা", "প্রথমে আজকের ইন-টাইম দিন!", "error");
-                if (type === 'out') {
-                    if (todayRecord.outTime) return showToast("ইনফরমেশন", "আউট-টাইম আগেই দেওয়া হয়েছে!", "info");
-                    if (!photoData) return showToast("সতর্কতা", "আউট-টাইমের জন্য ছবি তুলুন!", "error");
-                    let inT = new Date(todayStr + " " + todayRecord.inTime);
-                    let outT = new Date();
-                    let diffMs = outT - inT;
-                    let totalHours = isNaN(diffMs) ? "8.00" : (diffMs / (1000 * 60 * 60)).toFixed(2);
-                    todayRecord.outTime = nowTime;
-                    todayRecord.outPhoto = photoData;
-                    todayRecord.totalDuty = totalHours + " ঘণ্টা";
-                    todayRecord.diffDuty = "সফল";
-                    localStorage.setItem('bachchu_attendance_cache', JSON.stringify(globalAttendance));
-                    if (SCRIPT_URL) {
-                        try {
-                            await fetch(SCRIPT_URL, {
-                                method: "POST",
-                                body: JSON.stringify({
-                                    action: "updateAttendance", staffId: user.id, dateStr: todayStr,
-                                    outTime: nowTime, outPhoto: photoData, totalDuty: totalHours + " ঘণ্টা", diffDuty: "সফল"
-                                })
-                            });
-                        } catch (e) {}
-                    }
-                    logAuditAction("Attendance Out", `${user.name} আউট-টাইম দিয়েছেন। মোট ডিউটি: ${totalHours} ঘণ্টা`);
-                    triggerSuccessTick(`আউট-টাইম সফল! ডিউটি: ${totalHours} ঘণ্টা`);
-                } else if (type === 'lunchOut') {
-                    todayRecord.lunchOut = nowTime;
-                    localStorage.setItem('bachchu_attendance_cache', JSON.stringify(globalAttendance));
-                    if (SCRIPT_URL) {
-                        try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "updateAttendance", staffId: user.id, dateStr: todayStr, lunchOut: nowTime }) }); } catch (e) {}
-                    }
-                    triggerSuccessTick("লাঞ্চ আউট সফল!");
-                } else if (type === 'lunchIn') {
-                    todayRecord.lunchIn = nowTime;
-                    localStorage.setItem('bachchu_attendance_cache', JSON.stringify(globalAttendance));
-                    if (SCRIPT_URL) {
-                        try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "updateAttendance", staffId: user.id, dateStr: todayStr, lunchIn: nowTime }) }); } catch (e) {}
-                    }
-                    triggerSuccessTick("লাঞ্চ ইন সফল!");
-                }
-            }
-        }
-
-        async function loadStaffData() {
-            try {
-                if (SCRIPT_URL) {
-                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-                    globalAttendance = await res.json();
-                } else {
-                    globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
-                }
-            } catch (e) { globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]'); }
-            const myRecords = globalAttendance.filter(r => String(r.staffId) === String(currentUser.id));
-            document.getElementById("staffHistoryContainer").innerHTML = myRecords.length === 0 ? `<p class="text-xs text-slate-400 text-center py-4">কোনো হাজিরা রেকর্ড নেই</p>` : `
-                <table class="w-full text-xs text-left border">
-                    <tr class="bg-slate-100"><th class="p-2">তারিখ</th><th class="p-2">ইন</th><th class="p-2">লাঞ্চ আউট-ইন</th><th class="p-2">আউট</th><th class="p-2">ডিউটি</th></tr>
-                    ${myRecords.slice(-5).reverse().map(r => `<tr><td class="p-2">${r.dateStr}</td><td class="p-2">${format12Hour(r.inTime)}</td><td class="p-2">${format12Hour(r.lunchOut)} - ${format12Hour(r.lunchIn)}</td><td class="p-2">${format12Hour(r.outTime)}</td><td class="p-2">${r.totalDuty||'-'}</td></tr>`).join('')}
-                </table>
-            `;
-            renderMonthlyDetailedReport('staff');
-        }
-
-        async function loadManagerView() {
-            try {
-                if (SCRIPT_URL) {
-                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-                    globalAttendance = await res.json();
-                } else {
-                    globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
-                }
-            } catch (e) { globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]'); }
-            const todayStr = new Date().toLocaleDateString();
-            const todaysRecords = globalAttendance.filter(r => String(r.dateStr) === String(todayStr));
-
-            document.getElementById("managerTodayStaffSummary").innerHTML = todaysRecords.length === 0 ? `<p class="text-slate-400 text-xs">আজ এখনো কেউ হাজিরা দেয়নি</p>` : `
-                <table class="w-full text-xs text-left border">
-                    <tr class="bg-slate-100"><th class="p-2">আইডি</th><th class="p-2">নাম</th><th class="p-2">ইন-টাইম</th><th class="p-2">লাঞ্চ</th><th class="p-2">আউট</th></tr>
-                    ${todaysRecords.map(r => `<tr><td class="p-2 font-bold">${r.staffId}</td><td class="p-2">${r.staffName}</td><td class="p-2">${format12Hour(r.inTime)}</td><td class="p-2">${r.lunchOut ? format12Hour(r.lunchOut)+' - '+format12Hour(r.lunchIn) : 'না'}</td><td class="p-2">${format12Hour(r.outTime)}</td></tr>`).join('')}
-                </table>
-            `;
-            renderMonthlyDetailedReport('manager');
-        }
-
-        function generateMonthlyTableHtmlForUser(targetUserId, monthVal) {
-            const [year, month] = monthVal.split('-').map(Number);
-            const daysInMonth = new Date(year, month, 0).getDate();
-            let tableHtml = '', totalPresentDays = 0, totalAppPresentDays = 0, totalLateDays = 0, totalAbsentDays = 0;
-
-            const allAtt = SCRIPT_URL ? globalAttendance : JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
-            const myRecords = allAtt.filter(r => String(r.staffId) === String(targetUserId));
-            const myApprovedAttApps = globalAttApplications.filter(a => String(a.staffId) === String(targetUserId) && (a.finalApproval === 'Approved' || a.status === 'Approved (Final)'));
-            const myApprovedLeaves = globalLeaves.filter(l => String(l.staffId) === String(targetUserId) && l.finalApproval === 'Approved');
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                let dateObj = new Date(year, month - 1, day);
-                let isoDateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                let dayName = dateObj.toLocaleDateString('bn-BD', { weekday: 'long' });
-                let formattedDateNum = `${day} ${dateObj.toLocaleDateString('bn-BD', { month: 'long', year: 'numeric' })} (${dayName})`;
-
-                let matched = myRecords.find(r => {
-                    let d = new Date(r.dateStr);
-                    return d.getDate() === day && (d.getMonth() + 1) === month && d.getFullYear() === year;
-                });
-
-                let matchedAttApp = myApprovedAttApps.find(a => a.dateStr === isoDateStr);
-                let matchedLeave = myApprovedLeaves.find(l => isoDateStr >= l.startDate && isoDateStr <= l.endDate);
-
-                let rowBg = "bg-rose-100 text-rose-900 border-rose-300";
-                let statusBadge = `<span class="bg-rose-200 text-rose-800 px-2 py-0.5 rounded font-bold text-[10px]">অনুপস্থিত</span>`;
-                let inT = '-', lOut = '-', lIn = '-', outT = '-', totalLunch = '-', totalDuty = '-';
-
-                if (matched && matched.inStatus === 'AppPresent') {
-                    totalAppPresentDays++;
-                    inT = format12Hour(matched.inTime);
-                    lOut = format12Hour(matched.lunchOut);
-                    lIn = format12Hour(matched.lunchIn);
-                    outT = format12Hour(matched.outTime);
-                    totalDuty = matched.totalDuty || '8.00 ঘণ্টা';
-                    rowBg = "bg-blue-100 text-blue-950 border-blue-300";
-                    statusBadge = `<span class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold text-[10px]">প্রেজেন্ট (আবেদন)</span>`;
-                } else if (matchedAttApp) {
-                    totalAppPresentDays++;
-                    inT = format12Hour(matchedAttApp.inTime) !== '-' ? format12Hour(matchedAttApp.inTime) : '09:00 AM';
-                    lOut = format12Hour(matchedAttApp.lunchOut);
-                    lIn = format12Hour(matchedAttApp.lunchIn);
-                    outT = format12Hour(matchedAttApp.outTime) !== '-' ? format12Hour(matchedAttApp.outTime) : '06:00 PM';
-                    
-                    let inD = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.inTime || '09:00 AM'}`);
-                    let outD = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.outTime || '06:00 PM'}`);
-                    let tMs = outD - inD;
-                    let lMs = 0;
-                    if (matchedAttApp.lunchOut && matchedAttApp.lunchIn) {
-                        let lO = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.lunchOut}`);
-                        let lI = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.lunchIn}`);
-                        if (lI > lO) lMs = lI - lO;
-                    }
-                    let netMs = tMs - lMs;
-                    let hrs = netMs > 0 ? (netMs / (1000 * 60 * 60)).toFixed(2) : "8.00";
-                    totalDuty = `${hrs} ঘণ্টা (আবেদনকৃত)`;
-
-                    rowBg = "bg-blue-100 text-blue-950 border-blue-300";
-                    statusBadge = `<span class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold text-[10px]">প্রেজেন্ট (আবেদন)</span>`;
-                } else if (matchedLeave) {
-                    totalAppPresentDays++;
-                    inT = "অনুমোদিত ছুটি";
-                    totalDuty = `8.00 ঘণ্টা (${matchedLeave.type})`;
-                    rowBg = "bg-blue-100 text-blue-950 border-blue-300";
-                    statusBadge = `<span class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold text-[10px]">প্রেজেন্ট (ছুটি)</span>`;
-                } else if (matched) {
-                    inT = format12Hour(matched.inTime);
-                    lOut = format12Hour(matched.lunchOut);
-                    lIn = format12Hour(matched.lunchIn);
-                    outT = format12Hour(matched.outTime);
-                    totalDuty = matched.totalDuty || '-';
-
-                    if (matched.lunchOut && matched.lunchIn) {
-                        let lOutTime = new Date(`1970-01-01 ${matched.lunchOut}`);
-                        let lInTime = new Date(`1970-01-01 ${matched.lunchIn}`);
-                        let diffMin = Math.round((lInTime - lOutTime) / 60000);
-                        if (diffMin > 0) {
-                            let lh = Math.floor(diffMin / 60);
-                            let lm = diffMin % 60;
-                            totalLunch = lh > 0 ? `${lh} ঘণ্টা ${lm} মিনিট` : `${lm} মিনিট`;
-                        }
-                    }
-
-                    if (matched.inStatus === 'Late') {
-                        totalLateDays++;
-                        rowBg = "bg-amber-100 text-amber-900 border-amber-300";
-                        statusBadge = `<span class="bg-amber-200 text-amber-800 px-2 py-0.5 rounded font-bold text-[10px]">লেট</span>`;
-                    } else {
-                        totalPresentDays++;
-                        rowBg = "bg-emerald-100 text-emerald-900 border-emerald-300";
-                        statusBadge = `<span class="bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded font-bold text-[10px]">প্রেজেন্ট</span>`;
-                    }
-                } else {
-                    totalAbsentDays++;
-                }
-
-                tableHtml += `
-                    <tr class="${rowBg} border-b">
-                        <td class="p-2 border font-bold">${formattedDateNum}</td>
-                        <td class="p-2 border">${inT}</td>
-                        <td class="p-2 border">${lOut}</td>
-                        <td class="p-2 border">${lIn}</td>
-                        <td class="p-2 border">${outT}</td>
-                        <td class="p-2 border">${totalLunch}</td>
-                        <td class="p-2 border font-semibold">${totalDuty}</td>
-                        <td class="p-2 border text-center">${statusBadge}</td>
-                    </tr>
-                `;
-            }
-
-            return {
-                rowsHtml: tableHtml,
-                summaryHtml: `মোট দিন: ${daysInMonth} দিন | প্রেজেন্ট: <strong class="text-emerald-700">${totalPresentDays}</strong> | আবেদন/ছুটি: <strong class="text-blue-700">${totalAppPresentDays}</strong> | লেট: <strong class="text-amber-700">${totalLateDays}</strong> | অনুপস্থিত: <strong class="text-rose-700">${totalAbsentDays}</strong>`
-            };
-        }
-
-        function renderMonthlyDetailedReport(roleType) {
-            const pickerId = roleType === 'manager' ? "mgrMonthPicker" : "staffMonthPicker";
-            const tableBodyId = roleType === 'manager' ? "mgrMonthlyDetailedTableBody" : "staffMonthlyDetailedTableBody";
-            const badgeId = roleType === 'manager' ? "mgrMonthlySummaryBadge" : "monthlySummaryBadge";
-
-            const monthVal = document.getElementById(pickerId).value;
-            if (!monthVal) return;
-
-            const result = generateMonthlyTableHtmlForUser(currentUser.id, monthVal);
-            document.getElementById(tableBodyId).innerHTML = result.rowsHtml;
-            document.getElementById(badgeId).innerHTML = `<i class="fa-solid fa-calendar-days mr-1.5 text-red-600"></i>${result.summaryHtml}`;
-        }
-
-        // UNIFIED MONTHLY REPORT LOADER FOR MANAGER, ADMIN & SUPER ADMIN
-        async function populateStaffDropdownForReport(panelRole) {
-            let users = getUsersFromLocal();
-            if (SCRIPT_URL) {
-                try {
-                    const res = await fetch(`${SCRIPT_URL}?action=getUsers`);
-                    const rUsers = await res.json();
-                    if (rUsers && rUsers.length > 0) users = rUsers;
-                } catch (e) {}
-            }
-            const staffAndMgrList = users.filter(u => u.type === 'staff' || u.type === 'manager');
-            let selectId = panelRole === 'mgr' ? "mgrReportStaffSelect" : (panelRole === 'admin' ? "adminReportStaffSelect" : "reportStaffSelect");
-            const selElem = document.getElementById(selectId);
-            if (selElem) {
-                selElem.innerHTML = staffAndMgrList.map(u => `<option value="${u.id}">${u.name} (${u.id} - ${u.department || ''} - ${u.role})</option>`).join('');
-                loadIndividualMonthlyReportForPanel(panelRole);
-            }
-        }
-
-        async function loadIndividualMonthlyReportForPanel(panelRole) {
-            let selectId = panelRole === 'mgr' ? "mgrReportStaffSelect" : (panelRole === 'admin' ? "adminReportStaffSelect" : "reportStaffSelect");
-            let monthId = panelRole === 'mgr' ? "mgrReportMonthPicker" : (panelRole === 'admin' ? "adminReportMonthPicker" : "reportMonthPicker");
-            let containerId = panelRole === 'mgr' ? "mgrReportContainer" : (panelRole === 'admin' ? "adminMonthlyReportContainer" : "superAdminIndividualReportContainer");
-
-            const staffId = document.getElementById(selectId).value;
-            const monthVal = document.getElementById(monthId).value;
-            if (!staffId || !monthVal) return;
-
-            if (SCRIPT_URL) {
-                try {
-                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-                    globalAttendance = await res.json();
-                } catch (e) {}
-            }
-
-            const targetUser = getUsersFromLocal().find(u => String(u.id) === String(staffId)) || { name: staffId, department: '', role: '' };
-            const resData = generateMonthlyTableHtmlForUser(staffId, monthVal);
-
-            const fullReportHtml = `
-                <div class="space-y-3">
-                    <div class="bg-slate-50 p-3 rounded-xl border flex flex-wrap justify-between items-center gap-2">
-                        <div>
-                            <h4 class="font-bold text-sm text-slate-800">নাম: ${targetUser.name} (${staffId})</h4>
-                            <p class="text-xs text-slate-600">ডিপার্টমেন্ট: ${targetUser.department || 'সাধারণ'} | পদবী: ${targetUser.role} | মাস: ${monthVal}</p>
-                        </div>
-                        <div class="text-xs bg-white px-3 py-1.5 rounded-lg border font-semibold">${resData.summaryHtml}</div>
-                    </div>
-                    <table class="w-full text-xs text-left border border-slate-300">
-                        <thead class="bg-slate-200 text-slate-800 font-bold">
-                            <tr>
-                                <th class="p-2 border">তারিখ ও বার</th>
-                                <th class="p-2 border">ইন-টাইম</th>
-                                <th class="p-2 border">লাঞ্চ আউট</th>
-                                <th class="p-2 border">লাঞ্চ ইন</th>
-                                <th class="p-2 border">আউট-টাইম</th>
-                                <th class="p-2 border">মোট লাঞ্চ টাইম</th>
-                                <th class="p-2 border">মোট ডিউটি টাইম</th>
-                                <th class="p-2 border text-center">স্ট্যাটাস</th>
-                            </tr>
-                        </thead>
-                        <tbody>${resData.rowsHtml}</tbody>
-                    </table>
-                </div>
-            `;
-            document.getElementById(containerId).innerHTML = fullReportHtml;
-        }
-
-        function printMonthlyReportPDF(sourceContainerId) {
-            const sourceContent = document.getElementById(sourceContainerId).innerHTML;
-            const printArea = document.getElementById("printableArea");
-            printArea.innerHTML = `
-                <div style="text-align:center; border-bottom: 2px solid #1e293b; padding-bottom: 8px; margin-bottom: 12px;">
-                    <h2 style="font-size: 18px; font-weight: bold; margin: 0;">বাচ্চু মটরস - টু হুইলার অথরাইজড ডিলার</h2>
-                    <p style="font-size: 11px; color: #475569; margin: 2px 0;">মাদারীপুর | ডিজিটাল হাজিরা ও মুভমেন্ট রিপোর্ট</p>
-                </div>
-                ${sourceContent}
-            `;
-            printArea.classList.remove("hidden");
-            window.print();
-            printArea.classList.add("hidden");
-        }
-
-        async function loadAdminView() {
-            try {
-                const selectedDateVal = document.getElementById("adminReportDate").value;
-                let records = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
-                if (SCRIPT_URL) {
-                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-                    records = await res.json();
-                }
-                let targetDate = new Date(selectedDateVal), targetStr = targetDate.toLocaleDateString();
-                const todaysRecords = records.filter(r => new Date(r.dateStr).toDateString() === targetDate.toDateString() || String(r.dateStr) === String(targetStr));
-                
-                let presentCount = todaysRecords.filter(r => r.inStatus === 'Present' || r.inStatus === 'Manual/Present' || r.inStatus === 'AppPresent').length;
-                let lateCount = todaysRecords.filter(r => r.inStatus === 'Late').length;
-                let totalPresent = presentCount + lateCount;
-                
-                document.getElementById("statTotalPresent").innerText = `${totalPresent} জন`;
-                document.getElementById("statTotalLate").innerText = `${lateCount} জন`;
-                
-                let allUsers = getUsersFromLocal();
-                if (SCRIPT_URL) {
-                    const uRes = await fetch(`${SCRIPT_URL}?action=getUsers`);
-                    allUsers = await uRes.json();
-                }
-                const staffList = allUsers.filter(u => u.type === 'staff' || u.type === 'manager');
-                document.getElementById("statTotalAbsent").innerText = `${Math.max(0, staffList.length - totalPresent)} জন`;
-
-                renderAdminChart(presentCount, lateCount, Math.max(0, staffList.length - totalPresent));
-
-                document.getElementById("adminAttendanceTableContainer").innerHTML = todaysRecords.length === 0 ? `<p class="text-xs text-slate-400 text-center py-4">নির্বাচিত তারিখে কোনো হাজিরা রেকর্ড নেই</p>` : `
-                    <table class="w-full text-xs text-left border">
-                        <tr class="bg-slate-100"><th class="p-2">আইডি</th><th class="p-2">নাম</th><th class="p-2">ইন-টাইম</th><th class="p-2">লাঞ্চ আউট</th><th class="p-2">লাঞ্চ ইন</th><th class="p-2">আউট-টাইম</th><th class="p-2">মোট ডিউটি</th></tr>
-                        ${todaysRecords.map(r => `<tr><td class="p-2 font-bold">${r.staffId}</td><td class="p-2">${r.staffName}</td><td class="p-2">${format12Hour(r.inTime)}</td><td class="p-2">${format12Hour(r.lunchOut)}</td><td class="p-2">${format12Hour(r.lunchIn)}</td><td class="p-2">${format12Hour(r.outTime)}</td><td class="p-2 font-semibold text-emerald-700">${r.totalDuty||'-'}</td></tr>`).join('')}
-                    </table>
-                `;
-                calculateWinnerOfHonor();
-            } catch (e) {}
-        }
-
-       async function calculateWinnerOfHonor() {
-    try {
-        let records = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
-        if (typeof SCRIPT_URL !== 'undefined' && SCRIPT_URL) {
-            const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-            records = await res.json();
-        }
-
-        let dutyMap = {};
-        records.forEach(r => {
-            if (r.totalDuty) {
-                let h = parseFloat(r.totalDuty) || 0;
-                if (!dutyMap[r.staffId]) {
-                    dutyMap[r.staffId] = { name: r.staffName, hours: 0 };
-                }
-                dutyMap[r.staffId].hours += h;
-            }
-        });
-
-        let winnerId = null, winnerName = "এই মাসে কোনো ডেটা নেই", maxH = 0;
-        for (let id in dutyMap) {
-            if (dutyMap[id].hours > maxH) {
-                maxH = dutyMap[id].hours;
-                winnerName = dutyMap[id].name;
-                winnerId = id;
-            }
-        }
-
-        // ইউজার লিস্ট থেকে বিজয়ী কর্মীর ডিপার্টমেন্ট এবং ছবি বের করা
-        const allUsers = typeof getUsersFromLocal === 'function' ? getUsersFromLocal() : [];
-        const winnerUser = allUsers.find(u => String(u.id) === String(winnerId));
-        const dept = winnerUser && winnerUser.department ? winnerUser.department : "স্টাফ";
-        const photoUrl = winnerUser && winnerUser.photo ? winnerUser.photo : "";
-
-        const nameElem = document.getElementById("winnerName");
-        const deptElem = document.getElementById("winnerDept");
-        const imgElem = document.getElementById("winnerPhoto");
-
-        if (winnerId) {
-            if (nameElem) nameElem.innerText = `${winnerName} (${maxH.toFixed(1)} ঘণ্টা)`;
-            if (deptElem) deptElem.innerText = `ডিপার্টমেন্ট: ${dept}`;
-            
-            if (imgElem) {
-                if (photoUrl && photoUrl.trim() !== "") {
-                    imgElem.src = photoUrl;
-                } else {
-                    imgElem.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(winnerName)}&background=fef3c7&color=b45309`;
-                }
-                imgElem.classList.remove("hidden");
-            }
-        } else {
-            if (nameElem) nameElem.innerText = "এখনো নির্ধারিত হয়নি";
-            if (deptElem) deptElem.innerText = "সর্বমোট ডিউটি: ০ ঘণ্টা";
-            if (imgElem) imgElem.classList.add("hidden");
-        }
-    } catch (e) {
-        console.log("Winner calculation error:", e);
-    }
-}
-
-        function renderAdminChart(present, late, absent) {
-            const canvas = document.getElementById('adminChartCanvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            if (adminChartInstance) adminChartInstance.destroy();
-            adminChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['সময়মতো', 'লেট', 'অনুপস্থিত'],
-                    datasets: [{ data: [present, late, absent], backgroundColor: ['#10b981', '#f59e0b', '#f43f5e'] }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        async function loadSuperAdminView() {
-            try {
-                globalUsers = getUsersFromLocal();
-                if (SCRIPT_URL) {
-                    const res = await fetch(`${SCRIPT_URL}?action=getUsers`);
-                    const rUsers = await res.json();
-                    if (rUsers && rUsers.length > 0) globalUsers = rUsers;
-                }
-                const staffList = globalUsers.filter(u => u.type === 'staff');
-                const adminMgrList = globalUsers.filter(u => u.type !== 'staff');
-
-                document.getElementById("superAdminStaffList").innerHTML = staffList.map(u => `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-2 font-bold">${u.id}</td><td class="p-2">${u.name}</td><td class="p-2"><span class="bg-slate-100 px-2 py-0.5 rounded text-xs">${u.department || '-'}</span></td><td class="p-2">${u.role}</td>
-                        <td class="p-2"><input type="text" id="pass_${u.id}" placeholder="নতুন পাসওয়ার্ড" class="border px-2 py-1 rounded text-xs w-24"> <button onclick="resetPass('${u.id}')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs">সেভ</button></td>
-                        <td class="p-2 text-right"><button onclick="deleteUser('${u.id}')" class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded font-semibold">ডিলিট</button></td>
-                    </tr>
-                `).join('') || `<tr><td colspan="6" class="p-4 text-center text-slate-400">কোনো স্টাফ নেই</td></tr>`;
-
-                document.getElementById("superAdminAdminList").innerHTML = adminMgrList.map(u => `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-2 font-bold">${u.id}</td><td class="p-2">${u.name}</td><td class="p-2"><span class="bg-slate-100 px-2 py-0.5 rounded text-xs">${u.department || '-'}</span></td><td class="p-2">${u.role} (${u.type})</td>
-                        <td class="p-2"><input type="text" id="pass_${u.id}" placeholder="নতুন পাসওয়ার্ড" class="border px-2 py-1 rounded text-xs w-24"> <button onclick="resetPass('${u.id}')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs">সেভ</button></td>
-                        <td class="p-2 text-right"><button onclick="deleteUser('${u.id}')" class="text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded font-semibold">ডিলিট</button></td>
-                    </tr>
-                `).join('') || `<tr><td colspan="6" class="p-4 text-center text-slate-400">কোনো অ্যাকাউন্ট নেই</td></tr>`;
-                calculateWinnerOfHonor();
-            } catch (e) {}
-        }
-
-        async function createNewStaff(e) {
-            e.preventDefault();
-            const btn = document.getElementById("addStaffBtn");
-            btn.innerText = "তৈরি হচ্ছে...";
-            btn.disabled = true;
-
-            const newId = document.getElementById("newStaffId").value.trim();
-            const newName = document.getElementById("newStaffName").value.trim();
-            const newDept = document.getElementById("newStaffDept").value;
-            const payload = {
-                action: "addUser",
-                id: newId,
-                name: newName,
-                department: newDept,
-                role: document.getElementById("newStaffRole").value.trim(),
-                pass: document.getElementById("newStaffPass").value.trim(),
-                type: document.getElementById("newAccountType").value,
-                photo: ""
-            };
-
-            let allU = getUsersFromLocal();
-            if (allU.some(u => String(u.id).toLowerCase() === newId.toLowerCase())) {
-                showToast("ব্যর্থ!", "এই ইউজার আইডি ইতিমধ্যে ব্যবহৃত হয়েছে!", "error");
-                btn.innerText = "অ্যাকাউন্ট তৈরি করুন";
-                btn.disabled = false;
-                return;
-            }
-
-            if (SCRIPT_URL) {
-                try {
-                    const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-                    const result = await res.text();
-                    if (result === "Duplicate") {
-                        showToast("ব্যর্থ!", "এই ইউজার আইডি ইতিমধ্যে ব্যবহৃত হয়েছে!", "error");
-                        btn.innerText = "অ্যাকাউন্ট তৈরি করুন";
-                        btn.disabled = false;
-                        return;
-                    }
-                } catch (err) {}
-            }
-
-            allU.push(payload);
-            localStorage.setItem('bachchu_users', JSON.stringify(allU));
-            e.target.reset();
-            loadSuperAdminView();
-            logAuditAction("User Created", `নতুন অ্যাকাউন্ট তৈরি করা হয়েছে: ${newName} (${newId} - ${newDept})`);
-            triggerSuccessTick("নতুন অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!");
-
-            btn.innerText = "অ্যাকাউন্ট তৈরি করুন";
-            btn.disabled = false;
-        }
-
-        async function resetPass(id) {
-            const newPass = document.getElementById(`pass_${id}`).value.trim();
-            if (!newPass) return showToast("সতর্কতা", "নতুন পাসওয়ার্ড লিখুন!", "info");
-            
-            let allU = getUsersFromLocal();
-            let idx = allU.findIndex(u => String(u.id) === String(id));
-            if (idx !== -1) {
-                allU[idx].pass = newPass;
-                localStorage.setItem('bachchu_users', JSON.stringify(allU));
-            }
-            if (SCRIPT_URL) {
-                try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "updateUser", id: id, pass: newPass }) }); } catch (e) {}
-            }
-            document.getElementById(`pass_${id}`).value = "";
-            logAuditAction("Password Reset", `ইউজার ${id} এর পাসওয়ার্ড রিসেট করা হয়েছে`);
-            triggerSuccessTick(`${id} এর পাসওয়ার্ড সফলভাবে রিসেট হয়েছে!`);
-        }
-
-        async function deleteUser(id) {
-            if (confirm(`আপনি কি নিশ্চিত ${id} ডিলিট করতে চান?`)) {
-                let allU = getUsersFromLocal().filter(u => String(u.id) !== String(id));
-                localStorage.setItem('bachchu_users', JSON.stringify(allU));
-                if (SCRIPT_URL) {
-                    try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "deleteUser", id: id }) }); } catch (e) {}
-                }
-                loadSuperAdminView();
-                logAuditAction("User Deleted", `ইউজার ডিলিট করা হয়েছে: ${id}`);
-                triggerSuccessTick(`${id} সফলভাবে মুছে ফেলা হয়েছে!`);
-            }
-        }
-
-        async function exportToExcel() {
-            let records = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
-            if (SCRIPT_URL) {
-                try {
-                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-                    records = await res.json();
-                } catch (e) {}
-            }
-            if (records.length === 0) return showToast("সতর্কতা", "ডাউনলোড করার মতো ডাটা নেই!", "info");
-            let csv = "স্টাফ আইডি,নাম,তারিখ,ইন-টাইম,স্ট্যাটাস,লাঞ্চ আউট,লাঞ্চ ইন,আউট-টাইম,মোট ডিউটি,অবস্থান\n";
-            records.forEach(r => { csv += `${r.staffId},${r.staffName},${r.dateStr},${r.inTime},${r.inStatus},${r.lunchOut||''},${r.lunchIn||''},${r.outTime||''},${r.totalDuty||''},${r.location||''}\n`; });
-            const link = document.createElement("a");
-            link.href = encodeURI("data:text/csv;charset=utf-8,\uFEFF" + csv);
-            link.download = `Bachchu_Motors_Central_Attendance_${new Date().toLocaleDateString()}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            logAuditAction("Export Excel", `সেন্ট্রাল হাজিরা রিপোর্ট এক্সেল ডাউনলোড করা হয়েছে`);
-            triggerSuccessTick("সেন্ট্রাল এক্সেল ফাইল সফলভাবে ডাউনলোড হয়েছে!");
-        }
-
-        async function exportAuditLogCSV() {
-            if (globalAuditLogs.length === 0) return showToast("সতর্কতা", "ডাউনলোড করার মতো অডিট লগ নেই!", "info");
-            let csv = "সময়,ইউজার আইডি,নাম,পদবী,অ্যাকশন,বিবরণ\n";
-            globalAuditLogs.forEach(l => { csv += `"${l.timestamp}",${l.userId},"${l.userName}","${l.userRole}","${l.action}","${l.details}"\n`; });
-            const link = document.createElement("a");
-            link.href = encodeURI("data:text/csv;charset=utf-8,\uFEFF" + csv);
-            link.download = `Bachchu_Motors_Audit_Trail_${new Date().toLocaleDateString()}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            logAuditAction("Export Audit Log", `সিকিউরিটি অডিট ট্রেইল লগ ডাউনলোড করা হয়েছে`);
-            triggerSuccessTick("অডিট লগ সফলভাবে ডাউনলোড হয়েছে!");
-        }
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then((reg) => console.log('App Service Worker Registered', reg.scope))
-                    .catch((err) => console.log('Service Worker Failed', err));
-            });
-        }
-    </script>
-</body>
+                    document.</body>
 </html>
