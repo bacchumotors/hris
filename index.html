@@ -18,9 +18,23 @@
         @media (max-width: 640px) {
             .mobile-compact-btn { padding: 6px 10px; font-size: 11px; }
         }
+        /* PDF Print Specific Styling */
+        @media print {
+            body * { visibility: hidden; }
+            #printableArea, #printableArea * { visibility: visible; }
+            #printableArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white !important;
+                padding: 10px;
+            }
+            .no-print { display: none !important; }
+        }
     </style>
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAs9zrzE8BvwbRNowUU741GBegCY9bK8mZNE_gSypKpErW58D3eOrT7YZ3htpY5T5zgQ/exec"; // আপনার Google Apps Script URL এখানে থাকবে
+        const SCRIPT_URL = ""; // আপনার Google Apps Script URL এখানে বসান (ফাঁকা থাকলে লোকাল মোডে চলবে)
     </script>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
@@ -98,7 +112,7 @@
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold mb-1 text-slate-600">ইউজার আইডি</label>
-                    <input type="text" id="username" required placeholder="যেমন: BM-101" class="w-full border px-3.5 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-red-500">
+                    <input type="text" id="username" required placeholder="যেমন: BM-101 বা owner" class="w-full border px-3.5 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-red-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold mb-1 text-slate-600">পাসওয়ার্ড</label>
@@ -110,28 +124,21 @@
             </form>
         </div>
 
-        <!-- TOP PROFILE CARD & NOTICE BOARDS -->
-        <div id="topProfileCard" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-white rounded-2xl border p-4 shadow-sm flex items-center gap-4">
-                <div class="relative w-16 h-16 rounded-2xl bg-slate-200 overflow-hidden flex items-center justify-center font-bold text-slate-500 text-xl shrink-0 border">
+        <!-- TOP CENTERED USER PROFILE CARD -->
+        <div id="topProfileCard" class="hidden flex justify-center">
+            <div class="bg-white rounded-2xl border px-6 py-4 shadow-sm flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left max-w-lg w-full justify-center">
+                <div class="relative w-16 h-16 rounded-2xl bg-slate-200 overflow-hidden flex items-center justify-center font-bold text-slate-500 text-xl shrink-0 border-2 border-red-100 shadow-sm">
                     <span id="profileAvatarText">BM</span>
                     <img id="profileAvatarImg" class="w-full h-full object-cover hidden" alt="Profile">
                 </div>
                 <div class="space-y-0.5 overflow-hidden">
-                    <h3 id="headerUserName" class="text-base font-bold text-slate-800 truncate">ইউজার নাম</h3>
-                    <p id="headerUserRole" class="text-xs text-red-600 font-semibold">পদবী</p>
+                    <h3 id="headerUserName" class="text-base sm:text-lg font-bold text-slate-800 truncate">ইউজার নাম</h3>
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
+                        <span id="headerUserDept" class="text-[11px] bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-md font-semibold">ডিপার্টমেন্ট</span>
+                        <span id="headerUserRole" class="text-xs text-slate-600 font-semibold">পদবী</span>
+                    </div>
                     <p id="headerUserId" class="text-[11px] text-slate-400 font-mono">ID: --</p>
                     <p id="headerUserOrg" class="text-[11px] text-slate-500 truncate">বাচ্চু মটরস</p>
-                </div>
-            </div>
-
-            <div class="md:col-span-2 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-4 shadow-sm flex flex-col justify-between">
-                <div class="flex justify-between items-center">
-                    <span class="text-xs font-semibold text-amber-300"><i class="fa-solid fa-bullhorn mr-1"></i> শোরুম স্ট্যাটাস ও লোকেশন</span>
-                    <span id="gpsLocationStatus" class="text-[10px] bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">লোকেশন যাচাই হচ্ছে...</span>
-                </div>
-                <div class="mt-2 text-xs text-slate-300">
-                    <p>বাচ্চু মটরস টু হুইলার বিজনেস শোরুম। প্রতিদিন সকাল ৯:০০ টা থেকে হাজিরা ও মুভমেন্ট কাউন্ট করা হচ্ছে।</p>
                 </div>
             </div>
         </div>
@@ -165,16 +172,21 @@
             </div>
         </div>
 
-        <!-- TROPHY BANNER -->
-        <div id="trophyBanner" class="hidden bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-2xl p-4 shadow-md flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="text-3xl text-yellow-200"><i class="fa-solid fa-trophy"></i></div>
+        <!-- TROPHY BANNER (WINNER OF HONOR WITH PHOTO, NAME & DEPARTMENT) -->
+        <div id="trophyBanner" class="hidden bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-2xl p-4 shadow-md flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3.5">
+                <div class="relative shrink-0">
+                    <img id="winnerAvatarImg" src="https://ui-avatars.com/api/?name=Winner&background=fef3c7&color=b45309" alt="Winner" class="w-14 h-14 rounded-full object-cover border-2 border-yellow-200 shadow">
+                    <div class="absolute -bottom-1 -right-1 bg-amber-800 text-yellow-300 w-6 h-6 rounded-full flex items-center justify-center text-xs shadow border border-yellow-300">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                </div>
                 <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-amber-100">মাসের সেরা কর্মী (Winner of Honor)</h4>
-                    <p id="winnerDisplayInfo" class="text-sm font-extrabold mt-0.5">হিসাব করা হচ্ছে...</p>
+                    <h4 class="text-[11px] font-bold uppercase tracking-wider text-amber-100">মাসের সেরা কর্মী (Winner of Honor)</h4>
+                    <div id="winnerDisplayInfo" class="text-xs sm:text-sm font-bold mt-0.5 space-y-0.5">হিসাব করা হচ্ছে...</div>
                 </div>
             </div>
-            <span class="text-[10px] bg-amber-700/50 px-2.5 py-1 rounded-lg border border-amber-400/40">অটো আপডেট</span>
+            <span class="text-[10px] bg-amber-700/50 px-2.5 py-1 rounded-lg border border-amber-400/40 shrink-0">অটো আপডেট</span>
         </div>
 
         <!-- STAFF PANEL -->
@@ -193,16 +205,24 @@
             <!-- STAFF ATTENDANCE SECTION -->
             <div id="staffAttendanceSection" class="space-y-5">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm space-y-4">
-                        <h3 class="text-base sm:text-lg font-bold text-slate-800 border-b pb-2">ক্যামেরা হাজিরা ও মুভমেন্ট</h3>
+                    <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm space-y-3">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-base font-bold text-slate-800">ক্যামেরা হাজিরা ও মুভমেন্ট</h3>
+                            <span id="gpsLocationStatus" class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border"><i class="fa-solid fa-location-dot text-emerald-500 mr-1"></i>GPS যাচাই হচ্ছে...</span>
+                        </div>
                         <div class="relative w-full h-52 bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center border">
                             <video id="webcam" autoplay playsinline class="w-full h-full object-cover hidden"></video>
                             <img id="photoPreview" class="w-full h-full object-cover hidden" alt="Preview">
                             <div id="camPlaceholder" class="text-slate-400 text-xs text-center p-4">ক্যামেরা বন্ধ আছে</div>
                         </div>
-                        <div class="flex gap-2">
-                            <button onclick="startCamera()" class="flex-1 bg-slate-700 hover:bg-slate-800 text-white py-2.5 rounded-xl text-xs font-semibold shadow">ক্যামেরা অন করুন</button>
-                            <button onclick="capturePhoto()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-xs font-semibold shadow">ছবি তুলুন</button>
+                        <div class="flex items-center justify-between gap-3 pt-1">
+                            <button onclick="startCamera()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-[11px] font-semibold shadow">
+                                <i class="fa-solid fa-video mr-1"></i> ক্যামেরা অন
+                            </button>
+                            <button onclick="capturePhoto()" title="ছবি তুলুন" class="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-lg border-4 border-blue-200 transition transform active:scale-95">
+                                <i class="fa-solid fa-camera text-base"></i>
+                            </button>
+                            <span class="text-[10px] text-slate-400">ছবি তুলে হাজিরা দিন</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2 pt-2">
                             <button onclick="recordAttendanceAction('in')" class="bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-xs font-bold shadow">ইন-টাইম (হাজিরা)</button>
@@ -319,6 +339,7 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full md:w-auto">
                     <button onclick="switchTab('manager', 'attTab')" class="bg-red-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold shadow mobile-compact-btn" id="mgrBtnAtt">হাজিরা ও সামারি</button>
+                    <button onclick="switchTab('manager', 'staffMonthlyTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn" id="mgrBtnStaffRep">স্টাফ মাসিক রিপোর্ট</button>
                     <button onclick="switchTab('manager', 'myHistoryTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn" id="mgrBtnMyHist">আমার হাজিরা হিস্ট্রি</button>
                     <button onclick="switchTab('manager', 'leaveTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold relative mobile-compact-btn" id="mgrBtnLeave">আবেদন অনুমোদন <span id="mgrLeaveBadge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white rounded-full text-[9px] px-1.5 py-0.2">0</span></button>
                     <button onclick="switchTab('manager', 'myLeaveTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn" id="mgrBtnMyLeave">আমার ছুটি</button>
@@ -329,15 +350,23 @@
             <div id="managerAttendanceSection" class="space-y-5 sm:space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm space-y-3">
-                        <h3 class="text-base font-bold text-slate-800 border-b pb-2">ম্যানেজারের নিজস্ব হাজিরা</h3>
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-base font-bold text-slate-800">ম্যানেজারের নিজস্ব হাজিরা</h3>
+                            <span id="mgrGpsStatus" class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border"><i class="fa-solid fa-location-dot text-emerald-500 mr-1"></i>GPS Active</span>
+                        </div>
                         <div class="relative w-full h-44 bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center border">
                             <video id="mgrWebcam" autoplay playsinline class="w-full h-full object-cover hidden"></video>
                             <img id="mgrPhotoPreview" class="w-full h-full object-cover hidden" alt="Preview">
                             <div id="mgrCamPlaceholder" class="text-slate-400 text-xs text-center p-4">ক্যামেরা বন্ধ আছে</div>
                         </div>
-                        <div class="flex gap-2">
-                            <button onclick="startMgrCamera()" class="flex-1 bg-slate-700 text-white py-2 rounded-xl text-xs font-semibold">ক্যামেরা অন</button>
-                            <button onclick="captureMgrPhoto()" class="flex-1 bg-blue-600 text-white py-2 rounded-xl text-xs font-semibold">ছবি তুলুন</button>
+                        <div class="flex items-center justify-between gap-2 pt-1">
+                            <button onclick="startMgrCamera()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-[11px] font-semibold">
+                                <i class="fa-solid fa-video mr-1"></i> ক্যামেরা অন
+                            </button>
+                            <button onclick="captureMgrPhoto()" title="ছবি তুলুন" class="w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-lg border-4 border-blue-200">
+                                <i class="fa-solid fa-camera text-sm"></i>
+                            </button>
+                            <span class="text-[10px] text-slate-400">ছবি তুলে বাটন দিন</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <button onclick="recordManagerAttendance('in')" class="bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold">ইন-টাইম</button>
@@ -352,10 +381,26 @@
                     <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm space-y-3">
                         <div class="flex justify-between items-center border-b pb-2">
                             <h3 class="text-base font-bold text-slate-800">আজকের স্টাফ উপস্থিতি</h3>
-                            <span id="mgrGpsStatus" class="text-[10px] text-slate-500">GPS Active</span>
                         </div>
                         <div id="managerTodayStaffSummary" class="table-responsive max-h-72"><p class="text-xs text-slate-400">লোড হচ্ছে...</p></div>
                     </div>
+                </div>
+            </div>
+
+            <!-- MANAGER: INDIVIDUAL STAFF MONTHLY REPORT WITH PDF -->
+            <div id="managerStaffReportSection" class="hidden space-y-5">
+                <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800">স্টাফদের মাসিক হাজিরা রিপোর্ট ও PDF ডাউনলোড</h3>
+                        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                            <select id="mgrReportStaffSelect" onchange="loadIndividualMonthlyReportForPanel('mgr')" class="border px-3 py-1.5 rounded-lg text-xs sm:text-sm bg-white"></select>
+                            <input type="month" id="mgrReportMonthPicker" onchange="loadIndividualMonthlyReportForPanel('mgr')" class="border px-3 py-1.5 rounded-lg text-xs sm:text-sm">
+                            <button onclick="printMonthlyReportPDF('mgrReportContainer')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow">
+                                <i class="fa-solid fa-file-pdf mr-1"></i> PDF ডাউনলোড
+                            </button>
+                        </div>
+                    </div>
+                    <div id="mgrReportContainer" class="table-responsive"><p class="text-xs text-slate-400 text-center py-4">স্টাফ নির্বাচন করুন...</p></div>
                 </div>
             </div>
 
@@ -465,7 +510,8 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full md:w-auto">
                     <input type="date" id="adminReportDate" onchange="loadAdminView()" class="border px-2.5 py-1.5 rounded-lg text-xs sm:text-sm w-full sm:w-auto">
-                    <button onclick="switchTab('admin', 'attendanceTab')" class="bg-red-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold shadow mobile-compact-btn" id="adminBtnAttTab">হাজিরা রিপোর্ট</button>
+                    <button onclick="switchTab('admin', 'attendanceTab')" class="bg-red-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold shadow mobile-compact-btn" id="adminBtnAttTab">দৈনিক রিপোর্ট</button>
+                    <button onclick="switchTab('admin', 'monthlyRepTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn" id="adminBtnMonthlyTab">মাসিক রিপোর্ট (PDF)</button>
                     <button onclick="switchTab('admin', 'leaveTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold relative mobile-compact-btn" id="adminBtnLeaveTab">ছুটির অনুমোদন <span id="adminLeaveBadge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white rounded-full text-[9px] px-1.5 py-0.2">0</span></button>
                     <button onclick="switchTab('admin', 'attAppTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold relative mobile-compact-btn" id="adminBtnAttAppTab">হাজিরা আবেদন <span id="adminAttAppBadge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white rounded-full text-[9px] px-1.5 py-0.2">0</span></button>
                     <button onclick="switchTab('admin', 'profileTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn" id="adminBtnProfTab">আমার প্রফাইল</button>
@@ -502,9 +548,26 @@
                 <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm">
                     <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
                         <h3 class="text-base sm:text-lg font-bold text-slate-800">আজকের স্টাফ উপস্থিতি, লাঞ্চ ও ডিউটি বিবরণী</h3>
-                        <button onclick="exportAttendancePDF()" class="bg-slate-700 hover:bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg shadow"><i class="fa-solid fa-file-pdf mr-1"></i> পিডিএফ প্রিন্ট</button>
+                        <button onclick="printMonthlyReportPDF('adminAttendanceTableContainer')" class="bg-slate-700 hover:bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg shadow"><i class="fa-solid fa-file-pdf mr-1"></i> পিডিএফ প্রিন্ট</button>
                     </div>
                     <div class="table-responsive" id="adminAttendanceTableContainer"><p class="text-xs text-slate-400">ডাটা লোড হচ্ছে...</p></div>
+                </div>
+            </div>
+
+            <!-- ADMIN: INDIVIDUAL MONTHLY REPORT WITH PDF -->
+            <div id="adminMonthlyReportSection" class="hidden space-y-5">
+                <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800">কর্মীদের মাসিক হাজিরা রিপোর্ট ও PDF ডাউনলোড</h3>
+                        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                            <select id="adminReportStaffSelect" onchange="loadIndividualMonthlyReportForPanel('admin')" class="border px-3 py-1.5 rounded-lg text-xs sm:text-sm bg-white"></select>
+                            <input type="month" id="adminReportMonthPicker" onchange="loadIndividualMonthlyReportForPanel('admin')" class="border px-3 py-1.5 rounded-lg text-xs sm:text-sm">
+                            <button onclick="printMonthlyReportPDF('adminMonthlyReportContainer')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow">
+                                <i class="fa-solid fa-file-pdf mr-1"></i> PDF ডাউনলোড
+                            </button>
+                        </div>
+                    </div>
+                    <div id="adminMonthlyReportContainer" class="table-responsive"><p class="text-xs text-slate-400 text-center py-4">কর্মী নির্বাচন করুন...</p></div>
                 </div>
             </div>
 
@@ -579,7 +642,20 @@
                             </div>
                             <div><label class="text-xs font-semibold">ইউজার আইডি</label><input type="text" id="newStaffId" required placeholder="BM-103" class="w-full border px-3 py-2 rounded-lg text-sm"></div>
                             <div><label class="text-xs font-semibold">নাম</label><input type="text" id="newStaffName" required placeholder="নাম" class="w-full border px-3 py-2 rounded-lg text-sm"></div>
-                            <div><label class="text-xs font-semibold">পদবী</label><input type="text" id="newStaffRole" required placeholder="পদবী" class="w-full border px-3 py-2 rounded-lg text-sm"></div>
+                            <div>
+                                <label class="text-xs font-semibold">ডিপার্টমেন্ট</label>
+                                <select id="newStaffDept" class="w-full border px-3 py-2 rounded-lg text-sm bg-white">
+                                    <option value="সেলস">সেলস</option>
+                                    <option value="সার্ভিস">সার্ভিস</option>
+                                    <option value="কালেকশন">কালেকশন</option>
+                                    <option value="ডেসপাচ">ডেসপাচ</option>
+                                    <option value="ফলোআপ">ফলোআপ</option>
+                                    <option value="ওয়াশম্যান">ওয়াশম্যান</option>
+                                    <option value="অফিস সহকারী">অফিস সহকারী</option>
+                                    <option value="ম্যানেজমেন্ট">ম্যানেজমেন্ট</option>
+                                </select>
+                            </div>
+                            <div><label class="text-xs font-semibold">পদবী</label><input type="text" id="newStaffRole" required placeholder="যেমন: সেলস এক্সিকিউটিভ" class="w-full border px-3 py-2 rounded-lg text-sm"></div>
                             <div><label class="text-xs font-semibold">পাসওয়ার্ড</label><input type="password" id="newStaffPass" required placeholder="••••••" class="w-full border px-3 py-2 rounded-lg text-sm"></div>
                             <button type="submit" id="addStaffBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl text-sm shadow">অ্যাকাউন্ট তৈরি করুন</button>
                         </form>
@@ -590,8 +666,8 @@
                             <h3 class="text-base sm:text-lg font-bold border-b pb-3 mb-4 text-emerald-700">স্টাফ তালিকা ও পাসওয়ার্ড রিসেট</h3>
                             <div class="table-responsive max-h-60">
                                 <table class="w-full text-xs sm:text-sm text-left">
-                                    <thead class="bg-slate-50 text-slate-600 sticky top-0"><tr><th class="p-2">আইডি</th><th class="p-2">নাম</th><th class="p-2">পদবী</th><th class="p-2">পাসওয়ার্ড</th><th class="p-2 text-right">অ্যাকশন</th></tr></thead>
-                                    <tbody id="superAdminStaffList" class="divide-y"><tr><td colspan="5" class="p-4 text-center text-slate-400">লোড হচ্ছে...</td></tr></tbody>
+                                    <thead class="bg-slate-50 text-slate-600 sticky top-0"><tr><th class="p-2">আইডি</th><th class="p-2">নাম</th><th class="p-2">ডিপার্টমেন্ট</th><th class="p-2">পদবী</th><th class="p-2">পাসওয়ার্ড</th><th class="p-2 text-right">অ্যাকশন</th></tr></thead>
+                                    <tbody id="superAdminStaffList" class="divide-y"><tr><td colspan="6" class="p-4 text-center text-slate-400">লোড হচ্ছে...</td></tr></tbody>
                                 </table>
                             </div>
                         </div>
@@ -600,8 +676,8 @@
                             <h3 class="text-base sm:text-lg font-bold border-b pb-3 mb-4 text-amber-700">ম্যানেজার, অ্যাডমিন ও সুপার অ্যাডমিন তালিকা</h3>
                             <div class="table-responsive max-h-48">
                                 <table class="w-full text-xs sm:text-sm text-left">
-                                    <thead class="bg-slate-50 text-slate-600 sticky top-0"><tr><th class="p-2">আইডি</th><th class="p-2">নাম</th><th class="p-2">পদবী</th><th class="p-2">পাসওয়ার্ড</th><th class="p-2 text-right">অ্যাকশন</th></tr></thead>
-                                    <tbody id="superAdminAdminList" class="divide-y"><tr><td colspan="5" class="p-4 text-center text-slate-400">লোড হচ্ছে...</td></tr></tbody>
+                                    <thead class="bg-slate-50 text-slate-600 sticky top-0"><tr><th class="p-2">আইডি</th><th class="p-2">নাম</th><th class="p-2">ডিপার্টমেন্ট</th><th class="p-2">পদবী</th><th class="p-2">পাসওয়ার্ড</th><th class="p-2 text-right">অ্যাকশন</th></tr></thead>
+                                    <tbody id="superAdminAdminList" class="divide-y"><tr><td colspan="6" class="p-4 text-center text-slate-400">লোড হচ্ছে...</td></tr></tbody>
                                 </table>
                             </div>
                         </div>
@@ -613,9 +689,12 @@
                 <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
                         <h3 class="text-base sm:text-lg font-bold text-slate-800">স্টাফ ও ম্যানেজারদের ব্যক্তিগত মাসিক হাজিরা ও ডিউটি রিপোর্ট</h3>
-                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                            <select id="reportStaffSelect" onchange="loadSuperAdminIndividualReport()" class="border px-3 py-1.5 rounded-lg text-xs sm:text-sm bg-white"></select>
-                            <input type="month" id="reportMonthPicker" onchange="loadSuperAdminIndividualReport()" class="border px-3 py-1.5 rounded-lg text-xs sm:text-sm">
+                        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                            <select id="reportStaffSelect" onchange="loadIndividualMonthlyReportForPanel('superadmin')" class="border px-3 py-1.5 rounded-lg text-xs sm:text-sm bg-white"></select>
+                            <input type="month" id="reportMonthPicker" onchange="loadIndividualMonthlyReportForPanel('superadmin')" class="border px-3 py-1.5 rounded-lg text-xs sm:text-sm">
+                            <button onclick="printMonthlyReportPDF('superAdminIndividualReportContainer')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow">
+                                <i class="fa-solid fa-file-pdf mr-1"></i> PDF ডাউনলোড
+                            </button>
                         </div>
                     </div>
                     <div id="superAdminIndividualReportContainer" class="table-responsive"><p class="text-xs text-slate-400 text-center py-4">স্টাফ বা ম্যানেজার নির্বাচন করুন...</p></div>
@@ -665,6 +744,9 @@
         </div>
 
     </div>
+
+    <!-- HIDDEN PRINT AREA FOR PDF DOWNLOAD -->
+    <div id="printableArea" class="hidden"></div>
 
     <!-- NOTICE UPDATE MODAL -->
     <div id="noticeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -720,9 +802,24 @@
         let capturedPhotoData = null;
         let mgrCapturedPhoto = null;
         let uploadedProfilePhoto = null;
-        let currentGpsLocation = "অনলাইন";
+        let currentGpsLocation = "GPS Active";
         let adminChartInstance = null;
         let activeNoticeType = '';
+
+        const defaultUsers = [
+            { id: "owner", name: "সুপার অ্যাডমিন", department: "ফিন্যান্স অ্যান্ড অডিট", role: "সুপার অ্যাডমিন", pass: "123456", type: "superadmin", photo: "" },
+            { id: "admin", name: "জিয়াউল হাসান", department: "ম্যানেজমেন্ট", role: "ম্যানেজিং ডিরেক্টর", pass: "123456", type: "admin", photo: "" },
+            { id: "manager", name: "শোরুম ম্যানেজার", department: "ম্যানেজমেন্ট", role: "শোরুম ম্যানেজার", pass: "123456", type: "manager", photo: "" }
+        ];
+
+        function getUsersFromLocal() {
+            let stored = JSON.parse(localStorage.getItem('bachchu_users') || 'null');
+            if (!stored || stored.length === 0) {
+                localStorage.setItem('bachchu_users', JSON.stringify(defaultUsers));
+                return defaultUsers;
+            }
+            return stored;
+        }
 
         function hideLoader() {
             const loader = document.getElementById("loadingScreen");
@@ -796,7 +893,11 @@
                         const mgrElem = document.getElementById("mgrGpsStatus");
                         if (mgrElem) mgrElem.innerHTML = `<i class="fa-solid fa-location-dot text-emerald-500 mr-1"></i>${currentGpsLocation}`;
                     },
-                    () => { currentGpsLocation = "লোকেশন অফ"; }
+                    () => {
+                        currentGpsLocation = "লোকেশন অফ";
+                        const elem = document.getElementById("gpsLocationStatus");
+                        if (elem) elem.innerHTML = `<i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>লোকেশন অফ`;
+                    }
                 );
             }
         }
@@ -816,14 +917,18 @@
                 globalAuditLogs = JSON.parse(localStorage.getItem('bachchu_audit_logs') || '[]');
                 globalAuditLogs.push(newLog);
                 localStorage.setItem('bachchu_audit_logs', JSON.stringify(globalAuditLogs));
-                await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "addAuditLog", ...newLog }) });
+                if (SCRIPT_URL) await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "addAuditLog", ...newLog }) });
             } catch (e) {}
         }
 
         async function loadAuditLogs() {
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getAuditLogs`);
-                globalAuditLogs = await res.json();
+                if (SCRIPT_URL) {
+                    const res = await fetch(`${SCRIPT_URL}?action=getAuditLogs`);
+                    globalAuditLogs = await res.json();
+                } else {
+                    throw new Error("Local mode");
+                }
             } catch (e) {
                 globalAuditLogs = JSON.parse(localStorage.getItem('bachchu_audit_logs') || '[]');
             }
@@ -847,19 +952,26 @@
             const uInput = document.getElementById("username").value.trim();
             const pInput = document.getElementById("password").value.trim();
 
-            try {
-                const res = await fetch(`${SCRIPT_URL}?action=getUsers`);
-                globalUsers = await res.json();
-                const user = globalUsers.find(u => String(u.id).toLowerCase() === uInput.toLowerCase() && String(u.pass) === pInput);
+            globalUsers = getUsersFromLocal();
+            let user = globalUsers.find(u => String(u.id).toLowerCase() === uInput.toLowerCase() && String(u.pass) === pInput);
 
-                if (user) {
-                    localStorage.setItem('bachchu_logged_in_user', JSON.stringify(user));
-                    initializeUserSession(user, false);
-                } else {
-                    showToast("লগইন ব্যর্থ!", "ইউজার আইডি বা পাসওয়ার্ড ভুল হয়েছে!", "error");
-                }
-            } catch (err) {
-                showToast("কানেকশন সমস্যা", "ডাটাবেসের সাথে কানেক্ট করা যাচ্ছে না।", "error");
+            if (SCRIPT_URL && SCRIPT_URL.trim() !== "") {
+                try {
+                    const res = await fetch(`${SCRIPT_URL}?action=getUsers`);
+                    const remoteUsers = await res.json();
+                    if (remoteUsers && remoteUsers.length > 0) {
+                        globalUsers = remoteUsers;
+                        localStorage.setItem('bachchu_users', JSON.stringify(remoteUsers));
+                        user = globalUsers.find(u => String(u.id).toLowerCase() === uInput.toLowerCase() && String(u.pass) === pInput);
+                    }
+                } catch (err) {}
+            }
+
+            if (user) {
+                localStorage.setItem('bachchu_logged_in_user', JSON.stringify(user));
+                initializeUserSession(user, false);
+            } else {
+                showToast("লগইন ব্যর্থ!", "ইউজার আইডি বা পাসওয়ার্ড ভুল হয়েছে!", "error");
             }
             btn.innerText = "লগইন করুন";
             btn.disabled = false;
@@ -873,15 +985,17 @@
             document.getElementById("roleTag").innerText = user.role;
             document.getElementById("topProfileCard").classList.remove("hidden");
             
+            document.getElementById("headerUserDept").innerText = user.department || "সাধারণ বিভাগ";
+
             if (user.type === "admin") {
-                document.getElementById("headerUserName").innerText = "জিয়াউল হাসান";
+                document.getElementById("headerUserName").innerText = user.name || "জিয়াউল হাসান";
                 document.getElementById("headerUserRole").innerText = "ম্যানেজিং ডিরেক্টর";
                 document.getElementById("headerUserOrg").innerText = "বাচ্চু গ্রুপ, মাদারীপুর (টু হুইলার বিজনেস)";
                 document.getElementById("editAuthNoticeBtn").classList.remove("hidden");
                 document.getElementById("trophyBanner").classList.remove("hidden");
                 calculateWinnerOfHonor();
             } else if (user.type === "superadmin") {
-                document.getElementById("headerUserName").innerText = "সুপার অ্যাডমিন";
+                document.getElementById("headerUserName").innerText = user.name || "সুপার অ্যাডমিন";
                 document.getElementById("headerUserRole").innerText = "ফিন্যান্স অ্যান্ড অডিট";
                 document.getElementById("headerUserOrg").innerText = "বাচ্চু গ্রুপ, মাদারীপুর (টু হুইলার বিজনেস)";
                 document.getElementById("editMgmtNoticeBtn").classList.remove("hidden");
@@ -889,7 +1003,7 @@
                 calculateWinnerOfHonor();
             } else if (user.type === "manager") {
                 document.getElementById("headerUserName").innerText = user.name;
-                document.getElementById("headerUserRole").innerText = "শোরুম ম্যানেজার";
+                document.getElementById("headerUserRole").innerText = user.role || "শোরুম ম্যানেজার";
                 document.getElementById("headerUserOrg").innerText = "বাচ্চু মটরস";
                 document.getElementById("editMgmtNoticeBtn").classList.remove("hidden");
             } else {
@@ -898,8 +1012,8 @@
                 document.getElementById("headerUserOrg").innerText = "বাচ্চু মটরস";
             }
             
-            document.getElementById("headerUserId").innerText = user.id;
-            updateProfileAvatarDisplay(user.photo);
+            document.getElementById("headerUserId").innerText = `ID: ${user.id}`;
+            updateProfileAvatarDisplay(user.photo, user.name);
 
             loadNotices();
             loadLeavesData();
@@ -915,9 +1029,11 @@
             } else if (user.type === "manager") {
                 document.getElementById("managerPanel").classList.remove("hidden");
                 document.getElementById("mgrMonthPicker").value = currentMonthStr;
+                document.getElementById("mgrReportMonthPicker").value = currentMonthStr;
                 loadManagerView();
             } else if (user.type === "admin") {
                 document.getElementById("adminPanel").classList.remove("hidden");
+                document.getElementById("adminReportMonthPicker").value = currentMonthStr;
                 loadAdminView();
             } else if (user.type === "superadmin") {
                 document.getElementById("superAdminPanel").classList.remove("hidden");
@@ -931,7 +1047,7 @@
             }
         }
 
-        function updateProfileAvatarDisplay(photoUrl) {
+        function updateProfileAvatarDisplay(photoUrl, userName = "BM") {
             const imgElem = document.getElementById("profileAvatarImg");
             const textElem = document.getElementById("profileAvatarText");
             if (photoUrl && photoUrl.trim() !== "") {
@@ -940,6 +1056,7 @@
                 textElem.classList.add("hidden");
             } else {
                 imgElem.classList.add("hidden");
+                textElem.innerText = userName.substring(0, 2).toUpperCase();
                 textElem.classList.remove("hidden");
             }
         }
@@ -952,8 +1069,12 @@
 
         async function loadNotices() {
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getNotices`);
-                globalNotices = await res.json();
+                if (SCRIPT_URL) {
+                    const res = await fetch(`${SCRIPT_URL}?action=getNotices`);
+                    globalNotices = await res.json();
+                } else {
+                    throw new Error("Local mode");
+                }
             } catch (e) {
                 globalNotices = JSON.parse(localStorage.getItem('bachchu_notices') || '[]');
             }
@@ -1047,7 +1168,9 @@
 
             globalNotices.push(newNotice);
             localStorage.setItem('bachchu_notices', JSON.stringify(globalNotices));
-            try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(newNotice) }); } catch (e) {}
+            if (SCRIPT_URL) {
+                try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(newNotice) }); } catch (e) {}
+            }
 
             logAuditAction("Notice Published", `${activeNoticeType === 'authority' ? 'কর্তৃপক্ষ' : 'ম্যানেজমেন্ট'} নোটিশ প্রকাশ করা হয়েছে: ${subject}`);
             closeNoticeModal();
@@ -1069,8 +1192,12 @@
 
         async function loadLeavesData() {
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getLeaves`);
-                globalLeaves = await res.json();
+                if (SCRIPT_URL) {
+                    const res = await fetch(`${SCRIPT_URL}?action=getLeaves`);
+                    globalLeaves = await res.json();
+                } else {
+                    throw new Error("Local mode");
+                }
             } catch (e) {
                 globalLeaves = JSON.parse(localStorage.getItem('bachchu_leaves') || '[]');
             }
@@ -1093,10 +1220,7 @@
             let remS = Math.max(0, 10 - usedSick);
             let remE = Math.max(0, 6 - usedEmergency);
 
-            if (document.getElementById("remCasual")) {
-                document.getElementById("remCasual").innerText = remC;
-                document.getElementById("remSick").innerText = remS;
-                document.getElementById("remEmergency").innerText = remE;
+            if (document.getElementById("leaveBalanceCard")) {
                 document.getElementById("leaveBalanceCard").innerHTML = `
                     <div class="bg-blue-50 p-2 rounded border">ক্যাজুয়াল বাকি: <strong class="text-blue-700">${remC}/10</strong></div>
                     <div class="bg-emerald-50 p-2 rounded border">সিক বাকি: <strong class="text-emerald-700">${remS}/10</strong></div>
@@ -1177,7 +1301,9 @@
 
             globalLeaves.push(newLeave);
             localStorage.setItem('bachchu_leaves', JSON.stringify(globalLeaves));
-            try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(newLeave) }); } catch (e) {}
+            if (SCRIPT_URL) {
+                try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(newLeave) }); } catch (e) {}
+            }
 
             logAuditAction("Leave Applied", `ছুটির আবেদন করেছেন: ${newLeave.type}`);
             e.target.reset();
@@ -1222,7 +1348,9 @@
 
             globalLeaves.push(newLeave);
             localStorage.setItem('bachchu_leaves', JSON.stringify(globalLeaves));
-            try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(newLeave) }); } catch (e) {}
+            if (SCRIPT_URL) {
+                try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(newLeave) }); } catch (e) {}
+            }
 
             logAuditAction("Manager Leave Applied", `ম্যানেজার নিজের ছুটির আবেদন করেছেন (সরাসরি অ্যাডমিনের জন্য): ${newLeave.type}`);
             e.target.reset();
@@ -1308,6 +1436,7 @@
 
                 if (decision === 'Approved') {
                     const leaveDates = getDatesBetween(leave.startDate, leave.endDate);
+                    globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
                     for (let dObj of leaveDates) {
                         const dateFormatted = dObj.toLocaleDateString();
                         const attPayload = {
@@ -1327,24 +1456,28 @@
                             location: `Approved Leave (${leave.type})`
                         };
                         globalAttendance.push(attPayload);
-                        try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(attPayload) }); } catch (e) {}
+                        if (SCRIPT_URL) {
+                            try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(attPayload) }); } catch (e) {}
+                        }
                     }
                     localStorage.setItem('bachchu_attendance_cache', JSON.stringify(globalAttendance));
                 }
             }
             localStorage.setItem('bachchu_leaves', JSON.stringify(globalLeaves));
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        action: "updateLeave",
-                        leaveId: leave.leaveId,
-                        managerApproval: leave.managerApproval,
-                        finalApproval: leave.finalApproval,
-                        status: leave.status
-                    })
-                });
-            } catch (e) {}
+            if (SCRIPT_URL) {
+                try {
+                    await fetch(SCRIPT_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            action: "updateLeave",
+                            leaveId: leave.leaveId,
+                            managerApproval: leave.managerApproval,
+                            finalApproval: leave.finalApproval,
+                            status: leave.status
+                        })
+                    });
+                } catch (e) {}
+            }
             renderLeaveLists();
             updateLeaveBalancesAndBadges();
             triggerSuccessTick(`ছুটির আবেদন ${decision === 'Approved' ? 'অনুমোদন' : 'বাতিল'} করা হয়েছে!`);
@@ -1352,8 +1485,12 @@
 
         async function loadAttApplicationsData() {
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getAttApps`);
-                globalAttApplications = await res.json();
+                if (SCRIPT_URL) {
+                    const res = await fetch(`${SCRIPT_URL}?action=getAttApps`);
+                    globalAttApplications = await res.json();
+                } else {
+                    throw new Error("Local mode");
+                }
             } catch (e) {
                 globalAttApplications = JSON.parse(localStorage.getItem('bachchu_att_apps') || '[]');
             }
@@ -1394,7 +1531,9 @@
 
             globalAttApplications.push(newApp);
             localStorage.setItem('bachchu_att_apps', JSON.stringify(globalAttApplications));
-            try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(newApp) }); } catch (e) {}
+            if (SCRIPT_URL) {
+                try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(newApp) }); } catch (e) {}
+            }
 
             logAuditAction("Attendance Application", `হাজিরা মিসিং আবেদন করেছেন: ${dateStr}`);
             e.target.reset();
@@ -1453,14 +1592,12 @@
                     let [ay, am, ad] = app.dateStr.split('-').map(Number);
                     let targetDateFormatted = new Date(ay, am - 1, ad).toLocaleDateString();
                     
-                    // ১. ইন-টাইম ও আউট-টাইম থেকে মোট ব্যবধান (মিলি সেকেন্ডে) বের করা
                     let inTStr = app.inTime || "09:00 AM";
                     let outTStr = app.outTime || "06:00 PM";
                     let inDate = new Date(`${app.dateStr} ${inTStr}`);
                     let outDate = new Date(`${app.dateStr} ${outTStr}`);
                     let totalMs = outDate - inDate;
 
-                    // ২. লাঞ্চ টাইমের ব্যবধান বের করা (যদি লাঞ্চ আউট ও লাঞ্চ ইন দেওয়া থাকে)
                     let lunchMs = 0;
                     if (app.lunchOut && app.lunchIn) {
                         let lOutDate = new Date(`${app.dateStr} ${app.lunchOut}`);
@@ -1470,11 +1607,11 @@
                         }
                     }
 
-                    // ৩. মোট ব্যবধান থেকে লাঞ্চ টাইম বাদ দিয়ে প্রকৃত ডিউটি সময় হিসাব করা
                     let netWorkMs = totalMs - lunchMs;
                     let dutyHrs = (netWorkMs > 0) ? (netWorkMs / (1000 * 60 * 60)).toFixed(2) : "8.00";
                     let totalHours = `${dutyHrs} ঘণ্টা (আবেদনকৃত)`;
 
+                    globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
                     const attPayload = {
                         action: "addAttendance",
                         staffId: app.staffId,
@@ -1487,29 +1624,33 @@
                         lunchIn: format12Hour(app.lunchIn) !== '-' ? format12Hour(app.lunchIn) : "-",
                         outTime: format12Hour(app.outTime) !== '-' ? format12Hour(app.outTime) : "06:00 PM",
                         outPhoto: "",
-                        totalDuty: totalHours, // লাঞ্চ বাদ দিয়ে প্রকৃত ডিউটি
+                        totalDuty: totalHours,
                         diffDuty: "সফল",
                         location: "Manual Approved"
                     };
                     globalAttendance.push(attPayload);
                     localStorage.setItem('bachchu_attendance_cache', JSON.stringify(globalAttendance));
-                    try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(attPayload) }); } catch (e) {}
+                    if (SCRIPT_URL) {
+                        try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(attPayload) }); } catch (e) {}
+                    }
                 }
             }
             
             localStorage.setItem('bachchu_att_apps', JSON.stringify(globalAttApplications));
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        action: "updateAttApp",
-                        appId: app.appId,
-                        managerApproval: app.managerApproval,
-                        finalApproval: app.finalApproval,
-                        status: app.status
-                    })
-                });
-            } catch (e) {}
+            if (SCRIPT_URL) {
+                try {
+                    await fetch(SCRIPT_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            action: "updateAttApp",
+                            appId: app.appId,
+                            managerApproval: app.managerApproval,
+                            finalApproval: app.finalApproval,
+                            status: app.status
+                        })
+                    });
+                } catch (e) {}
+            }
             renderAttAppLists();
             updateLeaveBalancesAndBadges();
             triggerSuccessTick(`হাজিরা আবেদন ${decision === 'Approved' ? 'অনুমোদন' : 'বাতিল'} করা হয়েছে!`);
@@ -1581,7 +1722,7 @@
                         canvas.width = width; canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
                         uploadedProfilePhoto = canvas.toDataURL('image/jpeg', 0.7);
-                        updateProfileAvatarDisplay(uploadedProfilePhoto);
+                        updateProfileAvatarDisplay(uploadedProfilePhoto, currentUser.name);
                         const st = document.getElementById("imgUploadStatus");
                         if (st) st.classList.remove("hidden");
                         showToast("ছবি প্রস্তুত", "প্রফাইল সেভ করার জন্য নিচে ক্লিক করুন");
@@ -1616,11 +1757,13 @@
                 }
             } else if (role === 'manager') {
                 document.getElementById("managerAttendanceSection").classList.add("hidden");
+                document.getElementById("managerStaffReportSection").classList.add("hidden");
                 document.getElementById("managerMyHistorySection").classList.add("hidden");
                 document.getElementById("managerLeaveApprovalSection").classList.add("hidden");
                 document.getElementById("managerMyLeaveSection").classList.add("hidden");
                 document.getElementById("managerProfileSection").classList.add("hidden");
                 document.getElementById("mgrBtnAtt").className = "bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn";
+                document.getElementById("mgrBtnStaffRep").className = "bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn";
                 document.getElementById("mgrBtnMyHist").className = "bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn";
                 document.getElementById("mgrBtnLeave").className = "bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn";
                 document.getElementById("mgrBtnMyLeave").className = "bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn";
@@ -1629,6 +1772,10 @@
                 if (tab === 'attTab') {
                     document.getElementById("managerAttendanceSection").classList.remove("hidden");
                     document.getElementById("mgrBtnAtt").className = "bg-red-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold shadow mobile-compact-btn";
+                } else if (tab === 'staffMonthlyTab') {
+                    document.getElementById("managerStaffReportSection").classList.remove("hidden");
+                    document.getElementById("mgrBtnStaffRep").className = "bg-red-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold shadow mobile-compact-btn";
+                    populateStaffDropdownForReport('mgr');
                 } else if (tab === 'myHistoryTab') {
                     document.getElementById("managerMyHistorySection").classList.remove("hidden");
                     document.getElementById("mgrBtnMyHist").className = "bg-red-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold shadow mobile-compact-btn";
@@ -1651,10 +1798,12 @@
                 }
             } else if (role === 'admin') {
                 document.getElementById("adminAttendanceSection").classList.add("hidden");
+                document.getElementById("adminMonthlyReportSection").classList.add("hidden");
                 document.getElementById("adminLeaveApprovalSection").classList.add("hidden");
                 document.getElementById("adminAttApprovalSection").classList.add("hidden");
                 document.getElementById("adminProfileSection").classList.add("hidden");
                 document.getElementById("adminBtnAttTab").className = "bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn";
+                document.getElementById("adminBtnMonthlyTab").className = "bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn";
                 document.getElementById("adminBtnLeaveTab").className = "bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn";
                 document.getElementById("adminBtnAttAppTab").className = "bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn";
                 document.getElementById("adminBtnProfTab").className = "bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn";
@@ -1662,6 +1811,10 @@
                 if (tab === 'attendanceTab') {
                     document.getElementById("adminAttendanceSection").classList.remove("hidden");
                     document.getElementById("adminBtnAttTab").className = "bg-red-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold shadow mobile-compact-btn";
+                } else if (tab === 'monthlyRepTab') {
+                    document.getElementById("adminMonthlyReportSection").classList.remove("hidden");
+                    document.getElementById("adminBtnMonthlyTab").className = "bg-red-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold shadow mobile-compact-btn";
+                    populateStaffDropdownForReport('admin');
                 } else if (tab === 'leaveTab') {
                     document.getElementById("adminLeaveApprovalSection").classList.remove("hidden");
                     document.getElementById("adminBtnLeaveTab").className = "bg-red-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold shadow mobile-compact-btn";
@@ -1697,7 +1850,7 @@
                 } else if (tab === 'reportTab') {
                     document.getElementById("superAdminReportSection").classList.remove("hidden");
                     document.getElementById("ownerBtnRepTab").className = "bg-red-600 text-white px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-semibold shadow mobile-compact-btn";
-                    loadSuperAdminReportDropdown();
+                    populateStaffDropdownForReport('superadmin');
                 } else if (tab === 'leaveTab') {
                     document.getElementById("superAdminLeaveSection").classList.remove("hidden");
                     document.getElementById("ownerBtnLeaveTab").className = "bg-red-600 text-white px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-semibold shadow mobile-compact-btn";
@@ -1758,10 +1911,21 @@
             };
 
             try {
-                await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+                if (SCRIPT_URL) {
+                    await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+                }
                 currentUser.phone = phone; currentUser.address = address; currentUser.emergency = emergency; currentUser.pass = payload.pass;
                 if (payload.photo) currentUser.photo = payload.photo;
                 localStorage.setItem('bachchu_logged_in_user', JSON.stringify(currentUser));
+                
+                // Update local user list too
+                let allU = getUsersFromLocal();
+                let idx = allU.findIndex(u => String(u.id) === String(currentUser.id));
+                if (idx !== -1) {
+                    allU[idx] = { ...allU[idx], ...currentUser };
+                    localStorage.setItem('bachchu_users', JSON.stringify(allU));
+                }
+
                 logAuditAction("Profile Update", `${currentUser.name} প্রফাইল আপডেট করেছেন`);
                 triggerSuccessTick("প্রফাইল সফলভাবে আপডেট হয়েছে!");
             } catch (err) { showToast("ত্রুটি", "আপডেট করা সম্ভব হয়নি!", "error"); }
@@ -1804,10 +1968,14 @@
             const todayStr = new Date().toLocaleDateString();
             const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-                globalAttendance = await res.json();
+                if (SCRIPT_URL) {
+                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
+                    globalAttendance = await res.json();
+                } else {
+                    globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
+                }
             } catch (e) {
-                return showToast("কানেকশন ত্রুটি", "ডাটা লোড করা যাচ্ছে না!", "error");
+                globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
             }
             let todayRecord = globalAttendance.find(r => String(r.staffId) === String(user.id) && String(r.dateStr) === String(todayStr));
 
@@ -1822,7 +1990,11 @@
                     dateStr: todayStr, inTime: nowTime, inPhoto: photoData, inStatus: status,
                     lunchOut: "", lunchIn: "", outTime: "", outPhoto: "", totalDuty: "", diffDuty: "", location: currentGpsLocation
                 };
-                await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+                globalAttendance.push(payload);
+                localStorage.setItem('bachchu_attendance_cache', JSON.stringify(globalAttendance));
+                if (SCRIPT_URL) {
+                    try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) }); } catch (e) {}
+                }
                 logAuditAction("Attendance In", `${user.name} ইন-টাইম দিয়েছেন (${status})`);
                 triggerSuccessTick(`ইন-টাইম সফল (${status})!`);
             } else {
@@ -1834,18 +2006,37 @@
                     let outT = new Date();
                     let diffMs = outT - inT;
                     let totalHours = isNaN(diffMs) ? "8.00" : (diffMs / (1000 * 60 * 60)).toFixed(2);
-                    const payload = {
-                        action: "updateAttendance", staffId: user.id, dateStr: todayStr,
-                        outTime: nowTime, outPhoto: photoData, totalDuty: totalHours + " ঘণ্টা", diffDuty: "সফল"
-                    };
-                    await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+                    todayRecord.outTime = nowTime;
+                    todayRecord.outPhoto = photoData;
+                    todayRecord.totalDuty = totalHours + " ঘণ্টা";
+                    todayRecord.diffDuty = "সফল";
+                    localStorage.setItem('bachchu_attendance_cache', JSON.stringify(globalAttendance));
+                    if (SCRIPT_URL) {
+                        try {
+                            await fetch(SCRIPT_URL, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    action: "updateAttendance", staffId: user.id, dateStr: todayStr,
+                                    outTime: nowTime, outPhoto: photoData, totalDuty: totalHours + " ঘণ্টা", diffDuty: "সফল"
+                                })
+                            });
+                        } catch (e) {}
+                    }
                     logAuditAction("Attendance Out", `${user.name} আউট-টাইম দিয়েছেন। মোট ডিউটি: ${totalHours} ঘণ্টা`);
                     triggerSuccessTick(`আউট-টাইম সফল! ডিউটি: ${totalHours} ঘণ্টা`);
                 } else if (type === 'lunchOut') {
-                    await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "updateAttendance", staffId: user.id, dateStr: todayStr, lunchOut: nowTime }) });
+                    todayRecord.lunchOut = nowTime;
+                    localStorage.setItem('bachchu_attendance_cache', JSON.stringify(globalAttendance));
+                    if (SCRIPT_URL) {
+                        try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "updateAttendance", staffId: user.id, dateStr: todayStr, lunchOut: nowTime }) }); } catch (e) {}
+                    }
                     triggerSuccessTick("লাঞ্চ আউট সফল!");
                 } else if (type === 'lunchIn') {
-                    await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "updateAttendance", staffId: user.id, dateStr: todayStr, lunchIn: nowTime }) });
+                    todayRecord.lunchIn = nowTime;
+                    localStorage.setItem('bachchu_attendance_cache', JSON.stringify(globalAttendance));
+                    if (SCRIPT_URL) {
+                        try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "updateAttendance", staffId: user.id, dateStr: todayStr, lunchIn: nowTime }) }); } catch (e) {}
+                    }
                     triggerSuccessTick("লাঞ্চ ইন সফল!");
                 }
             }
@@ -1853,9 +2044,13 @@
 
         async function loadStaffData() {
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-                globalAttendance = await res.json();
-            } catch (e) { globalAttendance = []; }
+                if (SCRIPT_URL) {
+                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
+                    globalAttendance = await res.json();
+                } else {
+                    globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
+                }
+            } catch (e) { globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]'); }
             const myRecords = globalAttendance.filter(r => String(r.staffId) === String(currentUser.id));
             document.getElementById("staffHistoryContainer").innerHTML = myRecords.length === 0 ? `<p class="text-xs text-slate-400 text-center py-4">কোনো হাজিরা রেকর্ড নেই</p>` : `
                 <table class="w-full text-xs text-left border">
@@ -1868,13 +2063,17 @@
 
         async function loadManagerView() {
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-                globalAttendance = await res.json();
-            } catch (e) { globalAttendance = []; }
+                if (SCRIPT_URL) {
+                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
+                    globalAttendance = await res.json();
+                } else {
+                    globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
+                }
+            } catch (e) { globalAttendance = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]'); }
             const todayStr = new Date().toLocaleDateString();
             const todaysRecords = globalAttendance.filter(r => String(r.dateStr) === String(todayStr));
 
-            document.getElementById("managerTodayStaffSummary").innerHTML = todaysRecords.length === 0 ? `<p class="text-slate-400">আজ এখনো কেউ হাজিরা দেয়নি</p>` : `
+            document.getElementById("managerTodayStaffSummary").innerHTML = todaysRecords.length === 0 ? `<p class="text-slate-400 text-xs">আজ এখনো কেউ হাজিরা দেয়নি</p>` : `
                 <table class="w-full text-xs text-left border">
                     <tr class="bg-slate-100"><th class="p-2">আইডি</th><th class="p-2">নাম</th><th class="p-2">ইন-টাইম</th><th class="p-2">লাঞ্চ</th><th class="p-2">আউট</th></tr>
                     ${todaysRecords.map(r => `<tr><td class="p-2 font-bold">${r.staffId}</td><td class="p-2">${r.staffName}</td><td class="p-2">${format12Hour(r.inTime)}</td><td class="p-2">${r.lunchOut ? format12Hour(r.lunchOut)+' - '+format12Hour(r.lunchIn) : 'না'}</td><td class="p-2">${format12Hour(r.outTime)}</td></tr>`).join('')}
@@ -1883,19 +2082,15 @@
             renderMonthlyDetailedReport('manager');
         }
 
-        function renderMonthlyDetailedReport(roleType) {
-            const pickerId = roleType === 'manager' ? "mgrMonthPicker" : "staffMonthPicker";
-            const tableBodyId = roleType === 'manager' ? "mgrMonthlyDetailedTableBody" : "staffMonthlyDetailedTableBody";
-            const badgeId = roleType === 'manager' ? "mgrMonthlySummaryBadge" : "monthlySummaryBadge";
-
-            const monthVal = document.getElementById(pickerId).value;
-            if (!monthVal) return;
+        function generateMonthlyTableHtmlForUser(targetUserId, monthVal) {
             const [year, month] = monthVal.split('-').map(Number);
             const daysInMonth = new Date(year, month, 0).getDate();
             let tableHtml = '', totalPresentDays = 0, totalAppPresentDays = 0, totalLateDays = 0, totalAbsentDays = 0;
-            const myRecords = globalAttendance.filter(r => String(r.staffId) === String(currentUser.id));
-            const myApprovedAttApps = globalAttApplications.filter(a => String(a.staffId) === String(currentUser.id) && (a.finalApproval === 'Approved' || a.status === 'Approved (Final)'));
-            const myApprovedLeaves = globalLeaves.filter(l => String(l.staffId) === String(currentUser.id) && l.finalApproval === 'Approved');
+
+            const allAtt = SCRIPT_URL ? globalAttendance : JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
+            const myRecords = allAtt.filter(r => String(r.staffId) === String(targetUserId));
+            const myApprovedAttApps = globalAttApplications.filter(a => String(a.staffId) === String(targetUserId) && (a.finalApproval === 'Approved' || a.status === 'Approved (Final)'));
+            const myApprovedLeaves = globalLeaves.filter(l => String(l.staffId) === String(targetUserId) && l.finalApproval === 'Approved');
 
             for (let day = 1; day <= daysInMonth; day++) {
                 let dateObj = new Date(year, month - 1, day);
@@ -1997,15 +2192,115 @@
                 `;
             }
 
-            document.getElementById(tableBodyId).innerHTML = tableHtml;
-            document.getElementById(badgeId).innerHTML = `<i class="fa-solid fa-calendar-days mr-1.5 text-red-600"></i>এই মাসে মোট দিন: ${daysInMonth} দিন | প্রেজেন্ট: <strong class="text-emerald-700">${totalPresentDays}</strong> | আবেদনকৃত প্রেজেন্ট (নীল): <strong class="text-blue-700">${totalAppPresentDays}</strong> | লেট: <strong class="text-amber-700">${totalLateDays}</strong> | অনুপস্থিত: <strong class="text-rose-700">${totalAbsentDays}</strong>`;
+            return {
+                rowsHtml: tableHtml,
+                summaryHtml: `মোট দিন: ${daysInMonth} দিন | প্রেজেন্ট: <strong class="text-emerald-700">${totalPresentDays}</strong> | আবেদন/ছুটি: <strong class="text-blue-700">${totalAppPresentDays}</strong> | লেট: <strong class="text-amber-700">${totalLateDays}</strong> | অনুপস্থিত: <strong class="text-rose-700">${totalAbsentDays}</strong>`
+            };
+        }
+
+        function renderMonthlyDetailedReport(roleType) {
+            const pickerId = roleType === 'manager' ? "mgrMonthPicker" : "staffMonthPicker";
+            const tableBodyId = roleType === 'manager' ? "mgrMonthlyDetailedTableBody" : "staffMonthlyDetailedTableBody";
+            const badgeId = roleType === 'manager' ? "mgrMonthlySummaryBadge" : "monthlySummaryBadge";
+
+            const monthVal = document.getElementById(pickerId).value;
+            if (!monthVal) return;
+
+            const result = generateMonthlyTableHtmlForUser(currentUser.id, monthVal);
+            document.getElementById(tableBodyId).innerHTML = result.rowsHtml;
+            document.getElementById(badgeId).innerHTML = `<i class="fa-solid fa-calendar-days mr-1.5 text-red-600"></i>${result.summaryHtml}`;
+        }
+
+        // UNIFIED MONTHLY REPORT LOADER FOR MANAGER, ADMIN & SUPER ADMIN
+        async function populateStaffDropdownForReport(panelRole) {
+            let users = getUsersFromLocal();
+            if (SCRIPT_URL) {
+                try {
+                    const res = await fetch(`${SCRIPT_URL}?action=getUsers`);
+                    const rUsers = await res.json();
+                    if (rUsers && rUsers.length > 0) users = rUsers;
+                } catch (e) {}
+            }
+            const staffAndMgrList = users.filter(u => u.type === 'staff' || u.type === 'manager');
+            let selectId = panelRole === 'mgr' ? "mgrReportStaffSelect" : (panelRole === 'admin' ? "adminReportStaffSelect" : "reportStaffSelect");
+            const selElem = document.getElementById(selectId);
+            if (selElem) {
+                selElem.innerHTML = staffAndMgrList.map(u => `<option value="${u.id}">${u.name} (${u.id} - ${u.department || ''} - ${u.role})</option>`).join('');
+                loadIndividualMonthlyReportForPanel(panelRole);
+            }
+        }
+
+        async function loadIndividualMonthlyReportForPanel(panelRole) {
+            let selectId = panelRole === 'mgr' ? "mgrReportStaffSelect" : (panelRole === 'admin' ? "adminReportStaffSelect" : "reportStaffSelect");
+            let monthId = panelRole === 'mgr' ? "mgrReportMonthPicker" : (panelRole === 'admin' ? "adminReportMonthPicker" : "reportMonthPicker");
+            let containerId = panelRole === 'mgr' ? "mgrReportContainer" : (panelRole === 'admin' ? "adminMonthlyReportContainer" : "superAdminIndividualReportContainer");
+
+            const staffId = document.getElementById(selectId).value;
+            const monthVal = document.getElementById(monthId).value;
+            if (!staffId || !monthVal) return;
+
+            if (SCRIPT_URL) {
+                try {
+                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
+                    globalAttendance = await res.json();
+                } catch (e) {}
+            }
+
+            const targetUser = getUsersFromLocal().find(u => String(u.id) === String(staffId)) || { name: staffId, department: '', role: '' };
+            const resData = generateMonthlyTableHtmlForUser(staffId, monthVal);
+
+            const fullReportHtml = `
+                <div class="space-y-3">
+                    <div class="bg-slate-50 p-3 rounded-xl border flex flex-wrap justify-between items-center gap-2">
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-800">নাম: ${targetUser.name} (${staffId})</h4>
+                            <p class="text-xs text-slate-600">ডিপার্টমেন্ট: ${targetUser.department || 'সাধারণ'} | পদবী: ${targetUser.role} | মাস: ${monthVal}</p>
+                        </div>
+                        <div class="text-xs bg-white px-3 py-1.5 rounded-lg border font-semibold">${resData.summaryHtml}</div>
+                    </div>
+                    <table class="w-full text-xs text-left border border-slate-300">
+                        <thead class="bg-slate-200 text-slate-800 font-bold">
+                            <tr>
+                                <th class="p-2 border">তারিখ ও বার</th>
+                                <th class="p-2 border">ইন-টাইম</th>
+                                <th class="p-2 border">লাঞ্চ আউট</th>
+                                <th class="p-2 border">লাঞ্চ ইন</th>
+                                <th class="p-2 border">আউট-টাইম</th>
+                                <th class="p-2 border">মোট লাঞ্চ টাইম</th>
+                                <th class="p-2 border">মোট ডিউটি টাইম</th>
+                                <th class="p-2 border text-center">স্ট্যাটাস</th>
+                            </tr>
+                        </thead>
+                        <tbody>${resData.rowsHtml}</tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById(containerId).innerHTML = fullReportHtml;
+        }
+
+        function printMonthlyReportPDF(sourceContainerId) {
+            const sourceContent = document.getElementById(sourceContainerId).innerHTML;
+            const printArea = document.getElementById("printableArea");
+            printArea.innerHTML = `
+                <div style="text-align:center; border-bottom: 2px solid #1e293b; padding-bottom: 8px; margin-bottom: 12px;">
+                    <h2 style="font-size: 18px; font-weight: bold; margin: 0;">বাচ্চু মটরস - টু হুইলার অথরাইজড ডিলার</h2>
+                    <p style="font-size: 11px; color: #475569; margin: 2px 0;">মাদারীপুর | ডিজিটাল হাজিরা ও মুভমেন্ট রিপোর্ট</p>
+                </div>
+                ${sourceContent}
+            `;
+            printArea.classList.remove("hidden");
+            window.print();
+            printArea.classList.add("hidden");
         }
 
         async function loadAdminView() {
             try {
                 const selectedDateVal = document.getElementById("adminReportDate").value;
-                const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-                const records = await res.json();
+                let records = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
+                if (SCRIPT_URL) {
+                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
+                    records = await res.json();
+                }
                 let targetDate = new Date(selectedDateVal), targetStr = targetDate.toLocaleDateString();
                 const todaysRecords = records.filter(r => new Date(r.dateStr).toDateString() === targetDate.toDateString() || String(r.dateStr) === String(targetStr));
                 
@@ -2016,8 +2311,11 @@
                 document.getElementById("statTotalPresent").innerText = `${totalPresent} জন`;
                 document.getElementById("statTotalLate").innerText = `${lateCount} জন`;
                 
-                const uRes = await fetch(`${SCRIPT_URL}?action=getUsers`);
-                const allUsers = await uRes.json();
+                let allUsers = getUsersFromLocal();
+                if (SCRIPT_URL) {
+                    const uRes = await fetch(`${SCRIPT_URL}?action=getUsers`);
+                    allUsers = await uRes.json();
+                }
                 const staffList = allUsers.filter(u => u.type === 'staff' || u.type === 'manager');
                 document.getElementById("statTotalAbsent").innerText = `${Math.max(0, staffList.length - totalPresent)} জন`;
 
@@ -2035,21 +2333,45 @@
 
         async function calculateWinnerOfHonor() {
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-                const records = await res.json();
+                let records = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
+                if (SCRIPT_URL) {
+                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
+                    records = await res.json();
+                }
                 let dutyMap = {};
                 records.forEach(r => {
                     if (r.totalDuty) {
                         let h = parseFloat(r.totalDuty) || 0;
-                        dutyMap[r.staffName] = (dutyMap[r.staffName] || 0) + h;
+                        if (!dutyMap[r.staffId]) {
+                            dutyMap[r.staffId] = { name: r.staffName, hours: 0 };
+                        }
+                        dutyMap[r.staffId].hours += h;
                     }
                 });
-                let winnerName = "এখনো নির্ধারিত হয়নি", maxH = 0;
-                for (let name in dutyMap) {
-                    if (dutyMap[name] > maxH) { maxH = dutyMap[name]; winnerName = name; }
+                let winnerId = null, winnerName = "এখনো নির্ধারিত হয়নি", maxH = 0;
+                for (let id in dutyMap) {
+                    if (dutyMap[id].hours > maxH) {
+                        maxH = dutyMap[id].hours;
+                        winnerName = dutyMap[id].name;
+                        winnerId = id;
+                    }
                 }
+
+                const allUsers = getUsersFromLocal();
+                const winnerUser = allUsers.find(u => String(u.id) === String(winnerId));
+                const dept = winnerUser && winnerUser.department ? winnerUser.department : "নির্ধারিত নয়";
+                const photoUrl = winnerUser && winnerUser.photo ? winnerUser.photo : `https://ui-avatars.com/api/?name=${encodeURIComponent(winnerName)}&background=fef3c7&color=b45309`;
+
+                const imgElem = document.getElementById("winnerAvatarImg");
+                if (imgElem) imgElem.src = photoUrl;
+
                 const elem = document.getElementById("winnerDisplayInfo");
-                if (elem) elem.innerText = `${winnerName} (সর্বমোট ডিউটি: ${maxH.toFixed(1)} ঘণ্টা)`;
+                if (elem) {
+                    elem.innerHTML = `
+                        <p>নামঃ <span class="text-yellow-100 font-extrabold">${winnerName}</span></p>
+                        <p class="text-xs font-medium text-amber-100">ডিপার্টমেন্টঃ ${dept} | সর্বমোট ডিউটি: ${maxH.toFixed(1)} ঘণ্টা</p>
+                    `;
+                }
             } catch (e) {}
         }
 
@@ -2070,119 +2392,32 @@
 
         async function loadSuperAdminView() {
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getUsers`);
-                globalUsers = await res.json();
+                globalUsers = getUsersFromLocal();
+                if (SCRIPT_URL) {
+                    const res = await fetch(`${SCRIPT_URL}?action=getUsers`);
+                    const rUsers = await res.json();
+                    if (rUsers && rUsers.length > 0) globalUsers = rUsers;
+                }
                 const staffList = globalUsers.filter(u => u.type === 'staff');
                 const adminMgrList = globalUsers.filter(u => u.type !== 'staff');
 
                 document.getElementById("superAdminStaffList").innerHTML = staffList.map(u => `
                     <tr class="hover:bg-slate-50">
-                        <td class="p-2 font-bold">${u.id}</td><td class="p-2">${u.name}</td><td class="p-2">${u.role}</td>
-                        <td class="p-2"><input type="text" id="pass_${u.id}" placeholder="নতুন পাসওয়ার্ড" class="border px-2 py-1 rounded text-xs w-24 sm:w-28"> <button onclick="resetPass('${u.id}')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs">সেভ</button></td>
+                        <td class="p-2 font-bold">${u.id}</td><td class="p-2">${u.name}</td><td class="p-2"><span class="bg-slate-100 px-2 py-0.5 rounded text-xs">${u.department || '-'}</span></td><td class="p-2">${u.role}</td>
+                        <td class="p-2"><input type="text" id="pass_${u.id}" placeholder="নতুন পাসওয়ার্ড" class="border px-2 py-1 rounded text-xs w-24"> <button onclick="resetPass('${u.id}')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs">সেভ</button></td>
                         <td class="p-2 text-right"><button onclick="deleteUser('${u.id}')" class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded font-semibold">ডিলিট</button></td>
                     </tr>
-                `).join('') || `<tr><td colspan="5" class="p-4 text-center text-slate-400">কোনো স্টাফ নেই</td></tr>`;
+                `).join('') || `<tr><td colspan="6" class="p-4 text-center text-slate-400">কোনো স্টাফ নেই</td></tr>`;
 
                 document.getElementById("superAdminAdminList").innerHTML = adminMgrList.map(u => `
                     <tr class="hover:bg-slate-50">
-                        <td class="p-2 font-bold">${u.id}</td><td class="p-2">${u.name}</td><td class="p-2">${u.role} (${u.type})</td>
-                        <td class="p-2"><input type="text" id="pass_${u.id}" placeholder="নতুন পাসওয়ার্ড" class="border px-2 py-1 rounded text-xs w-24 sm:w-28"> <button onclick="resetPass('${u.id}')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs">সেভ</button></td>
+                        <td class="p-2 font-bold">${u.id}</td><td class="p-2">${u.name}</td><td class="p-2"><span class="bg-slate-100 px-2 py-0.5 rounded text-xs">${u.department || '-'}</span></td><td class="p-2">${u.role} (${u.type})</td>
+                        <td class="p-2"><input type="text" id="pass_${u.id}" placeholder="নতুন পাসওয়ার্ড" class="border px-2 py-1 rounded text-xs w-24"> <button onclick="resetPass('${u.id}')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs">সেভ</button></td>
                         <td class="p-2 text-right"><button onclick="deleteUser('${u.id}')" class="text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded font-semibold">ডিলিট</button></td>
                     </tr>
-                `).join('') || `<tr><td colspan="5" class="p-4 text-center text-slate-400">কোনো অ্যাকাউন্ট নেই</td></tr>`;
+                `).join('') || `<tr><td colspan="6" class="p-4 text-center text-slate-400">কোনো অ্যাকাউন্ট নেই</td></tr>`;
                 calculateWinnerOfHonor();
             } catch (e) {}
-        }
-
-        async function loadSuperAdminReportDropdown() {
-            const res = await fetch(`${SCRIPT_URL}?action=getUsers`);
-            const users = await res.json();
-            const staffAndMgrList = users.filter(u => u.type === 'staff' || u.type === 'manager');
-            document.getElementById("reportStaffSelect").innerHTML = staffAndMgrList.map(u => `<option value="${u.id}">${u.name} (${u.id} - ${u.role})</option>`).join('');
-            loadSuperAdminIndividualReport();
-        }
-
-        async function loadSuperAdminIndividualReport() {
-            const staffId = document.getElementById("reportStaffSelect").value;
-            const monthVal = document.getElementById("reportMonthPicker").value;
-            if (!staffId || !monthVal) return;
-
-            const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-            const records = await res.json();
-            const [year, month] = monthVal.split('-').map(Number);
-            const daysInMonth = new Date(year, month, 0).getDate();
-            const myRecords = records.filter(r => String(r.staffId) === String(staffId));
-            const myApprovedAttApps = globalAttApplications.filter(a => String(a.staffId) === String(staffId) && (a.finalApproval === 'Approved' || a.status === 'Approved (Final)'));
-            const myApprovedLeaves = globalLeaves.filter(l => String(l.staffId) === String(staffId) && l.finalApproval === 'Approved');
-
-            let html = `<table class="w-full text-xs text-left border border-slate-200">
-                <tr class="bg-slate-100 font-bold"><th class="p-2 border">তারিখ</th><th class="p-2 border">ইন</th><th class="p-2 border">লাঞ্চ আউট</th><th class="p-2 border">লাঞ্চ ইন</th><th class="p-2 border">আউট</th><th class="p-2 border">মোট ডিউটি</th><th class="p-2 border text-center">স্ট্যাটাস</th></tr>`;
-            
-            for (let day = 1; day <= daysInMonth; day++) {
-                let dateObj = new Date(year, month - 1, day);
-                let isoDateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                let matched = myRecords.find(r => {
-                    let d = new Date(r.dateStr);
-                    return d.getDate() === day && (d.getMonth() + 1) === month && d.getFullYear() === year;
-                });
-                let matchedAttApp = myApprovedAttApps.find(a => a.dateStr === isoDateStr);
-                let matchedLeave = myApprovedLeaves.find(l => isoDateStr >= l.startDate && isoDateStr <= l.endDate);
-
-                let rowBg = "bg-rose-100 text-rose-900";
-                let statusText = "অনুপস্থিত";
-                let inT = '-', lOut = '-', lIn = '-', outT = '-', totalDuty = '-';
-                if (matched && matched.inStatus === 'AppPresent') {
-                    inT = format12Hour(matched.inTime);
-                    lOut = format12Hour(matched.lunchOut);
-                    lIn = format12Hour(matched.lunchIn);
-                    outT = format12Hour(matched.outTime);
-                    totalDuty = matched.totalDuty || '8.00 ঘণ্টা';
-                    rowBg = "bg-blue-100 text-blue-950";
-                    statusText = "প্রেজেন্ট (আবেদন)";
-                } else if (matchedAttApp) {
-                    inT = format12Hour(matchedAttApp.inTime) !== '-' ? format12Hour(matchedAttApp.inTime) : '09:00 AM';
-                    lOut = format12Hour(matchedAttApp.lunchOut);
-                    lIn = format12Hour(matchedAttApp.lunchIn);
-                    outT = format12Hour(matchedAttApp.outTime) !== '-' ? format12Hour(matchedAttApp.outTime) : '06:00 PM';
-                    
-                    let inD = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.inTime || '09:00 AM'}`);
-                    let outD = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.outTime || '06:00 PM'}`);
-                    let tMs = outD - inD;
-                    let lMs = 0;
-                    if (matchedAttApp.lunchOut && matchedAttApp.lunchIn) {
-                        let lO = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.lunchOut}`);
-                        let lI = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.lunchIn}`);
-                        if (lI > lO) lMs = lI - lO;
-                    }
-                    let netMs = tMs - lMs;
-                    let hrs = netMs > 0 ? (netMs / (1000 * 60 * 60)).toFixed(2) : "8.00";
-                    totalDuty = `${hrs} ঘণ্টা (আবেদনকৃত)`;
-
-                    rowBg = "bg-blue-100 text-blue-950";
-                    statusText = "প্রেজেন্ট (আবেদন)";
-                } else if (matchedLeave) {
-                    inT = "অনুমোদিত ছুটি";
-                    totalDuty = `8.00 ঘণ্টা (${matchedLeave.type})`;
-                    rowBg = "bg-blue-100 text-blue-950";
-                    statusText = "প্রেজেন্ট (ছুটি)";
-                } else if (matched) {
-                    inT = format12Hour(matched.inTime);
-                    lOut = format12Hour(matched.lunchOut);
-                    lIn = format12Hour(matched.lunchIn);
-                    outT = format12Hour(matched.outTime);
-                    totalDuty = matched.totalDuty || '-';
-                    if (matched.inStatus === 'Late') {
-                        rowBg = "bg-amber-100 text-amber-900";
-                        statusText = "লেট";
-                    } else {
-                        rowBg = "bg-emerald-100 text-emerald-900";
-                        statusText = "প্রেজেন্ট";
-                    }
-                }
-                html += `<tr class="${rowBg} border-b"><td class="p-2 border font-bold">${day} ${dateObj.toLocaleDateString('bn-BD', { month: 'long' })}</td><td class="p-2 border">${inT}</td><td class="p-2 border">${lOut}</td><td class="p-2 border">${lIn}</td><td class="p-2 border">${outT}</td><td class="p-2 border font-semibold">${totalDuty}</td><td class="p-2 border text-center font-bold">${statusText}</td></tr>`;
-            }
-            html += `</table>`;
-            document.getElementById("superAdminIndividualReportContainer").innerHTML = html;
         }
 
         async function createNewStaff(e) {
@@ -2193,25 +2428,46 @@
 
             const newId = document.getElementById("newStaffId").value.trim();
             const newName = document.getElementById("newStaffName").value.trim();
+            const newDept = document.getElementById("newStaffDept").value;
             const payload = {
                 action: "addUser",
                 id: newId,
                 name: newName,
+                department: newDept,
                 role: document.getElementById("newStaffRole").value.trim(),
                 pass: document.getElementById("newStaffPass").value.trim(),
-                type: document.getElementById("newAccountType").value
+                type: document.getElementById("newAccountType").value,
+                photo: ""
             };
 
-            const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-            const result = await res.text();
-            if (result === "Duplicate") {
+            let allU = getUsersFromLocal();
+            if (allU.some(u => String(u.id).toLowerCase() === newId.toLowerCase())) {
                 showToast("ব্যর্থ!", "এই ইউজার আইডি ইতিমধ্যে ব্যবহৃত হয়েছে!", "error");
-            } else {
-                e.target.reset();
-                loadSuperAdminView();
-                logAuditAction("User Created", `নতুন অ্যাকাউন্ট তৈরি করা হয়েছে: ${newName} (${newId})`);
-                triggerSuccessTick("নতুন অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!");
+                btn.innerText = "অ্যাকাউন্ট তৈরি করুন";
+                btn.disabled = false;
+                return;
             }
+
+            if (SCRIPT_URL) {
+                try {
+                    const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+                    const result = await res.text();
+                    if (result === "Duplicate") {
+                        showToast("ব্যর্থ!", "এই ইউজার আইডি ইতিমধ্যে ব্যবহৃত হয়েছে!", "error");
+                        btn.innerText = "অ্যাকাউন্ট তৈরি করুন";
+                        btn.disabled = false;
+                        return;
+                    }
+                } catch (err) {}
+            }
+
+            allU.push(payload);
+            localStorage.setItem('bachchu_users', JSON.stringify(allU));
+            e.target.reset();
+            loadSuperAdminView();
+            logAuditAction("User Created", `নতুন অ্যাকাউন্ট তৈরি করা হয়েছে: ${newName} (${newId} - ${newDept})`);
+            triggerSuccessTick("নতুন অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!");
+
             btn.innerText = "অ্যাকাউন্ট তৈরি করুন";
             btn.disabled = false;
         }
@@ -2219,7 +2475,16 @@
         async function resetPass(id) {
             const newPass = document.getElementById(`pass_${id}`).value.trim();
             if (!newPass) return showToast("সতর্কতা", "নতুন পাসওয়ার্ড লিখুন!", "info");
-            await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "updateUser", id: id, pass: newPass }) });
+            
+            let allU = getUsersFromLocal();
+            let idx = allU.findIndex(u => String(u.id) === String(id));
+            if (idx !== -1) {
+                allU[idx].pass = newPass;
+                localStorage.setItem('bachchu_users', JSON.stringify(allU));
+            }
+            if (SCRIPT_URL) {
+                try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "updateUser", id: id, pass: newPass }) }); } catch (e) {}
+            }
             document.getElementById(`pass_${id}`).value = "";
             logAuditAction("Password Reset", `ইউজার ${id} এর পাসওয়ার্ড রিসেট করা হয়েছে`);
             triggerSuccessTick(`${id} এর পাসওয়ার্ড সফলভাবে রিসেট হয়েছে!`);
@@ -2227,7 +2492,11 @@
 
         async function deleteUser(id) {
             if (confirm(`আপনি কি নিশ্চিত ${id} ডিলিট করতে চান?`)) {
-                await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "deleteUser", id: id }) });
+                let allU = getUsersFromLocal().filter(u => String(u.id) !== String(id));
+                localStorage.setItem('bachchu_users', JSON.stringify(allU));
+                if (SCRIPT_URL) {
+                    try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "deleteUser", id: id }) }); } catch (e) {}
+                }
                 loadSuperAdminView();
                 logAuditAction("User Deleted", `ইউজার ডিলিট করা হয়েছে: ${id}`);
                 triggerSuccessTick(`${id} সফলভাবে মুছে ফেলা হয়েছে!`);
@@ -2235,8 +2504,13 @@
         }
 
         async function exportToExcel() {
-            const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-            const records = await res.json();
+            let records = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
+            if (SCRIPT_URL) {
+                try {
+                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
+                    records = await res.json();
+                } catch (e) {}
+            }
             if (records.length === 0) return showToast("সতর্কতা", "ডাউনলোড করার মতো ডাটা নেই!", "info");
             let csv = "স্টাফ আইডি,নাম,তারিখ,ইন-টাইম,স্ট্যাটাস,লাঞ্চ আউট,লাঞ্চ ইন,আউট-টাইম,মোট ডিউটি,অবস্থান\n";
             records.forEach(r => { csv += `${r.staffId},${r.staffName},${r.dateStr},${r.inTime},${r.inStatus},${r.lunchOut||''},${r.lunchIn||''},${r.outTime||''},${r.totalDuty||''},${r.location||''}\n`; });
@@ -2261,8 +2535,6 @@
             logAuditAction("Export Audit Log", `সিকিউরিটি অডিট ট্রেইল লগ ডাউনলোড করা হয়েছে`);
             triggerSuccessTick("অডিট লগ সফলভাবে ডাউনলোড হয়েছে!");
         }
-
-        function exportAttendancePDF() { window.print(); }
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
