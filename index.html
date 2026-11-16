@@ -173,21 +173,29 @@
         </div>
 
         <!-- TROPHY BANNER (WINNER OF HONOR WITH PHOTO, NAME & DEPARTMENT) -->
-        <div id="trophyBanner" class="hidden bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-2xl p-4 shadow-md flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div class="flex items-center gap-3.5">
-                <div class="relative shrink-0">
-                    <img id="winnerAvatarImg" src="https://ui-avatars.com/api/?name=Winner&background=fef3c7&color=b45309" alt="Winner" class="w-14 h-14 rounded-full object-cover border-2 border-yellow-200 shadow">
-                    <div class="absolute -bottom-1 -right-1 bg-amber-800 text-yellow-300 w-6 h-6 rounded-full flex items-center justify-center text-xs shadow border border-yellow-300">
-                        <i class="fa-solid fa-trophy"></i>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="text-[11px] font-bold uppercase tracking-wider text-amber-100">মাসের সেরা কর্মী (Winner of Honor)</h4>
-                    <div id="winnerDisplayInfo" class="text-xs sm:text-sm font-bold mt-0.5 space-y-0.5">হিসাব করা হচ্ছে...</div>
-                </div>
-            </div>
-            <span class="text-[10px] bg-amber-700/50 px-2.5 py-1 rounded-lg border border-amber-400/40 shrink-0">অটো আপডেট</span>
+        <!-- মাসের সেরা কর্মী ব্যানার -->
+<div id="trophyBanner" class="hidden bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-2xl p-4 md:p-5 flex justify-between items-center shadow-lg relative my-4">
+    
+    <!-- বাম পাশ: ট্রফি আইকন এবং নাম -->
+    <div class="flex items-center gap-4">
+        <!-- ট্রফি আইকন -->
+        <div class="bg-white/30 w-12 h-12 flex items-center justify-center rounded-full shadow-inner shrink-0">
+            <i class="fa-solid fa-trophy text-white text-xl"></i>
         </div>
+        
+        <!-- টেক্সট ও নাম -->
+        <div class="text-left space-y-0.5">
+            <p class="text-[10px] text-amber-100 font-bold uppercase tracking-wider">মাসের সেরা কর্মী (Winner of Honor)</p>
+            <h3 id="winnerName" class="text-sm md:text-lg text-white font-extrabold">হিসাব করা হচ্ছে...</h3>
+            <p id="winnerDept" class="text-xs text-amber-100 font-medium"></p>
+        </div>
+    </div>
+
+    <!-- ডান পাশ: কর্মীর প্রফাইল ছবি -->
+    <div>
+        <img id="winnerPhoto" src="" alt="Winner Photo" class="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-white shadow-md hidden object-cover">
+    </div>
+</div>
 
         <!-- STAFF PANEL -->
         <div id="staffPanel" class="hidden space-y-5 sm:space-y-6">
@@ -2331,49 +2339,65 @@
             } catch (e) {}
         }
 
-        async function calculateWinnerOfHonor() {
-            try {
-                let records = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
-                if (SCRIPT_URL) {
-                    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-                    records = await res.json();
-                }
-                let dutyMap = {};
-                records.forEach(r => {
-                    if (r.totalDuty) {
-                        let h = parseFloat(r.totalDuty) || 0;
-                        if (!dutyMap[r.staffId]) {
-                            dutyMap[r.staffId] = { name: r.staffName, hours: 0 };
-                        }
-                        dutyMap[r.staffId].hours += h;
-                    }
-                });
-                let winnerId = null, winnerName = "এখনো নির্ধারিত হয়নি", maxH = 0;
-                for (let id in dutyMap) {
-                    if (dutyMap[id].hours > maxH) {
-                        maxH = dutyMap[id].hours;
-                        winnerName = dutyMap[id].name;
-                        winnerId = id;
-                    }
-                }
-
-                const allUsers = getUsersFromLocal();
-                const winnerUser = allUsers.find(u => String(u.id) === String(winnerId));
-                const dept = winnerUser && winnerUser.department ? winnerUser.department : "নির্ধারিত নয়";
-                const photoUrl = winnerUser && winnerUser.photo ? winnerUser.photo : `https://ui-avatars.com/api/?name=${encodeURIComponent(winnerName)}&background=fef3c7&color=b45309`;
-
-                const imgElem = document.getElementById("winnerAvatarImg");
-                if (imgElem) imgElem.src = photoUrl;
-
-                const elem = document.getElementById("winnerDisplayInfo");
-                if (elem) {
-                    elem.innerHTML = `
-                        <p>নামঃ <span class="text-yellow-100 font-extrabold">${winnerName}</span></p>
-                        <p class="text-xs font-medium text-amber-100">ডিপার্টমেন্টঃ ${dept} | সর্বমোট ডিউটি: ${maxH.toFixed(1)} ঘণ্টা</p>
-                    `;
-                }
-            } catch (e) {}
+       async function calculateWinnerOfHonor() {
+    try {
+        let records = JSON.parse(localStorage.getItem('bachchu_attendance_cache') || '[]');
+        if (typeof SCRIPT_URL !== 'undefined' && SCRIPT_URL) {
+            const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
+            records = await res.json();
         }
+
+        let dutyMap = {};
+        records.forEach(r => {
+            if (r.totalDuty) {
+                let h = parseFloat(r.totalDuty) || 0;
+                if (!dutyMap[r.staffId]) {
+                    dutyMap[r.staffId] = { name: r.staffName, hours: 0 };
+                }
+                dutyMap[r.staffId].hours += h;
+            }
+        });
+
+        let winnerId = null, winnerName = "এই মাসে কোনো ডেটা নেই", maxH = 0;
+        for (let id in dutyMap) {
+            if (dutyMap[id].hours > maxH) {
+                maxH = dutyMap[id].hours;
+                winnerName = dutyMap[id].name;
+                winnerId = id;
+            }
+        }
+
+        // ইউজার লিস্ট থেকে বিজয়ী কর্মীর ডিপার্টমেন্ট এবং ছবি বের করা
+        const allUsers = typeof getUsersFromLocal === 'function' ? getUsersFromLocal() : [];
+        const winnerUser = allUsers.find(u => String(u.id) === String(winnerId));
+        const dept = winnerUser && winnerUser.department ? winnerUser.department : "স্টাফ";
+        const photoUrl = winnerUser && winnerUser.photo ? winnerUser.photo : "";
+
+        const nameElem = document.getElementById("winnerName");
+        const deptElem = document.getElementById("winnerDept");
+        const imgElem = document.getElementById("winnerPhoto");
+
+        if (winnerId) {
+            if (nameElem) nameElem.innerText = `${winnerName} (${maxH.toFixed(1)} ঘণ্টা)`;
+            if (deptElem) deptElem.innerText = `ডিপার্টমেন্ট: ${dept}`;
+            
+            if (imgElem) {
+                if (photoUrl && photoUrl.trim() !== "") {
+                    imgElem.src = photoUrl;
+                } else {
+                    imgElem.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(winnerName)}&background=fef3c7&color=b45309`;
+                }
+                imgElem.classList.remove("hidden");
+            }
+        } else {
+            if (nameElem) nameElem.innerText = "এখনো নির্ধারিত হয়নি";
+            if (deptElem) deptElem.innerText = "সর্বমোট ডিউটি: ০ ঘণ্টা";
+            if (imgElem) imgElem.classList.add("hidden");
+        }
+    } catch (e) {
+        console.log("Winner calculation error:", e);
+    }
+}
 
         function renderAdminChart(present, late, absent) {
             const canvas = document.getElementById('adminChartCanvas');
