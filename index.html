@@ -298,6 +298,7 @@
                     <div class="flex flex-wrap gap-2.5 sm:gap-3 text-[11px] sm:text-xs font-semibold">
                         <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 border border-emerald-400 inline-block rounded"></span> সময়মতো (গ্রিন)</span>
                         <span class="flex items-center gap-1"><span class="w-3 h-3 bg-amber-100 border border-amber-400 inline-block rounded"></span> লেট (হলুদ)</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-100 border border-blue-400 inline-block rounded"></span> আবেদনকৃত উপস্থিতি/ছুটি (নীল)</span>
                         <span class="flex items-center gap-1"><span class="w-3 h-3 bg-rose-100 border border-rose-400 inline-block rounded"></span> অনুপস্থিত (লাল)</span>
                     </div>
                     <div class="table-responsive max-h-96">
@@ -442,6 +443,7 @@
                     <div class="flex flex-wrap gap-2.5 sm:gap-3 text-[11px] sm:text-xs font-semibold">
                         <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 border border-emerald-400 inline-block rounded"></span> সময়মতো (গ্রিন)</span>
                         <span class="flex items-center gap-1"><span class="w-3 h-3 bg-amber-100 border border-amber-400 inline-block rounded"></span> লেট (হলুদ)</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-100 border border-blue-400 inline-block rounded"></span> আবেদনকৃত উপস্থিতি/ছুটি (নীল)</span>
                         <span class="flex items-center gap-1"><span class="w-3 h-3 bg-rose-100 border border-rose-400 inline-block rounded"></span> অনুপস্থিত (লাল)</span>
                     </div>
                     <div class="table-responsive max-h-96">
@@ -1191,8 +1193,7 @@
 
             // Admin/SuperAdmin sees applications where manager already approved OR it bypassed manager
             let pendingForMD = globalLeaves.filter(l => (l.staffType === 'manager' || l.managerApproval === 'Approved') && l.finalApproval === 'Pending').length;
-            let pendingAttForMD = globalAttApplications.filter(a => (a.staffType === 'manager' || a.managerApproval === 'Approved') && a.status === 'Pending').length;
-            let totalMDPending = pendingForMD + pendingAttForMD;
+            let pendingAttForMD = globalAttApplications.filter(a => (a.staffType === 'manager' || a.managerApproval === 'Approved') && (a.finalApproval === 'Pending' || (!a.finalApproval && String(a.status).includes('Pending')))).length;
 
             if (document.getElementById("mgrLeaveBadge")) {
                 const b1 = document.getElementById("mgrLeaveBadge");
@@ -1200,11 +1201,19 @@
             }
             if (document.getElementById("adminLeaveBadge")) {
                 const b2 = document.getElementById("adminLeaveBadge");
-                if (totalMDPending > 0) { b2.innerText = totalMDPending; b2.classList.remove("hidden"); } else { b2.classList.add("hidden"); }
+                if (pendingForMD > 0) { b2.innerText = pendingForMD; b2.classList.remove("hidden"); } else { b2.classList.add("hidden"); }
             }
             if (document.getElementById("superLeaveBadge")) {
                 const b3 = document.getElementById("superLeaveBadge");
-                if (totalMDPending > 0) { b3.innerText = totalMDPending; b3.classList.remove("hidden"); } else { b3.classList.add("hidden"); }
+                if (pendingForMD > 0) { b3.innerText = pendingForMD; b3.classList.remove("hidden"); } else { b3.classList.add("hidden"); }
+            }
+            if (document.getElementById("adminAttAppBadge")) {
+                const b4 = document.getElementById("adminAttAppBadge");
+                if (pendingAttForMD > 0) { b4.innerText = pendingAttForMD; b4.classList.remove("hidden"); } else { b4.classList.add("hidden"); }
+            }
+            if (document.getElementById("superAttAppBadge")) {
+                const b5 = document.getElementById("superAttAppBadge");
+                if (pendingAttForMD > 0) { b5.innerText = pendingAttForMD; b5.classList.remove("hidden"); } else { b5.classList.add("hidden"); }
             }
         }
 
@@ -1349,6 +1358,19 @@
             }
         }
 
+        function getDatesBetween(startStr, endStr) {
+            let dates = [];
+            let [sy, sm, sd] = startStr.split('-').map(Number);
+            let [ey, em, ed] = endStr.split('-').map(Number);
+            let curr = new Date(sy, sm - 1, sd);
+            let end = new Date(ey, em - 1, ed);
+            while (curr <= end) {
+                dates.push(new Date(curr));
+                curr.setDate(curr.getDate() + 1);
+            }
+            return dates;
+        }
+
         async function processLeave(leaveId, byRole, decision) {
             let leave = globalLeaves.find(l => l.leaveId === leaveId);
             if (!leave) return;
@@ -1360,9 +1382,47 @@
                 leave.finalApproval = decision;
                 leave.status = decision === 'Approved' ? 'Approved (Final)' : 'Rejected by MD/SuperAdmin';
                 logAuditAction("Leave Final Approved", `${currentUser.role} ${leave.staffName} এর ছুটির আবেদন ${decision}`);
+
+                if (decision === 'Approved') {
+                    const leaveDates = getDatesBetween(leave.startDate, leave.endDate);
+                    for (let dObj of leaveDates) {
+                        const dateFormatted = dObj.toLocaleDateString();
+                        const attPayload = {
+                            action: "addAttendance",
+                            staffId: leave.staffId,
+                            staffName: leave.staffName,
+                            dateStr: dateFormatted,
+                            inTime: "অনুমোদিত ছুটি",
+                            inPhoto: "",
+                            inStatus: "AppPresent",
+                            lunchOut: "-",
+                            lunchIn: "-",
+                            outTime: "-",
+                            outPhoto: "",
+                            totalDuty: "8.00 ঘণ্টা (ছুটি)",
+                            diffDuty: "সফল",
+                            location: `Approved Leave (${leave.type})`
+                        };
+                        globalAttendance.push(attPayload);
+                        try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(attPayload) }); } catch (e) {}
+                    }
+                    localStorage.setItem('bachchu_attendance_cache', JSON.stringify(globalAttendance));
+                }
             }
             localStorage.setItem('bachchu_leaves', JSON.stringify(globalLeaves));
-            loadLeavesData();
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "updateLeave",
+                        leaveId: leave.leaveId,
+                        managerApproval: leave.managerApproval,
+                        finalApproval: leave.finalApproval,
+                        status: leave.status
+                    })
+                });
+            } catch (e) {}
+            renderLeaveLists();
             updateLeaveBalancesAndBadges();
             triggerSuccessTick(`ছুটির আবেদন ${decision === 'Approved' ? 'অনুমোদন' : 'বাতিল'} করা হয়েছে!`);
         }
@@ -1405,6 +1465,7 @@
                 lunchIn: lIn,
                 reason: reason,
                 managerApproval: isManager ? "Approved" : "Pending",
+                finalApproval: "Pending",
                 status: isManager ? "Pending (Admin/SuperAdmin Approval)" : "Pending (Manager Approval)"
             };
 
@@ -1413,8 +1474,10 @@
             try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(newApp) }); } catch (e) {}
 
             logAuditAction("Attendance Application", `হাজিরা মিসিং আবেদন করেছেন: ${dateStr}`);
+            e.target.reset();
             closeManualAttModal();
-            loadAttApplicationsData();
+            renderAttAppLists();
+            updateLeaveBalancesAndBadges();
             triggerSuccessTick(isManager ? "ম্যানেজারের হাজিরা আবেদন সরাসরি অ্যাডমিনের কাছে জমা হয়েছে!" : "হাজিরা মিসিং আবেদন ম্যানেজারের কাছে জমা হয়েছে!");
         }
 
@@ -1435,7 +1498,7 @@
             }
 
             if (currentUser.type === 'admin' || currentUser.type === 'superadmin') {
-                let pendingApps = globalAttApplications.filter(a => (a.staffType === 'manager' || a.managerApproval === 'Approved') && a.status === 'Pending');
+                let pendingApps = globalAttApplications.filter(a => (a.staffType === 'manager' || a.managerApproval === 'Approved') && (a.finalApproval === 'Pending' || (!a.finalApproval && String(a.status).includes('Pending'))));
                 let targetId = currentUser.type === 'admin' ? "adminAttAppListContainer" : "superAdminAttAppListContainer";
                 const elem = document.getElementById(targetId);
                 if (elem) {
@@ -1455,25 +1518,54 @@
             
             if (byRole === 'manager') {
                 app.managerApproval = decision;
+                app.finalApproval = decision === 'Approved' ? 'Pending' : 'Rejected';
                 app.status = decision === 'Approved' ? 'Pending (Final MD/SuperAdmin Approval)' : 'Rejected by Manager';
                 logAuditAction("Att App 1st Approved", `ম্যানেজার ${app.staffName} এর হাজিরা আবেদন ${decision}`);
             } else {
+                app.finalApproval = decision;
                 app.status = decision === 'Approved' ? 'Approved (Final)' : 'Rejected by MD/SuperAdmin';
                 logAuditAction("Att App Final Approved", `${currentUser.role} ${app.staffName} এর হাজিরা আবেদন ${decision}`);
                 
                 if (decision === 'Approved') {
+                    let [ay, am, ad] = app.dateStr.split('-').map(Number);
+                    let targetDateFormatted = new Date(ay, am - 1, ad).toLocaleDateString();
                     let totalHours = "8.00 ঘণ্টা (আবেদনকৃত)";
                     const attPayload = {
-                        action: "addAttendance", staffId: app.staffId, staffName: app.staffName,
-                        dateStr: new Date(app.dateStr).toLocaleDateString(), inTime: format12Hour(app.inTime) !== '-' ? format12Hour(app.inTime) : "09:30 AM", inPhoto: "", inStatus: "Present",
-                        lunchOut: format12Hour(app.lunchOut) !== '-' ? format12Hour(app.lunchOut) : "", lunchIn: format12Hour(app.lunchIn) !== '-' ? format12Hour(app.lunchIn) : "", outTime: format12Hour(app.outTime) !== '-' ? format12Hour(app.outTime) : "06:00 PM", outPhoto: "", totalDuty: totalHours, diffDuty: "সফল", location: "Manual Approved"
+                        action: "addAttendance",
+                        staffId: app.staffId,
+                        staffName: app.staffName,
+                        dateStr: targetDateFormatted,
+                        inTime: format12Hour(app.inTime) !== '-' ? format12Hour(app.inTime) : "09:30 AM",
+                        inPhoto: "",
+                        inStatus: "AppPresent",
+                        lunchOut: format12Hour(app.lunchOut) !== '-' ? format12Hour(app.lunchOut) : "-",
+                        lunchIn: format12Hour(app.lunchIn) !== '-' ? format12Hour(app.lunchIn) : "-",
+                        outTime: format12Hour(app.outTime) !== '-' ? format12Hour(app.outTime) : "06:00 PM",
+                        outPhoto: "",
+                        totalDuty: totalHours,
+                        diffDuty: "সফল",
+                        location: "Manual Approved"
                     };
+                    globalAttendance.push(attPayload);
+                    localStorage.setItem('bachchu_attendance_cache', JSON.stringify(globalAttendance));
                     try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(attPayload) }); } catch (e) {}
                 }
             }
             
             localStorage.setItem('bachchu_att_apps', JSON.stringify(globalAttApplications));
-            loadAttApplicationsData();
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "updateAttApp",
+                        appId: app.appId,
+                        managerApproval: app.managerApproval,
+                        finalApproval: app.finalApproval,
+                        status: app.status
+                    })
+                });
+            } catch (e) {}
+            renderAttAppLists();
             updateLeaveBalancesAndBadges();
             triggerSuccessTick(`হাজিরা আবেদন ${decision === 'Approved' ? 'অনুমোদন' : 'বাতিল'} করা হয়েছে!`);
         }
@@ -1855,11 +1947,14 @@
             if (!monthVal) return;
             const [year, month] = monthVal.split('-').map(Number);
             const daysInMonth = new Date(year, month, 0).getDate();
-            let tableHtml = '', totalPresentDays = 0, totalLateDays = 0, totalAbsentDays = 0;
+            let tableHtml = '', totalPresentDays = 0, totalAppPresentDays = 0, totalLateDays = 0, totalAbsentDays = 0;
             const myRecords = globalAttendance.filter(r => String(r.staffId) === String(currentUser.id));
+            const myApprovedAttApps = globalAttApplications.filter(a => String(a.staffId) === String(currentUser.id) && (a.finalApproval === 'Approved' || a.status === 'Approved (Final)'));
+            const myApprovedLeaves = globalLeaves.filter(l => String(l.staffId) === String(currentUser.id) && l.finalApproval === 'Approved');
 
             for (let day = 1; day <= daysInMonth; day++) {
                 let dateObj = new Date(year, month - 1, day);
+                let isoDateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 let dayName = dateObj.toLocaleDateString('bn-BD', { weekday: 'long' });
                 let formattedDateNum = `${day} ${dateObj.toLocaleDateString('bn-BD', { month: 'long', year: 'numeric' })} (${dayName})`;
 
@@ -1868,11 +1963,38 @@
                     return d.getDate() === day && (d.getMonth() + 1) === month && d.getFullYear() === year;
                 });
 
+                let matchedAttApp = myApprovedAttApps.find(a => a.dateStr === isoDateStr);
+                let matchedLeave = myApprovedLeaves.find(l => isoDateStr >= l.startDate && isoDateStr <= l.endDate);
+
                 let rowBg = "bg-rose-100 text-rose-900 border-rose-300";
                 let statusBadge = `<span class="bg-rose-200 text-rose-800 px-2 py-0.5 rounded font-bold text-[10px]">অনুপস্থিত</span>`;
                 let inT = '-', lOut = '-', lIn = '-', outT = '-', totalLunch = '-', totalDuty = '-';
 
-                if (matched) {
+                if (matched && matched.inStatus === 'AppPresent') {
+                    totalAppPresentDays++;
+                    inT = format12Hour(matched.inTime);
+                    lOut = format12Hour(matched.lunchOut);
+                    lIn = format12Hour(matched.lunchIn);
+                    outT = format12Hour(matched.outTime);
+                    totalDuty = matched.totalDuty || '8.00 ঘণ্টা';
+                    rowBg = "bg-blue-100 text-blue-950 border-blue-300";
+                    statusBadge = `<span class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold text-[10px]">প্রেজেন্ট (আবেদন)</span>`;
+                } else if (matchedAttApp) {
+                    totalAppPresentDays++;
+                    inT = format12Hour(matchedAttApp.inTime) !== '-' ? format12Hour(matchedAttApp.inTime) : '09:30 AM';
+                    lOut = format12Hour(matchedAttApp.lunchOut);
+                    lIn = format12Hour(matchedAttApp.lunchIn);
+                    outT = format12Hour(matchedAttApp.outTime) !== '-' ? format12Hour(matchedAttApp.outTime) : '06:00 PM';
+                    totalDuty = "8.00 ঘণ্টা (আবেদনকৃত)";
+                    rowBg = "bg-blue-100 text-blue-950 border-blue-300";
+                    statusBadge = `<span class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold text-[10px]">প্রেজেন্ট (আবেদন)</span>`;
+                } else if (matchedLeave) {
+                    totalAppPresentDays++;
+                    inT = "অনুমোদিত ছুটি";
+                    totalDuty = `8.00 ঘণ্টা (${matchedLeave.type})`;
+                    rowBg = "bg-blue-100 text-blue-950 border-blue-300";
+                    statusBadge = `<span class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold text-[10px]">প্রেজেন্ট (ছুটি)</span>`;
+                } else if (matched) {
                     inT = format12Hour(matched.inTime);
                     lOut = format12Hour(matched.lunchOut);
                     lIn = format12Hour(matched.lunchIn);
@@ -1918,7 +2040,7 @@
             }
 
             document.getElementById(tableBodyId).innerHTML = tableHtml;
-            document.getElementById(badgeId).innerHTML = `<i class="fa-solid fa-calendar-days mr-1.5 text-red-600"></i>এই মাসে মোট দিন: ${daysInMonth} দিন | প্রেজেন্ট: <strong class="text-emerald-700">${totalPresentDays}</strong> | লেট: <strong class="text-amber-700">${totalLateDays}</strong> | অনুপস্থিত: <strong class="text-rose-700">${totalAbsentDays}</strong>`;
+            document.getElementById(badgeId).innerHTML = `<i class="fa-solid fa-calendar-days mr-1.5 text-red-600"></i>এই মাসে মোট দিন: ${daysInMonth} দিন | প্রেজেন্ট: <strong class="text-emerald-700">${totalPresentDays}</strong> | আবেদনকৃত প্রেজেন্ট (নীল): <strong class="text-blue-700">${totalAppPresentDays}</strong> | লেট: <strong class="text-amber-700">${totalLateDays}</strong> | অনুপস্থিত: <strong class="text-rose-700">${totalAbsentDays}</strong>`;
         }
 
         async function loadAdminView() {
@@ -1929,7 +2051,7 @@
                 let targetDate = new Date(selectedDateVal), targetStr = targetDate.toLocaleDateString();
                 const todaysRecords = records.filter(r => new Date(r.dateStr).toDateString() === targetDate.toDateString() || String(r.dateStr) === String(targetStr));
                 
-                let presentCount = todaysRecords.filter(r => r.inStatus === 'Present' || r.inStatus === 'Manual/Present').length;
+                let presentCount = todaysRecords.filter(r => r.inStatus === 'Present' || r.inStatus === 'Manual/Present' || r.inStatus === 'AppPresent').length;
                 let lateCount = todaysRecords.filter(r => r.inStatus === 'Late').length;
                 let totalPresent = presentCount + lateCount;
                 
@@ -2032,20 +2154,47 @@
             const [year, month] = monthVal.split('-').map(Number);
             const daysInMonth = new Date(year, month, 0).getDate();
             const myRecords = records.filter(r => String(r.staffId) === String(staffId));
+            const myApprovedAttApps = globalAttApplications.filter(a => String(a.staffId) === String(staffId) && (a.finalApproval === 'Approved' || a.status === 'Approved (Final)'));
+            const myApprovedLeaves = globalLeaves.filter(l => String(l.staffId) === String(staffId) && l.finalApproval === 'Approved');
 
             let html = `<table class="w-full text-xs text-left border border-slate-200">
                 <tr class="bg-slate-100 font-bold"><th class="p-2 border">তারিখ</th><th class="p-2 border">ইন</th><th class="p-2 border">লাঞ্চ আউট</th><th class="p-2 border">লাঞ্চ ইন</th><th class="p-2 border">আউট</th><th class="p-2 border">মোট ডিউটি</th><th class="p-2 border text-center">স্ট্যাটাস</th></tr>`;
             
             for (let day = 1; day <= daysInMonth; day++) {
                 let dateObj = new Date(year, month - 1, day);
+                let isoDateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 let matched = myRecords.find(r => {
                     let d = new Date(r.dateStr);
                     return d.getDate() === day && (d.getMonth() + 1) === month && d.getFullYear() === year;
                 });
+                let matchedAttApp = myApprovedAttApps.find(a => a.dateStr === isoDateStr);
+                let matchedLeave = myApprovedLeaves.find(l => isoDateStr >= l.startDate && isoDateStr <= l.endDate);
+
                 let rowBg = "bg-rose-100 text-rose-900";
                 let statusText = "অনুপস্থিত";
                 let inT = '-', lOut = '-', lIn = '-', outT = '-', totalDuty = '-';
-                if (matched) {
+                if (matched && matched.inStatus === 'AppPresent') {
+                    inT = format12Hour(matched.inTime);
+                    lOut = format12Hour(matched.lunchOut);
+                    lIn = format12Hour(matched.lunchIn);
+                    outT = format12Hour(matched.outTime);
+                    totalDuty = matched.totalDuty || '8.00 ঘণ্টা';
+                    rowBg = "bg-blue-100 text-blue-950";
+                    statusText = "প্রেজেন্ট (আবেদন)";
+                } else if (matchedAttApp) {
+                    inT = format12Hour(matchedAttApp.inTime) !== '-' ? format12Hour(matchedAttApp.inTime) : '09:30 AM';
+                    lOut = format12Hour(matchedAttApp.lunchOut);
+                    lIn = format12Hour(matchedAttApp.lunchIn);
+                    outT = format12Hour(matchedAttApp.outTime) !== '-' ? format12Hour(matchedAttApp.outTime) : '06:00 PM';
+                    totalDuty = "8.00 ঘণ্টা (আবেদনকৃত)";
+                    rowBg = "bg-blue-100 text-blue-950";
+                    statusText = "প্রেজেন্ট (আবেদন)";
+                } else if (matchedLeave) {
+                    inT = "অনুমোদিত ছুটি";
+                    totalDuty = `8.00 ঘণ্টা (${matchedLeave.type})`;
+                    rowBg = "bg-blue-100 text-blue-950";
+                    statusText = "প্রেজেন্ট (ছুটি)";
+                } else if (matched) {
                     inT = format12Hour(matched.inTime);
                     lOut = format12Hour(matched.lunchOut);
                     lIn = format12Hour(matched.lunchIn);
