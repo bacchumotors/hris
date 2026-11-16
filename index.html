@@ -2,304 +2,236 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>বাচ্চু মটরস - ডিজিটাল হাজিরা ও স্টাফ পোর্টাল</title>
-    
-    <!-- PWA & Home Screen Meta Tags -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#dc2626">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="বাচ্চু মটরস">
-
-    <!-- Tailwind CSS CDN -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>বাচ্চু মটরস - ডিজিটাল হাজিরা ও ছুটির অনুমোদন সিস্টেম</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Bengali Font (Hind Siliguri) -->
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chart.js for Admin Analytics -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <link rel="manifest" href="manifest.json">
     <style>
-        html, body { 
-            font-family: 'Hind Siliguri', sans-serif; 
-            background-color: #f8fafc;
-            position: relative;
-            overflow-x: hidden;
-            width: 100%;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body::after {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="90" fill="none" stroke="%23fbbf24" stroke-width="15"/><text x="50%" y="55%" font-size="65" font-weight="bold" fill="%23dc2626" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">BM</text></svg>');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 320px;
-            opacity: 0.035;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        #toastBox { transition: all 0.4s ease-in-out; }
-
-        @keyframes scaleUp {
-            0% { transform: scale(0); opacity: 0; }
-            60% { transform: scale(1.15); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .success-tick-anim { animation: scaleUp 0.4s ease-in-out forwards; }
-
-        @keyframes bikeRun {
-            0% { left: -110px; transform: scaleX(1); }
-            48% { left: calc(100% + 20px); transform: scaleX(1); }
-            50% { left: calc(100% + 20px); transform: scaleX(-1); }
-            98% { left: -110px; transform: scaleX(-1); }
-            100% { left: -110px; transform: scaleX(1); }
-        }
-
-        @keyframes spinWheel {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .bike-runner { animation: bikeRun 4s infinite linear; }
-        .wheel-spinner { animation: spinWheel 0.35s infinite linear; }
-
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        table {
-            min-width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            white-space: nowrap;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Hind Siliguri', sans-serif; background-color: #f8fafc; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         @media (max-width: 640px) {
-            .mobile-compact-btn {
-                padding: 0.4rem 0.65rem;
-                font-size: 0.72rem;
-            }
-            input, select, textarea {
-                font-size: 16px !important;
-            }
+            .mobile-compact-btn { padding: 6px 10px; font-size: 11px; }
         }
     </style>
-</head>
-<body class="min-h-screen text-slate-800">
-
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAs9zrzE8BvwbRNowUU741GBegCY9bK8mZNE_gSypKpErW58D3eOrT7YZ3htpY5T5zgQ/exec";
+        const SCRIPT_URL = ""; // আপনার Google Apps Script URL এখানে থাকবে
     </script>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
 
-    <!-- MOTORCYCLE ANIMATED LOADING SCREEN -->
-    <div id="loadingScreen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center text-white transition-opacity duration-500 overflow-hidden px-4">
-        <div class="relative w-full h-24 overflow-hidden mb-4 max-w-md">
-            <div class="bike-runner absolute bottom-2 flex items-center">
-                <div class="relative text-red-500 text-5xl sm:text-6xl drop-shadow-[0_8px_8px_rgba(239,68,68,0.5)]">
-                    <i class="fa-solid fa-motorcycle"></i>
-                    <div class="wheel-spinner text-amber-400 text-lg sm:text-xl absolute bottom-0 right-1.5"><i class="fa-solid fa-gear"></i></div>
-                    <div class="wheel-spinner text-amber-400 text-lg sm:text-xl absolute bottom-0 left-1.5"><i class="fa-solid fa-gear"></i></div>
-                </div>
-            </div>
-            <div class="absolute bottom-0 w-full h-1 bg-slate-700 border-b border-dashed border-red-500"></div>
+    <!-- LOADING SCREEN -->
+    <div id="loadingScreen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center text-white transition-opacity duration-500">
+        <div class="relative w-24 h-24 mb-4">
+            <div class="absolute inset-0 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+            <div class="absolute inset-3 border-4 border-slate-700 border-b-transparent rounded-full animate-spin" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
+            <div class="absolute inset-0 flex items-center justify-center font-bold text-xs text-red-500">TVS</div>
         </div>
-        <h2 class="text-lg sm:text-xl font-bold tracking-wider text-red-500 animate-pulse text-center">বাচ্চু মটরস পোর্টাল লোড হচ্ছে...</h2>
-        <p class="text-xs text-slate-400 mt-1 text-center">TVS Authorized Dealer, Madaripur</p>
-    </div>
-
-    <!-- SUCCESS TICK OVERLAY MODAL -->
-    <div id="successTickModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-xs w-full text-center space-y-4 shadow-2xl success-tick-anim">
-            <div class="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl sm:text-4xl shadow-inner">
-                <i class="fa-solid fa-check"></i>
-            </div>
-            <h3 class="text-lg font-bold text-slate-800">সফলভাবে সম্পন্ন!</h3>
-            <p id="successTickText" class="text-xs text-slate-500">আপনার অনুরোধ সফলভাবে প্রসেস করা হয়েছে।</p>
-        </div>
+        <h2 class="text-lg font-bold tracking-wider">বাচ্চু মটরস - ডিজিটাল সিস্টেম</h2>
+        <p class="text-xs text-slate-400 mt-1">লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
     </div>
 
     <!-- TOAST NOTIFICATION -->
-    <div id="toastBox" class="fixed top-4 right-4 left-4 sm:left-auto z-50 transform -translate-y-32 sm:translate-y-0 sm:translate-x-full opacity-0 sm:max-w-sm bg-slate-900 text-white rounded-xl shadow-2xl p-3.5 sm:p-4 flex items-center gap-3 border border-slate-700 pointer-events-none">
-        <div id="toastIcon" class="text-xl shrink-0"></div>
-        <div class="min-w-0 flex-1">
-            <h4 id="toastTitle" class="font-bold text-sm truncate"></h4>
-            <p id="toastMessage" class="text-xs text-slate-300 break-words"></p>
+    <div id="toastBox" class="fixed top-5 right-5 z-50 transform -translate-y-32 sm:translate-x-full opacity-0 transition-all duration-300 max-w-sm w-full bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3">
+        <div id="toastIcon" class="text-xl"></div>
+        <div>
+            <h4 id="toastTitle" class="text-xs font-bold text-slate-200"></h4>
+            <p id="toastMessage" class="text-[11px] text-slate-400"></p>
         </div>
     </div>
 
-    <!-- Navigation Header -->
-    <nav class="bg-red-700 text-white shadow-md sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex justify-between items-center gap-2">
-            <div class="flex items-center space-x-2.5 sm:space-x-3 space-x-reverse min-w-0">
-                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-amber-400 text-red-700 flex items-center justify-center font-bold text-sm sm:text-base shadow border-2 border-white shrink-0">BM</div>
-                <div class="truncate">
-                    <h1 class="text-base sm:text-xl font-bold tracking-wide truncate">বাচ্চু মটরস</h1>
-                    <p class="text-[10px] sm:text-xs text-red-100 truncate">টু হুইলার বিজনেস, মাদারীপুর</p>
-                </div>
+    <!-- SUCCESS TICK MODAL -->
+    <div id="successTickModal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 text-center max-w-xs w-full shadow-2xl space-y-3 transform animate-bounce">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl">
+                <i class="fa-solid fa-check"></i>
             </div>
-            <div class="flex items-center gap-2 sm:gap-4 shrink-0">
-                <div id="liveClockDisplay" class="hidden lg:block bg-red-800/80 px-3 py-1 rounded-lg text-xs font-semibold tracking-wider text-amber-300 border border-red-600"></div>
-                <div id="userBadge" class="hidden flex items-center gap-1.5 sm:gap-3">
-                    <span id="roleTag" class="hidden sm:inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-white text-red-700 shadow"></span>
-                    <button onclick="logout()" class="bg-red-800 hover:bg-red-900 text-xs px-2.5 sm:px-3 py-1.5 rounded-lg transition flex items-center shadow-sm">
-                        <i class="fa-solid fa-right-from-bracket sm:mr-1"></i> <span class="hidden sm:inline">লগআউট</span>
-                    </button>
-                </div>
-            </div>
+            <h3 class="text-lg font-bold text-slate-800">সফল হয়েছে!</h3>
+            <p id="successTickText" class="text-xs text-slate-500"></p>
         </div>
-    </nav>
+    </div>
 
-    <div class="max-w-7xl mx-auto px-3 py-4 sm:p-6 relative z-10">
-        
-        <!-- WINNER TROPHY BANNER -->
-        <div id="trophyBanner" class="hidden max-w-4xl mx-auto mb-4 sm:mb-6 bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 text-slate-900 rounded-2xl shadow-lg p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-2 border-2 border-amber-300">
-            <div class="flex items-center gap-3 w-full sm:w-auto">
-                <div class="text-2xl sm:text-4xl text-yellow-900 bg-white/80 p-2.5 sm:p-3 rounded-xl shadow shrink-0"><i class="fa-solid fa-trophy"></i></div>
-                <div class="min-w-0 flex-1">
-                    <h4 class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-yellow-950">মাসের সেরা পারফর্মার (সর্বোচ্চ ডিউটিদাতা)</h4>
-                    <p id="winnerDisplayInfo" class="text-xs sm:text-sm font-extrabold text-slate-900 mt-0.5 truncate">হিসাব করা হচ্ছে...</p>
+    <!-- TOP HEADER -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 bg-red-600 rounded-xl flex items-center justify-center font-bold text-white shadow"><i class="fa-solid fa-motorcycle"></i></div>
+                    <div>
+                        <h1 class="text-sm sm:text-base font-bold tracking-tight">বাচ্চু মটরস</h1>
+                        <p class="text-[10px] text-slate-400">টুইলার অথরাইজড ডিলার, মাদারীপুর</p>
+                    </div>
+                </div>
+                <div id="userBadge" class="hidden sm:hidden bg-slate-800 px-2.5 py-1 rounded-lg text-xs border border-slate-700">
+                    <span id="roleTag" class="text-red-400 font-bold"></span>
                 </div>
             </div>
-            <span class="text-[10px] sm:text-xs bg-slate-900 text-amber-300 px-3 py-1 rounded-full font-bold self-end sm:self-center">👑 উইনার</span>
+            
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                <div id="liveClockDisplay" class="text-xs font-semibold bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 text-amber-300">
+                    <i class="fa-regular fa-clock mr-1"></i> লোড হচ্ছে...
+                </div>
+                <button onclick="logout()" id="logoutBtn" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition border border-rose-600/30">
+                    <i class="fa-solid fa-power-off mr-1"></i> লগআউট
+                </button>
+            </div>
         </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-5 space-y-5">
 
         <!-- LOGIN SECTION -->
-        <div id="loginSection" class="max-w-md mx-auto my-6 sm:my-12 bg-white rounded-2xl shadow-xl border p-5 sm:p-8 backdrop-blur bg-opacity-95">
-            <div class="text-center mb-6">
-                <div class="w-14 h-14 sm:w-16 sm:h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl mb-3 shadow">
-                    <i class="fa-solid fa-user-lock"></i>
+        <div id="loginSection" class="max-w-md mx-auto bg-white rounded-3xl shadow-xl border p-6 sm:p-8 space-y-6 my-10">
+            <div class="text-center space-y-1">
+                <div class="w-14 h-14 bg-red-600 text-white rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-lg shadow-red-600/30 mb-2">
+                    <i class="fa-solid fa-fingerprint"></i>
                 </div>
-                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">সিস্টেম লগইন</h2>
-                <p class="text-xs sm:text-sm text-slate-500">আপনার স্টাফ আইডি ও পাসওয়ার্ড দিন</p>
+                <h2 class="text-xl font-bold text-slate-800">ডিজিটাল হাজিরা পোর্টাল</h2>
+                <p class="text-xs text-slate-500">আপনার ইউজার আইডি ও পাসওয়ার্ড দিয়ে প্রবেশ করুন</p>
             </div>
+            
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs sm:text-sm font-medium mb-1">স্টাফ আইডি</label>
-                    <input type="text" id="username" required placeholder="স্টাফ আইডি" class="w-full px-3.5 py-2.5 border rounded-xl focus:ring-2 focus:ring-red-500 text-sm">
+                    <label class="block text-xs font-semibold mb-1 text-slate-600">ইউজার আইডি</label>
+                    <input type="text" id="username" required placeholder="যেমন: BM-101" class="w-full border px-3.5 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-red-500">
                 </div>
                 <div>
-                    <label class="block text-xs sm:text-sm font-medium mb-1">পাসওয়ার্ড</label>
-                    <input type="password" id="password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 border rounded-xl focus:ring-2 focus:ring-red-500 text-sm">
+                    <label class="block text-xs font-semibold mb-1 text-slate-600">পাসওয়ার্ড</label>
+                    <input type="password" id="password" required placeholder="••••••" class="w-full border px-3.5 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-red-500">
                 </div>
-                <button type="submit" id="loginBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 sm:py-3 rounded-xl transition shadow-md text-sm sm:text-base">
+                <button type="submit" id="loginBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-red-600/30 transition">
                     লগইন করুন
                 </button>
             </form>
         </div>
 
-        <!-- TOP CENTER PROFILE CARD -->
-        <div id="topProfileCard" class="hidden max-w-lg mx-auto mb-4 sm:mb-6 bg-white rounded-2xl shadow-sm border p-3.5 sm:p-4 text-center backdrop-blur bg-opacity-95">
-            <div id="profileAvatarContainer" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full mx-auto border-2 border-red-600 shadow mb-2 overflow-hidden flex items-center justify-center bg-amber-400 text-red-700 font-extrabold text-xl sm:text-2xl">
-                <span id="profileAvatarText">BM</span>
-                <img id="profileAvatarImg" class="w-full h-full object-cover hidden" alt="Profile">
+        <!-- TOP PROFILE CARD & NOTICE BOARDS -->
+        <div id="topProfileCard" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white rounded-2xl border p-4 shadow-sm flex items-center gap-4">
+                <div class="relative w-16 h-16 rounded-2xl bg-slate-200 overflow-hidden flex items-center justify-center font-bold text-slate-500 text-xl shrink-0 border">
+                    <span id="profileAvatarText">BM</span>
+                    <img id="profileAvatarImg" class="w-full h-full object-cover hidden" alt="Profile">
+                </div>
+                <div class="space-y-0.5 overflow-hidden">
+                    <h3 id="headerUserName" class="text-base font-bold text-slate-800 truncate">ইউজার নাম</h3>
+                    <p id="headerUserRole" class="text-xs text-red-600 font-semibold">পদবী</p>
+                    <p id="headerUserId" class="text-[11px] text-slate-400 font-mono">ID: --</p>
+                    <p id="headerUserOrg" class="text-[11px] text-slate-500 truncate">বাচ্চু মটরস</p>
+                </div>
             </div>
-            <h2 id="headerUserName" class="text-lg sm:text-xl font-bold text-slate-800"></h2>
-            <p class="text-xs sm:text-sm text-slate-500">আইডি: <span id="headerUserId" class="font-semibold text-red-600"></span> | পদবী: <span id="headerUserRole" class="font-semibold text-slate-700"></span></p>
-            <p id="headerUserOrg" class="text-[11px] sm:text-xs text-slate-400 mt-0.5"></p>
+
+            <div class="md:col-span-2 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-semibold text-amber-300"><i class="fa-solid fa-bullhorn mr-1"></i> শোরুম স্ট্যাটাস ও লোকেশন</span>
+                    <span id="gpsLocationStatus" class="text-[10px] bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">লোকেশন যাচাই হচ্ছে...</span>
+                </div>
+                <div class="mt-2 text-xs text-slate-300">
+                    <p>বাচ্চু মটরস টু হুইলার বিজনেস শোরুম। প্রতিদিন সকাল ৯:০০ টা থেকে হাজিরা ও মুভমেন্ট কাউন্ট করা হচ্ছে।</p>
+                </div>
+            </div>
         </div>
 
-        <!-- TWO NOTICE BOARDS SECTION -->
-        <div id="noticeBoardsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-6">
-            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 shadow-sm space-y-1.5">
-                <div class="flex justify-between items-center border-b border-amber-200 pb-1">
-                    <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
-                        <i class="fa-solid fa-bullhorn text-amber-600"></i>
-                        <span>ঊর্ধ্বতন কর্তৃপক্ষ নোটিশ</span>
-                    </div>
-                    <button id="editAuthNoticeBtn" onclick="openNoticeModal('authority')" class="hidden text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded shadow-sm">নোটিশ আপডেট</button>
+        <!-- NOTICE BOARDS CONTAINER -->
+        <div id="noticeBoardsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- AUTHORITY NOTICE BOARD -->
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 shadow-sm space-y-2">
+                <div class="flex justify-between items-center border-b border-amber-200 pb-2">
+                    <h4 class="text-xs font-bold text-amber-900 uppercase tracking-wide"><i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1.5"></i>ঊর্ধ্বতন কর্তৃপক্ষ নোটিশ বোর্ড (Managing Director)</h4>
+                    <button onclick="openNoticeModal('authority')" id="editAuthNoticeBtn" class="hidden bg-amber-600 hover:bg-amber-700 text-white text-[10px] px-2.5 py-1 rounded-lg font-semibold shadow">নোটিশ আপডেট</button>
                 </div>
-                <div id="authNoticeDisplay" class="text-[11px] text-amber-950 space-y-1">লোড হচ্ছে...</div>
-                <div class="mt-1 pt-1 border-t border-amber-200/60 max-h-16 overflow-y-auto">
-                    <p class="text-[9px] font-bold text-amber-800 mb-0.5">পূর্ববর্তী নোটিশ:</p>
-                    <div id="authNoticeArchive" class="space-y-1 text-[10px] text-amber-900"></div>
-                </div>
+                <div id="authNoticeDisplay" class="text-xs text-slate-700 space-y-1">নোটিশ লোড হচ্ছে...</div>
+                <details class="text-[11px] text-amber-800 pt-1">
+                    <summary class="cursor-pointer font-semibold">পূর্ববর্তী নোটিশসমূহ দেখুন</summary>
+                    <div id="authNoticeArchive" class="mt-2 space-y-2"></div>
+                </details>
             </div>
 
-            <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 shadow-sm space-y-1.5">
-                <div class="flex justify-between items-center border-b border-blue-200 pb-1">
-                    <div class="flex items-center gap-1.5 text-blue-900 font-bold text-xs">
-                        <i class="fa-solid fa-clipboard-question text-blue-600"></i>
-                        <span>ম্যানেজমেন্ট নোটিশ</span>
-                    </div>
-                    <button id="editMgmtNoticeBtn" onclick="openNoticeModal('management')" class="hidden text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded shadow-sm">নোটিশ আপডেট</button>
+            <!-- MANAGEMENT NOTICE BOARD -->
+            <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 shadow-sm space-y-2">
+                <div class="flex justify-between items-center border-b border-blue-200 pb-2">
+                    <h4 class="text-xs font-bold text-blue-950 uppercase tracking-wide"><i class="fa-solid fa-circle-info text-blue-600 mr-1.5"></i>ম্যানেজমেন্ট নোটিশ বোর্ড</h4>
+                    <button onclick="openNoticeModal('management')" id="editMgmtNoticeBtn" class="hidden bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2.5 py-1 rounded-lg font-semibold shadow">নোটিশ আপডেট</button>
                 </div>
-                <div id="mgmtNoticeDisplay" class="text-[11px] text-blue-950 space-y-1">লোড হচ্ছে...</div>
-                <div class="mt-1 pt-1 border-t border-blue-200/60 max-h-16 overflow-y-auto">
-                    <p class="text-[9px] font-bold text-blue-800 mb-0.5">পূর্ববর্তী নোটিশ:</p>
-                    <div id="mgmtNoticeArchive" class="space-y-1 text-[10px] text-blue-900"></div>
+                <div id="mgmtNoticeDisplay" class="text-xs text-slate-700 space-y-1">নোটিশ লোড হচ্ছে...</div>
+                <details class="text-[11px] text-blue-900 pt-1">
+                    <summary class="cursor-pointer font-semibold">পূর্ববর্তী নোটিশসমূহ দেখুন</summary>
+                    <div id="mgmtNoticeArchive" class="mt-2 space-y-2"></div>
+                </details>
+            </div>
+        </div>
+
+        <!-- TROPHY BANNER -->
+        <div id="trophyBanner" class="hidden bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-2xl p-4 shadow-md flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl text-yellow-200"><i class="fa-solid fa-trophy"></i></div>
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-amber-100">মাসের সেরা কর্মী (Winner of Honor)</h4>
+                    <p id="winnerDisplayInfo" class="text-sm font-extrabold mt-0.5">হিসাব করা হচ্ছে...</p>
                 </div>
             </div>
+            <span class="text-[10px] bg-amber-700/50 px-2.5 py-1 rounded-lg border border-amber-400/40">অটো আপডেট</span>
         </div>
 
         <!-- STAFF PANEL -->
         <div id="staffPanel" class="hidden space-y-5 sm:space-y-6">
-            <div class="flex justify-center sm:justify-end max-w-7xl mx-auto">
-                <div class="flex flex-wrap justify-center gap-1.5 sm:gap-2 w-full sm:w-auto">
-                    <button onclick="switchTab('staff', 'attendanceTab')" class="bg-red-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold shadow flex-1 sm:flex-initial" id="btnAttTab">হাজিরা প্যানেল</button>
-                    <button onclick="switchTab('staff', 'leaveTab')" class="bg-slate-200 text-slate-700 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold flex-1 sm:flex-initial" id="btnLeaveTab">ছুটির আবেদন</button>
-                    <button onclick="switchTab('staff', 'profileTab')" class="bg-slate-200 text-slate-700 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold flex-1 sm:flex-initial" id="btnProfTab">আমার প্রফাইল</button>
+            <div class="flex flex-wrap justify-between items-center bg-white rounded-2xl border p-4 shadow-sm gap-3">
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="switchTab('staff', 'attendanceTab')" class="bg-red-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold shadow flex-1 sm:flex-initial" id="btnAttTab">হাজিরা ও মুভমেন্ট</button>
+                    <button onclick="switchTab('staff', 'leaveTab')" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex-1 sm:flex-initial" id="btnLeaveTab">ছুটি ও আবেদন</button>
+                    <button onclick="switchTab('staff', 'profileTab')" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex-1 sm:flex-initial" id="btnProfTab">আমার প্রফাইল</button>
                 </div>
+                <button onclick="openManualAttModal()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3.5 py-2 rounded-xl font-semibold shadow flex items-center gap-1.5">
+                    <i class="fa-solid fa-clock-rotate-left"></i> হাজিরা মিসিং আবেদন
+                </button>
             </div>
 
-            <div id="staffAttendanceSection" class="space-y-5 sm:space-y-6">
+            <!-- STAFF ATTENDANCE SECTION -->
+            <div id="staffAttendanceSection" class="space-y-5">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    <div class="bg-white rounded-2xl border p-4 sm:p-6 space-y-4 shadow-sm">
-                        <h3 class="text-base sm:text-lg font-bold border-b pb-2 text-slate-800 flex flex-wrap justify-between items-center gap-1">
-                            <span><i class="fa-solid fa-camera text-red-600 mr-1.5"></i>হাজিরা ও মুভমেন্ট</span>
-                            <span id="gpsLocationStatus" class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-normal"><i class="fa-solid fa-location-dot text-red-500 mr-1"></i>জিপিএস...</span>
-                        </h3>
-                        <div class="bg-slate-900 rounded-xl overflow-hidden h-44 sm:h-48 flex items-center justify-center relative shadow-inner">
+                    <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm space-y-4">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 border-b pb-2">ক্যামেরা হাজিরা ও মুভমেন্ট</h3>
+                        <div class="relative w-full h-52 bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center border">
                             <video id="webcam" autoplay playsinline class="w-full h-full object-cover hidden"></video>
-                            <img id="photoPreview" class="w-full h-full object-cover hidden" alt="Captured Preview">
-                            <span id="camPlaceholder" class="text-slate-400 text-xs sm:text-sm">ক্যামেরা বন্ধ আছে</span>
+                            <img id="photoPreview" class="w-full h-full object-cover hidden" alt="Preview">
+                            <div id="camPlaceholder" class="text-slate-400 text-xs text-center p-4">ক্যামেরা বন্ধ আছে</div>
                         </div>
-                        <div class="flex justify-center gap-2">
-                            <button onclick="startCamera()" class="text-xs bg-slate-700 hover:bg-slate-800 text-white px-3.5 py-2 rounded-lg font-medium">ক্যামেরা অন</button>
-                            <button onclick="capturePhoto()" class="text-xs bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-lg font-medium">ছবি তুলুন</button>
+                        <div class="flex gap-2">
+                            <button onclick="startCamera()" class="flex-1 bg-slate-700 hover:bg-slate-800 text-white py-2.5 rounded-xl text-xs font-semibold shadow">ক্যামেরা অন করুন</button>
+                            <button onclick="capturePhoto()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-xs font-semibold shadow">ছবি তুলুন</button>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 pt-1">
-                            <button onclick="recordAttendanceAction('in')" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow">ইন-টাইম (In)</button>
-                            <button onclick="recordAttendanceAction('out')" class="bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow">আউট-টাইম (Out)</button>
-                            <button onclick="recordAttendanceAction('lunchOut')" class="bg-amber-600 hover:bg-amber-700 text-white py-2 rounded-xl text-xs sm:text-sm font-medium">লাঞ্চ আউট</button>
-                            <button onclick="recordAttendanceAction('lunchIn')" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-xs sm:text-sm font-medium">লাঞ্চ ইন</button>
+                        <div class="grid grid-cols-2 gap-2 pt-2">
+                            <button onclick="recordAttendanceAction('in')" class="bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-xs font-bold shadow">ইন-টাইম (হাজিরা)</button>
+                            <button onclick="recordAttendanceAction('out')" class="bg-rose-600 hover:bg-rose-700 text-white py-3 rounded-xl text-xs font-bold shadow">আউট-টাইম (ছুটি)</button>
                         </div>
-                        <div class="pt-3 border-t">
-                            <button onclick="openManualAttModal()" class="w-full bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-md flex items-center justify-center gap-2 transition">
-                                <i class="fa-solid fa-pen-to-square text-amber-300 text-sm shrink-0"></i>
-                                <span class="text-center">হাজিরা মিসিং বা সার্ভার সমস্যা হলে আবেদন করুন</span>
-                            </button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="recordAttendanceAction('lunchOut')" class="bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-xl text-xs font-semibold shadow">লাঞ্চ আউট (বাইরে)</button>
+                            <button onclick="recordAttendanceAction('lunchIn')" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-semibold shadow">লাঞ্চ ইন (শোরুম)</button>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm">
-                        <h3 class="text-base sm:text-lg font-bold border-b pb-2 mb-3 text-slate-800">সাম্প্রতিক হাজিরা ও লাঞ্চ হিস্ট্রি</h3>
-                        <div class="table-responsive max-h-72" id="staffHistoryContainer">
-                            <p class="text-xs text-slate-400 text-center py-4">ডাটা লোড হচ্ছে...</p>
+                    <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-base sm:text-lg font-bold text-slate-800">সাম্প্রতিক হাজিরা হিস্ট্রি</h3>
+                            <input type="month" id="staffMonthPicker" onchange="loadStaffData()" class="border px-2.5 py-1 rounded-lg text-xs">
                         </div>
+                        <div id="staffHistoryContainer" class="table-responsive"><p class="text-xs text-slate-400 text-center py-4">ডাটা লোড হচ্ছে...</p></div>
                     </div>
                 </div>
 
-                <!-- 30/31 Days Monthly Detailed History Table Section for Staff -->
                 <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-3">
-                        <h3 class="text-base sm:text-lg font-bold text-slate-800">৩০/৩১ দিনের বিস্তারিত মাসিক হাজিরা হিস্ট্রি</h3>
-                        <div class="flex items-center gap-2 w-full sm:w-auto">
-                            <label class="text-xs font-semibold shrink-0">মাস:</label>
-                            <input type="month" id="staffMonthPicker" onchange="renderMonthlyDetailedReport('staff')" class="border px-2.5 py-1 rounded-lg text-xs sm:text-sm w-full sm:w-auto">
-                        </div>
+                    <div class="flex flex-wrap justify-between items-center gap-2 border-b pb-3">
+                        <h3 id="monthlySummaryBadge" class="text-xs sm:text-sm font-bold text-slate-800">মাসিক বিস্তারিত হাজিরা</h3>
                     </div>
-                    <div id="monthlySummaryBadge" class="text-xs font-bold text-slate-700 bg-slate-100 p-2.5 sm:p-3 rounded-xl border leading-relaxed"></div>
-                    <div class="flex flex-wrap gap-2.5 sm:gap-3 text-[11px] sm:text-xs font-semibold">
-                        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 border border-emerald-400 inline-block rounded"></span> সময়মতো (গ্রিন)</span>
-                        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-amber-100 border border-amber-400 inline-block rounded"></span> লেট (হলুদ)</span>
-                        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-100 border border-blue-400 inline-block rounded"></span> আবেদনকৃত উপস্থিতি/ছুটি (নীল)</span>
-                        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-rose-100 border border-rose-400 inline-block rounded"></span> অনুপস্থিত (লাল)</span>
+                    <div class="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
+                        <span class="bg-emerald-100 px-2 py-1 rounded border border-emerald-300">প্রেজেন্ট (সবুজ)</span>
+                        <span class="bg-amber-100 px-2 py-1 rounded border border-amber-300">লেট (হলুদ)</span>
+                        <span class="bg-blue-100 px-2 py-1 rounded border border-blue-300">আবেদনকৃত/ছুটি (নীল)</span>
+                        <span class="bg-rose-100 px-2 py-1 rounded border border-rose-300">অনুপস্থিত (লাল)</span>
                     </div>
                     <div class="table-responsive max-h-96">
                         <table class="w-full text-xs text-left border border-slate-200">
@@ -323,18 +255,18 @@
                 </div>
             </div>
 
-            <!-- Staff Leave Section -->
-            <div id="staffLeaveSection" class="hidden space-y-5 sm:space-y-6">
+            <!-- STAFF LEAVE SECTION -->
+            <div id="staffLeaveSection" class="hidden space-y-5">
                 <div class="bg-white rounded-2xl border p-4 sm:p-6 max-w-xl mx-auto shadow-sm space-y-4">
-                    <h3 class="text-base sm:text-lg font-bold text-slate-800 border-b pb-2">ছুটির নতুন আবেদন করুন</h3>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-800 border-b pb-2">ছুটির আবেদন ফরম</h3>
                     <div id="leaveBalanceCard" class="grid grid-cols-3 gap-1.5 sm:gap-2 text-center text-[11px] sm:text-xs bg-slate-50 p-2.5 sm:p-3 rounded-xl border font-semibold"></div>
                     <form onsubmit="submitLeaveApplication(event)" class="space-y-3">
                         <div>
                             <label class="block text-xs font-semibold mb-1">ছুটির ধরন</label>
                             <select id="leaveType" onchange="checkLeaveType()" class="w-full border px-3 py-2 rounded-lg text-sm bg-white">
-                                <option value="ক্যাজুয়াল লিভ">ক্যাজুয়াল লিভ (বাকি: <span id="remCasual">১০</span> দিন)</option>
-                                <option value="সিক লিভ">সিক লিভ (বাকি: <span id="remSick">১০</span> দিন)</option>
-                                <option value="ইমারজেন্সি লিভ">ইমারজেন্সি লিভ (বাকি: <span id="remEmergency">৬</span> দিন)</option>
+                                <option value="ক্যাজুয়াল লিভ">ক্যাজুয়াল লিভ (সর্বোচ্চ ১০ দিন)</option>
+                                <option value="সিক লিভ">সিক লিভ (প্রেসক্রিপশন বাধ্যতামূলক)</option>
+                                <option value="ইমারজেন্সি লিভ">ইমারজেন্সি লিভ (সর্বোচ্চ ৬ দিন)</option>
                             </select>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -346,27 +278,28 @@
                             <textarea id="leaveReason" rows="3" required placeholder="ছুটির কারণ বিস্তারিত লিখুন..." class="w-full border px-3 py-2 rounded-lg text-sm"></textarea>
                         </div>
                         <div id="prescriptionUploadBox" class="hidden">
-                            <label class="block text-xs font-semibold mb-1 text-red-600">প্রেসক্রিপশন / ডাক্তারের রিপোর্টের ছবি আপলোড করুন (সিক লিভের জন্য বাধ্যতামূলক)</label>
+                            <label class="block text-xs font-semibold mb-1 text-red-600">প্রেসক্রিপশন আপলোড করুন (সিক লিভের জন্য বাধ্যতামূলক)</label>
                             <input type="file" id="prescriptionFileInput" accept="image/*" class="w-full border px-3 py-2 rounded-lg text-sm bg-slate-50">
                         </div>
                         <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-sm shadow">আবেদন জমা দিন</button>
                     </form>
                 </div>
                 <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm">
-                    <h3 class="text-base sm:text-lg font-bold text-slate-800 mb-3">আমার ছুটির আবেদনসমূহের স্ট্যাটাস</h3>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-800 mb-3">আমার ছুটির আবেদনের স্ট্যাটাস</h3>
                     <div id="myLeaveHistoryContainer" class="table-responsive"><p class="text-xs text-slate-400">লোড হচ্ছে...</p></div>
                 </div>
             </div>
 
+            <!-- STAFF PROFILE SECTION -->
             <div id="staffProfileSection" class="hidden bg-white rounded-2xl border p-4 sm:p-6 max-w-xl mx-auto shadow-sm">
-                <h3 class="text-lg sm:text-xl font-bold border-b pb-3 mb-4 text-slate-800">প্রফাইল ও তথ্য আপডেট</h3>
+                <h3 class="text-lg sm:text-xl font-bold border-b pb-3 mb-4 text-slate-800">প্রফাইল আপডেট</h3>
                 <form onsubmit="updateProfile(event)" class="space-y-4">
                     <div class="text-center mb-4">
                         <label class="inline-block bg-slate-700 hover:bg-slate-800 text-white text-xs px-3.5 py-2 rounded-lg cursor-pointer shadow">
                             <i class="fa-solid fa-upload mr-1"></i> ছবি আপলোড করুন
                             <input type="file" id="profileImageInput" accept="image/*" class="hidden" onchange="previewProfileImage(event)">
                         </label>
-                        <p id="imgUploadStatus" class="text-xs text-emerald-600 mt-1 font-semibold hidden">ছবি সিলেক্ট করা হয়েছে!</p>
+                        <p id="imgUploadStatus" class="text-[10px] text-emerald-600 mt-1 hidden">ছবি সিলেক্ট করা হয়েছে। নিচে প্রফাইল আপডেট করুন বাটনে ক্লিক করুন।</p>
                     </div>
                     <div><label class="block text-xs font-semibold mb-1">ফোন নাম্বার</label><input type="text" id="profPhone" class="w-full border px-3 py-2 rounded-lg text-sm"></div>
                     <div><label class="block text-xs font-semibold mb-1">ঠিকানা</label><input type="text" id="profAddress" class="w-full border px-3 py-2 rounded-lg text-sm"></div>
@@ -379,72 +312,64 @@
 
         <!-- MANAGER PANEL -->
         <div id="managerPanel" class="hidden space-y-5 sm:space-y-6">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center max-w-7xl mx-auto bg-white rounded-2xl border p-3.5 sm:p-4 shadow-sm gap-3">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white rounded-2xl border p-3.5 sm:p-4 shadow-sm gap-3">
                 <div>
-                    <h3 class="text-lg sm:text-xl font-bold text-slate-800">ম্যানেজার পোর্টাল (শোরুম অপারেশন ও হাজিরা)</h3>
-                    <p class="text-xs text-slate-500">সকল স্টাফদের হাজিরা মনিটরিং, নিজের হাজিরা হিস্ট্রি ও ছুটির অনুমোদন</p>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-800">শোরুম ম্যানেজার ড্যাশবোর্ড</h3>
+                    <p class="text-xs text-slate-500">স্টাফ উপস্থিতি মনিটরিং ও ১ম অনুমোদন প্যানেল</p>
                 </div>
-                <div class="flex flex-wrap gap-1.5 sm:gap-2 w-full md:w-auto">
-                    <button onclick="switchTab('manager', 'attTab')" class="bg-red-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold shadow mobile-compact-btn" id="mgrBtnAtt">হাজিরা ও স্টাফ</button>
+                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full md:w-auto">
+                    <button onclick="switchTab('manager', 'attTab')" class="bg-red-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold shadow mobile-compact-btn" id="mgrBtnAtt">হাজিরা ও সামারি</button>
                     <button onclick="switchTab('manager', 'myHistoryTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn" id="mgrBtnMyHist">আমার হাজিরা হিস্ট্রি</button>
-                    <button onclick="switchTab('manager', 'leaveTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold relative mobile-compact-btn" id="mgrBtnLeave">ছুটির অনুমোদন <span id="mgrLeaveBadge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white rounded-full text-[9px] px-1.5 py-0.2">0</span></button>
+                    <button onclick="switchTab('manager', 'leaveTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold relative mobile-compact-btn" id="mgrBtnLeave">আবেদন অনুমোদন <span id="mgrLeaveBadge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white rounded-full text-[9px] px-1.5 py-0.2">0</span></button>
                     <button onclick="switchTab('manager', 'myLeaveTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn" id="mgrBtnMyLeave">আমার ছুটি</button>
-                    <button onclick="switchTab('manager', 'profileTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn" id="mgrBtnProf">আমার প্রফাইল</button>
+                    <button onclick="switchTab('manager', 'profTab')" class="bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold mobile-compact-btn" id="mgrBtnProf">আমার প্রফাইল</button>
                 </div>
             </div>
 
             <div id="managerAttendanceSection" class="space-y-5 sm:space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    <div class="bg-white rounded-2xl border p-4 sm:p-6 space-y-4 shadow-sm">
-                        <h3 class="text-base sm:text-lg font-bold border-b pb-2 text-slate-800 flex flex-wrap justify-between items-center gap-1">
-                            <span><i class="fa-solid fa-camera text-red-600 mr-1.5"></i>আমার হাজিরা ও লাঞ্চ অপারেশন</span>
-                            <span id="mgrGpsStatus" class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-normal">লোকেশন...</span>
-                        </h3>
-                        <div class="bg-slate-900 rounded-xl overflow-hidden h-40 sm:h-44 flex items-center justify-center relative shadow-inner">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm space-y-3">
+                        <h3 class="text-base font-bold text-slate-800 border-b pb-2">ম্যানেজারের নিজস্ব হাজিরা</h3>
+                        <div class="relative w-full h-44 bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center border">
                             <video id="mgrWebcam" autoplay playsinline class="w-full h-full object-cover hidden"></video>
-                            <img id="mgrPhotoPreview" class="w-full h-full object-cover hidden" alt="Manager Preview">
-                            <span id="mgrCamPlaceholder" class="text-slate-400 text-xs">ক্যামেরা বন্ধ</span>
+                            <img id="mgrPhotoPreview" class="w-full h-full object-cover hidden" alt="Preview">
+                            <div id="mgrCamPlaceholder" class="text-slate-400 text-xs text-center p-4">ক্যামেরা বন্ধ আছে</div>
                         </div>
-                        <div class="flex justify-center gap-2">
-                            <button onclick="startMgrCamera()" class="text-xs bg-slate-700 text-white px-3.5 py-2 rounded-lg font-medium">ক্যামেরা অন</button>
-                            <button onclick="captureMgrPhoto()" class="text-xs bg-red-600 text-white px-3.5 py-2 rounded-lg font-medium">ছবি তুলুন</button>
+                        <div class="flex gap-2">
+                            <button onclick="startMgrCamera()" class="flex-1 bg-slate-700 text-white py-2 rounded-xl text-xs font-semibold">ক্যামেরা অন</button>
+                            <button onclick="captureMgrPhoto()" class="flex-1 bg-blue-600 text-white py-2 rounded-xl text-xs font-semibold">ছবি তুলুন</button>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <button onclick="recordManagerAttendance('in')" class="bg-emerald-600 text-white py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow">ইন-টাইম (In)</button>
-                            <button onclick="recordManagerAttendance('out')" class="bg-rose-600 text-white py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow">আউট-টাইম (Out)</button>
-                            <button onclick="recordManagerAttendance('lunchOut')" class="bg-amber-600 text-white py-2 rounded-xl text-xs sm:text-sm font-medium">লাঞ্চ আউট</button>
-                            <button onclick="recordManagerAttendance('lunchIn')" class="bg-blue-600 text-white py-2 rounded-xl text-xs sm:text-sm font-medium">লাঞ্চ ইন</button>
+                            <button onclick="recordManagerAttendance('in')" class="bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold">ইন-টাইম</button>
+                            <button onclick="recordManagerAttendance('out')" class="bg-rose-600 text-white py-2.5 rounded-xl text-xs font-bold">আউট-টাইম</button>
                         </div>
-                        <div class="pt-3 border-t">
-                            <button onclick="openManualAttModal()" class="w-full bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-md flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-pen-to-square text-amber-300 shrink-0"></i>
-                                <span>হাজিরা মিসিং আবেদন করুন</span>
-                            </button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="recordManagerAttendance('lunchOut')" class="bg-amber-600 text-white py-2 rounded-xl text-xs font-semibold">লাঞ্চ আউট</button>
+                            <button onclick="recordManagerAttendance('lunchIn')" class="bg-indigo-600 text-white py-2 rounded-xl text-xs font-semibold">লাঞ্চ ইন</button>
                         </div>
                     </div>
-                    <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm">
-                        <h3 class="text-base sm:text-lg font-bold border-b pb-2 mb-3 text-slate-800">আজকের স্টাফ উপস্থিতি ও লাঞ্চ সারসংক্ষেপ</h3>
-                        <div id="managerTodayStaffSummary" class="table-responsive max-h-64 text-xs"><p class="text-slate-400">লোড হচ্ছে...</p></div>
+
+                    <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm space-y-3">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-base font-bold text-slate-800">আজকের স্টাফ উপস্থিতি</h3>
+                            <span id="mgrGpsStatus" class="text-[10px] text-slate-500">GPS Active</span>
+                        </div>
+                        <div id="managerTodayStaffSummary" class="table-responsive max-h-72"><p class="text-xs text-slate-400">লোড হচ্ছে...</p></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Manager Personal 30/31 Days Attendance History Section -->
             <div id="managerMyHistorySection" class="hidden space-y-5 sm:space-y-6">
                 <div class="bg-white rounded-2xl border p-4 sm:p-6 shadow-sm space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-3">
-                        <h3 class="text-base sm:text-lg font-bold text-slate-800">আমার ৩০/৩১ দিনের বিস্তারিত মাসিক হাজিরা হিস্ট্রি</h3>
-                        <div class="flex items-center gap-2 w-full sm:w-auto">
-                            <label class="text-xs font-semibold shrink-0">মাস:</label>
-                            <input type="month" id="mgrMonthPicker" onchange="renderMonthlyDetailedReport('manager')" class="border px-2.5 py-1 rounded-lg text-xs sm:text-sm w-full sm:w-auto">
-                        </div>
+                    <div class="flex flex-wrap justify-between items-center gap-2 border-b pb-3">
+                        <h3 id="mgrMonthlySummaryBadge" class="text-xs sm:text-sm font-bold text-slate-800">আমার মাসিক বিস্তারিত হাজিরা</h3>
+                        <input type="month" id="mgrMonthPicker" onchange="renderMonthlyDetailedReport('manager')" class="border px-2.5 py-1 rounded-lg text-xs">
                     </div>
-                    <div id="mgrMonthlySummaryBadge" class="text-xs font-bold text-slate-700 bg-slate-100 p-2.5 sm:p-3 rounded-xl border leading-relaxed"></div>
-                    <div class="flex flex-wrap gap-2.5 sm:gap-3 text-[11px] sm:text-xs font-semibold">
-                        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 border border-emerald-400 inline-block rounded"></span> সময়মতো (গ্রিন)</span>
-                        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-amber-100 border border-amber-400 inline-block rounded"></span> লেট (হলুদ)</span>
-                        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-100 border border-blue-400 inline-block rounded"></span> আবেদনকৃত উপস্থিতি/ছুটি (নীল)</span>
-                        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-rose-100 border border-rose-400 inline-block rounded"></span> অনুপস্থিত (লাল)</span>
+                    <div class="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
+                        <span class="bg-emerald-100 px-2 py-1 rounded border border-emerald-300">প্রেজেন্ট (সবুজ)</span>
+                        <span class="bg-amber-100 px-2 py-1 rounded border border-amber-300">লেট (হলুদ)</span>
+                        <span class="bg-blue-100 px-2 py-1 rounded border border-blue-300">আবেদনকৃত/ছুটি (নীল)</span>
+                        <span class="bg-rose-100 px-2 py-1 rounded border border-rose-300">অনুপস্থিত (লাল)</span>
                     </div>
                     <div class="table-responsive max-h-96">
                         <table class="w-full text-xs text-left border border-slate-200">
@@ -1186,12 +1111,10 @@
                 `;
             }
 
-            // Manager sees pending applications from staff where managerApproval is 'Pending'
             let pendingForManager = globalLeaves.filter(l => l.staffType === 'staff' && l.managerApproval === 'Pending').length;
             let pendingAttForManager = globalAttApplications.filter(a => a.staffType === 'staff' && a.managerApproval === 'Pending').length;
             let totalMgrPending = pendingForManager + pendingAttForManager;
 
-            // Admin/SuperAdmin sees applications where manager already approved OR it bypassed manager
             let pendingForMD = globalLeaves.filter(l => (l.staffType === 'manager' || l.managerApproval === 'Approved') && l.finalApproval === 'Pending').length;
             let pendingAttForMD = globalAttApplications.filter(a => (a.staffType === 'manager' || a.managerApproval === 'Approved') && (a.finalApproval === 'Pending' || (!a.finalApproval && String(a.status).includes('Pending')))).length;
 
@@ -1529,20 +1452,42 @@
                 if (decision === 'Approved') {
                     let [ay, am, ad] = app.dateStr.split('-').map(Number);
                     let targetDateFormatted = new Date(ay, am - 1, ad).toLocaleDateString();
-                    let totalHours = "8.00 ঘণ্টা (আবেদনকৃত)";
+                    
+                    // ১. ইন-টাইম ও আউট-টাইম থেকে মোট ব্যবধান (মিলি সেকেন্ডে) বের করা
+                    let inTStr = app.inTime || "09:00 AM";
+                    let outTStr = app.outTime || "06:00 PM";
+                    let inDate = new Date(`${app.dateStr} ${inTStr}`);
+                    let outDate = new Date(`${app.dateStr} ${outTStr}`);
+                    let totalMs = outDate - inDate;
+
+                    // ২. লাঞ্চ টাইমের ব্যবধান বের করা (যদি লাঞ্চ আউট ও লাঞ্চ ইন দেওয়া থাকে)
+                    let lunchMs = 0;
+                    if (app.lunchOut && app.lunchIn) {
+                        let lOutDate = new Date(`${app.dateStr} ${app.lunchOut}`);
+                        let lInDate = new Date(`${app.dateStr} ${app.lunchIn}`);
+                        if (lInDate > lOutDate) {
+                            lunchMs = lInDate - lOutDate;
+                        }
+                    }
+
+                    // ৩. মোট ব্যবধান থেকে লাঞ্চ টাইম বাদ দিয়ে প্রকৃত ডিউটি সময় হিসাব করা
+                    let netWorkMs = totalMs - lunchMs;
+                    let dutyHrs = (netWorkMs > 0) ? (netWorkMs / (1000 * 60 * 60)).toFixed(2) : "8.00";
+                    let totalHours = `${dutyHrs} ঘণ্টা (আবেদনকৃত)`;
+
                     const attPayload = {
                         action: "addAttendance",
                         staffId: app.staffId,
                         staffName: app.staffName,
                         dateStr: targetDateFormatted,
-                        inTime: format12Hour(app.inTime) !== '-' ? format12Hour(app.inTime) : "09:30 AM",
+                        inTime: format12Hour(app.inTime) !== '-' ? format12Hour(app.inTime) : "09:00 AM",
                         inPhoto: "",
                         inStatus: "AppPresent",
                         lunchOut: format12Hour(app.lunchOut) !== '-' ? format12Hour(app.lunchOut) : "-",
                         lunchIn: format12Hour(app.lunchIn) !== '-' ? format12Hour(app.lunchIn) : "-",
                         outTime: format12Hour(app.outTime) !== '-' ? format12Hour(app.outTime) : "06:00 PM",
                         outPhoto: "",
-                        totalDuty: totalHours,
+                        totalDuty: totalHours, // লাঞ্চ বাদ দিয়ে প্রকৃত ডিউটি
                         diffDuty: "সফল",
                         location: "Manual Approved"
                     };
@@ -1651,20 +1596,20 @@
                 document.getElementById("staffAttendanceSection").classList.add("hidden");
                 document.getElementById("staffLeaveSection").classList.add("hidden");
                 document.getElementById("staffProfileSection").classList.add("hidden");
-                document.getElementById("btnAttTab").className = "bg-slate-200 text-slate-700 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold flex-1 sm:flex-initial";
-                document.getElementById("btnLeaveTab").className = "bg-slate-200 text-slate-700 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold flex-1 sm:flex-initial";
-                document.getElementById("btnProfTab").className = "bg-slate-200 text-slate-700 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold flex-1 sm:flex-initial";
+                document.getElementById("btnAttTab").className = "bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex-1 sm:flex-initial";
+                document.getElementById("btnLeaveTab").className = "bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex-1 sm:flex-initial";
+                document.getElementById("btnProfTab").className = "bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex-1 sm:flex-initial";
 
                 if (tab === 'attendanceTab') {
                     document.getElementById("staffAttendanceSection").classList.remove("hidden");
-                    document.getElementById("btnAttTab").className = "bg-red-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold shadow flex-1 sm:flex-initial";
+                    document.getElementById("btnAttTab").className = "bg-red-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold shadow flex-1 sm:flex-initial";
                 } else if (tab === 'leaveTab') {
                     document.getElementById("staffLeaveSection").classList.remove("hidden");
-                    document.getElementById("btnLeaveTab").className = "bg-red-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold shadow flex-1 sm:flex-initial";
+                    document.getElementById("btnLeaveTab").className = "bg-red-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold shadow flex-1 sm:flex-initial";
                     loadLeavesData();
                 } else {
                     document.getElementById("staffProfileSection").classList.remove("hidden");
-                    document.getElementById("btnProfTab").className = "bg-red-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold shadow flex-1 sm:flex-initial";
+                    document.getElementById("btnProfTab").className = "bg-red-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold shadow flex-1 sm:flex-initial";
                     document.getElementById("profPhone").value = currentUser.phone || "";
                     document.getElementById("profAddress").value = currentUser.address || "";
                     document.getElementById("profEmergency").value = currentUser.emergency || "";
@@ -1981,11 +1926,24 @@
                     statusBadge = `<span class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold text-[10px]">প্রেজেন্ট (আবেদন)</span>`;
                 } else if (matchedAttApp) {
                     totalAppPresentDays++;
-                    inT = format12Hour(matchedAttApp.inTime) !== '-' ? format12Hour(matchedAttApp.inTime) : '09:30 AM';
+                    inT = format12Hour(matchedAttApp.inTime) !== '-' ? format12Hour(matchedAttApp.inTime) : '09:00 AM';
                     lOut = format12Hour(matchedAttApp.lunchOut);
                     lIn = format12Hour(matchedAttApp.lunchIn);
                     outT = format12Hour(matchedAttApp.outTime) !== '-' ? format12Hour(matchedAttApp.outTime) : '06:00 PM';
-                    totalDuty = "8.00 ঘণ্টা (আবেদনকৃত)";
+                    
+                    let inD = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.inTime || '09:00 AM'}`);
+                    let outD = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.outTime || '06:00 PM'}`);
+                    let tMs = outD - inD;
+                    let lMs = 0;
+                    if (matchedAttApp.lunchOut && matchedAttApp.lunchIn) {
+                        let lO = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.lunchOut}`);
+                        let lI = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.lunchIn}`);
+                        if (lI > lO) lMs = lI - lO;
+                    }
+                    let netMs = tMs - lMs;
+                    let hrs = netMs > 0 ? (netMs / (1000 * 60 * 60)).toFixed(2) : "8.00";
+                    totalDuty = `${hrs} ঘণ্টা (আবেদনকৃত)`;
+
                     rowBg = "bg-blue-100 text-blue-950 border-blue-300";
                     statusBadge = `<span class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold text-[10px]">প্রেজেন্ট (আবেদন)</span>`;
                 } else if (matchedLeave) {
@@ -2182,11 +2140,24 @@
                     rowBg = "bg-blue-100 text-blue-950";
                     statusText = "প্রেজেন্ট (আবেদন)";
                 } else if (matchedAttApp) {
-                    inT = format12Hour(matchedAttApp.inTime) !== '-' ? format12Hour(matchedAttApp.inTime) : '09:30 AM';
+                    inT = format12Hour(matchedAttApp.inTime) !== '-' ? format12Hour(matchedAttApp.inTime) : '09:00 AM';
                     lOut = format12Hour(matchedAttApp.lunchOut);
                     lIn = format12Hour(matchedAttApp.lunchIn);
                     outT = format12Hour(matchedAttApp.outTime) !== '-' ? format12Hour(matchedAttApp.outTime) : '06:00 PM';
-                    totalDuty = "8.00 ঘণ্টা (আবেদনকৃত)";
+                    
+                    let inD = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.inTime || '09:00 AM'}`);
+                    let outD = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.outTime || '06:00 PM'}`);
+                    let tMs = outD - inD;
+                    let lMs = 0;
+                    if (matchedAttApp.lunchOut && matchedAttApp.lunchIn) {
+                        let lO = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.lunchOut}`);
+                        let lI = new Date(`${matchedAttApp.dateStr} ${matchedAttApp.lunchIn}`);
+                        if (lI > lO) lMs = lI - lO;
+                    }
+                    let netMs = tMs - lMs;
+                    let hrs = netMs > 0 ? (netMs / (1000 * 60 * 60)).toFixed(2) : "8.00";
+                    totalDuty = `${hrs} ঘণ্টা (আবেদনকৃত)`;
+
                     rowBg = "bg-blue-100 text-blue-950";
                     statusText = "প্রেজেন্ট (আবেদন)";
                 } else if (matchedLeave) {
