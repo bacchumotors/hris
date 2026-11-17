@@ -39,16 +39,25 @@
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
 
-    <!-- LOADING SCREEN -->
-    <div id="loadingScreen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center text-white transition-opacity duration-500">
-        <div class="relative w-24 h-24 mb-4">
-            <div class="absolute inset-0 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-            <div class="absolute inset-3 border-4 border-slate-700 border-b-transparent rounded-full animate-spin" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
-            <div class="absolute inset-0 flex items-center justify-center font-bold text-xs text-red-500">TVS</div>
+    <!-- LOADING SCREEN WITH U-TURN BIKE ANIMATION -->
+<div id="loadingScreen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center text-white transition-opacity duration-500">
+    <div class="bike-loader-container mb-4">
+        <div class="bike-wrapper">
+            <div class="bike-body">
+                <div class="bike-frame"></div>
+                <div class="bike-wheel wheel-back">
+                    <div class="wheel-spoke"></div>
+                </div>
+                <div class="bike-wheel wheel-front">
+                    <div class="wheel-spoke"></div>
+                </div>
+            </div>
         </div>
-        <h2 class="text-lg font-bold tracking-wider">বাচ্চু মটরস - ডিজিটাল সিস্টেম</h2>
-        <p class="text-xs text-slate-400 mt-1">লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
+        <div class="road-line"></div>
     </div>
+    <h2 class="text-lg font-bold tracking-wider">বাচ্চু মটরস - ডিজিটাল সিস্টেম</h2>
+    <p class="text-xs text-slate-400 mt-1">লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
+</div>
 
     <!-- TOAST NOTIFICATION -->
     <div id="toastBox" class="fixed top-5 right-5 z-50 transform -translate-y-32 sm:translate-x-full opacity-0 transition-all duration-300 max-w-sm w-full bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3">
