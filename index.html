@@ -464,11 +464,11 @@
                 </div>
             </div>
 
-            <!-- MANAGER 1ST APPROVAL -->
+            <!-- MANAGER 1ST APPROVAL + REJECT -->
             <div id="managerLeaveApprovalSection" class="hidden fade-up space-y-6">
                 <div class="surface-card rounded-3xl p-6">
                     <h3 class="text-base font-bold text-slate-900 mb-3 border-b pb-2">
-                        স্টাফদের আবেদন — ১ম অনুমোদন প্যানেল (ম্যানেজার)
+                        স্টাফদের আবেদন — ১ম অনুমোদন ও রিজেক্ট প্যানেল (ম্যানেজার)
                     </h3>
                     <div class="overflow-x-auto rounded-xl border">
                         <table class="w-full text-xs text-left">
@@ -566,7 +566,7 @@
 
             <div id="superAdminFinalApprovalSection" class="hidden fade-up surface-card rounded-3xl p-6 space-y-4">
                 <h3 class="text-base font-bold text-slate-900 border-b pb-2.5">
-                    ফাইনাল অনুমোদন প্যানেল (অ্যাডমিন / সুপার অ্যাডমিন)
+                    ফাইনাল অনুমোদন ও রিজেক্ট প্যানেল (অ্যাডমিন / সুপার অ্যাডমিন)
                 </h3>
                 <div class="overflow-x-auto rounded-xl border">
                     <table class="w-full text-xs text-left">
@@ -1079,30 +1079,42 @@
             showToast("আপডেট সম্পন্ন", "আপনার প্রোফাইল তথ্য সংরক্ষিত হয়েছে");
         }
 
+        function isTruthyFlag(val) {
+            return val === true || String(val).toLowerCase() === "true" || val === 1 || String(val) === "1";
+        }
+
         function normalizeLeaveItem(raw) {
-            const mgrApproved = raw.managerApproved === true || String(raw.managerApproved).toLowerCase() === "true";
-            const finApproved = raw.finalApproved === true || String(raw.finalApproved).toLowerCase() === "true";
-            const appType = raw.applicantType || "staff";
+            const mgrApproved = isTruthyFlag(raw.managerApproved);
+            const finApproved = isTruthyFlag(raw.finalApproved);
+            const rejected = isTruthyFlag(raw.rejected);
+            const appType = String(raw.applicantType || "staff").toLowerCase();
             return {
                 ...raw,
-                leaveId: raw.leaveId || ("LV-" + Math.random().toString(36).slice(2, 8)),
+                leaveId: String(raw.leaveId || ("LV-" + Math.random().toString(36).slice(2, 8))),
                 applicantType: appType,
                 days: Number(raw.days || 1),
                 managerApproved: mgrApproved,
                 finalApproved: finApproved,
+                rejected: rejected,
                 statusText: raw.statusText || (
-                    finApproved
-                        ? "ফাইনাল অনুমোদিত (উপস্থিতি নিশ্চিত)"
-                        : (appType === "manager" || mgrApproved)
-                            ? "অ্যাডমিন / সুপার অ্যাডমিনের অনুমোদনের অপেক্ষায়"
-                            : "ম্যানেজারের ১ম অনুমোদনের অপেক্ষায়"
+                    rejected
+                        ? "রিজেক্ট করা হয়েছে"
+                        : finApproved
+                            ? "ফাইনাল অনুমোদিত (উপস্থিতি নিশ্চিত)"
+                            : (appType === "manager" || mgrApproved)
+                                ? "অ্যাডমিন / সুপার অ্যাডমিনের অনুমোদনের অপেক্ষায়"
+                                : "ম্যানেজারের ১ম অনুমোদনের অপেক্ষায়"
                 )
             };
         }
 
         function updateApprovalBadges() {
-            const mgrCount = globalLeaves.filter(l => l.applicantType === "staff" && !l.managerApproved && !l.finalApproved).length;
-            const admCount = globalLeaves.filter(l => !l.finalApproved && (l.managerApproved || l.applicantType === "manager")).length;
+            const mgrCount = globalLeaves.filter(l =>
+                l.applicantType === "staff" && !l.managerApproved && !l.finalApproved && !l.rejected
+            ).length;
+            const admCount = globalLeaves.filter(l =>
+                !l.finalApproved && !l.rejected && (l.managerApproved || l.applicantType === "manager")
+            ).length;
 
             const mgrBadge = document.getElementById("mgrPendingBadge");
             if (mgrBadge) {
@@ -1236,7 +1248,25 @@
                 const res = await fetch(`${SCRIPT_URL}?action=getLeaves&_t=${Date.now()}`);
                 const d = await res.json();
                 if (Array.isArray(d)) {
-                    globalLeaves = d.map(normalizeLeaveItem);
+                    const sheetItems = d.map(normalizeLeaveItem);
+                    const localItems = (JSON.parse(localStorage.getItem("bm_leaves") || "[]") || []).map(normalizeLeaveItem);
+                    const mergedMap = new Map();
+                    sheetItems.forEach(item => mergedMap.set(String(item.leaveId), item));
+                    localItems.forEach(loc => {
+                        const existing = mergedMap.get(String(loc.leaveId));
+                        if (!existing) {
+                            mergedMap.set(String(loc.leaveId), loc);
+                        } else if (loc.rejected || loc.finalApproved || loc.managerApproved) {
+                            mergedMap.set(String(loc.leaveId), {
+                                ...existing,
+                                managerApproved: existing.managerApproved || loc.managerApproved,
+                                finalApproved: existing.finalApproved || loc.finalApproved,
+                                rejected: existing.rejected || loc.rejected,
+                                statusText: loc.statusText || existing.statusText
+                            });
+                        }
+                    });
+                    globalLeaves = Array.from(mergedMap.values());
                     localStorage.setItem("bm_leaves", JSON.stringify(globalLeaves));
                     return;
                 }
@@ -1486,7 +1516,7 @@
         }
 
         function getLeaveBalance(userId) {
-            const approvedLeaves = globalLeaves.filter(l => String(l.staffId) === String(userId) && l.finalApproved === true);
+            const approvedLeaves = globalLeaves.filter(l => String(l.staffId) === String(userId) && l.finalApproved === true && !l.rejected);
             let sickUsed = 0, casualUsed = 0, emergencyUsed = 0;
             approvedLeaves.forEach(l => {
                 const days = Number(l.days || 1);
@@ -1565,6 +1595,7 @@
                 prescription: category === "sick" ? prescriptionBase64 : "",
                 managerApproved: isManager ? true : false,
                 finalApproved: false,
+                rejected: false,
                 statusText: isManager
                     ? "অ্যাডমিন / সুপার অ্যাডমিনের অনুমোদনের অপেক্ষায়"
                     : "ম্যানেজারের ১ম অনুমোদনের অপেক্ষায়"
@@ -1599,19 +1630,28 @@
             const mine = globalLeaves.filter(l => String(l.staffId) === String(currentUser.id));
             document.getElementById("myLeaveHistoryBody").innerHTML = mine.length === 0
                 ? `<tr><td colspan="5" class="p-4 text-center text-slate-400">কোনো আবেদন নেই</td></tr>`
-                : mine.map(l => `
-                    <tr>
-                        <td class="p-3 font-bold">${getCategoryLabel(l.category)}</td>
-                        <td class="p-3">${l.startDate} থেকে ${l.endDate}</td>
-                        <td class="p-3 font-bold">${l.days || 1} দিন</td>
-                        <td class="p-3">${l.prescription ? `<img src="${l.prescription}" class="h-10 w-10 object-cover rounded border">` : "-"}</td>
-                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${l.finalApproved ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}">${l.statusText}</span></td>
-                    </tr>
-                `).join("");
+                : mine.map(l => {
+                    const badgeCls = l.rejected
+                        ? "bg-rose-100 text-rose-800"
+                        : l.finalApproved
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-amber-100 text-amber-800";
+                    return `
+                        <tr>
+                            <td class="p-3 font-bold">${getCategoryLabel(l.category)}</td>
+                            <td class="p-3">${l.startDate} থেকে ${l.endDate}</td>
+                            <td class="p-3 font-bold">${l.days || 1} দিন</td>
+                            <td class="p-3">${l.prescription ? `<img src="${l.prescription}" class="h-10 w-10 object-cover rounded border">` : "-"}</td>
+                            <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${badgeCls}">${l.statusText}</span></td>
+                        </tr>
+                    `;
+                }).join("");
         }
 
         function renderManagerPendingLeaves() {
-            const list = globalLeaves.filter(l => l.applicantType === "staff" && !l.managerApproved && !l.finalApproved);
+            const list = globalLeaves.filter(l =>
+                l.applicantType === "staff" && !l.managerApproved && !l.finalApproved && !l.rejected
+            );
             updateApprovalBadges();
             document.getElementById("managerPendingLeavesBody").innerHTML = list.length === 0
                 ? `<tr><td colspan="6" class="p-4 text-center text-slate-400">১ম অনুমোদনের জন্য কোনো আবেদন নেই</td></tr>`
@@ -1622,20 +1662,25 @@
                         <td class="p-3">${l.startDate} - ${l.endDate} (${l.days || 1} দিন)</td>
                         <td class="p-3">${l.reason}</td>
                         <td class="p-3">${l.prescription ? `<img src="${l.prescription}" class="h-10 w-10 object-cover rounded border">` : "-"}</td>
-                        <td class="p-3 text-right">
-                            <button onclick="managerFirstApprove('${l.leaveId}')" class="action-btn bg-emerald-600 text-white px-3 py-1.5 rounded-xl font-bold">১ম অনুমোদন</button>
+                        <td class="p-3 text-right whitespace-nowrap space-x-1.5">
+                            <button onclick="managerFirstApprove('${l.leaveId}')" class="action-btn bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl font-bold">১ম অনুমোদন</button>
+                            <button onclick="managerRejectLeave('${l.leaveId}')" class="action-btn bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-xl font-bold">রিজেক্ট</button>
                         </td>
                     </tr>
                 `).join("");
         }
 
         async function managerFirstApprove(leaveId) {
-            const item = globalLeaves.find(l => l.leaveId === leaveId);
+            const item = globalLeaves.find(l => String(l.leaveId) === String(leaveId));
             if (!item) return;
             showBikeLoader("১ম অনুমোদন সেভ হচ্ছে...", "");
             item.managerApproved = true;
+            item.rejected = false;
             item.statusText = "১ম ধাপ সম্পন্ন • অ্যাডমিন / সুপার অ্যাডমিনের অপেক্ষায়";
             localStorage.setItem("bm_leaves", JSON.stringify(globalLeaves));
+            updateApprovalBadges();
+            renderManagerPendingLeaves();
+            renderFinalApprovals();
             try {
                 await fetch(SCRIPT_URL, {
                     method: "POST",
@@ -1644,20 +1689,48 @@
                         leaveId,
                         managerApproved: true,
                         finalApproved: false,
+                        rejected: false,
                         statusText: item.statusText
                     })
                 });
-                await loadLeavesFromSheet();
             } catch {}
-            updateApprovalBadges();
-            renderManagerPendingLeaves();
-            renderFinalApprovals();
             hideBikeLoader(100);
             showToast("১ম অনুমোদন সম্পন্ন", "আবেদনটি অ্যাডমিন ও সুপার অ্যাডমিনের কাছে পাঠানো হয়েছে");
         }
 
+        async function managerRejectLeave(leaveId) {
+            const item = globalLeaves.find(l => String(l.leaveId) === String(leaveId));
+            if (!item) return;
+            showBikeLoader("আবেদন রিজেক্ট হচ্ছে...", "");
+            item.rejected = true;
+            item.managerApproved = false;
+            item.finalApproved = false;
+            item.statusText = "ম্যানেজার কর্তৃক রিজেক্টেড";
+            localStorage.setItem("bm_leaves", JSON.stringify(globalLeaves));
+            updateApprovalBadges();
+            renderManagerPendingLeaves();
+            renderFinalApprovals();
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "updateLeave",
+                        leaveId,
+                        managerApproved: false,
+                        finalApproved: false,
+                        rejected: true,
+                        statusText: item.statusText
+                    })
+                });
+            } catch {}
+            hideBikeLoader(100);
+            showToast("রিজেক্ট সম্পন্ন", "আবেদনটি বাতিল করা হয়েছে");
+        }
+
         function renderFinalApprovals() {
-            const list = globalLeaves.filter(l => !l.finalApproved && (l.managerApproved || l.applicantType === "manager"));
+            const list = globalLeaves.filter(l =>
+                !l.finalApproved && !l.rejected && (l.managerApproved || l.applicantType === "manager")
+            );
             updateApprovalBadges();
             document.getElementById("adminFinalLeavesBody").innerHTML = list.length === 0
                 ? `<tr><td colspan="6" class="p-4 text-center text-slate-400">ফাইনাল অনুমোদনের কোনো আবেদন নেই</td></tr>`
@@ -1668,18 +1741,20 @@
                         <td class="p-3">${l.startDate} - ${l.endDate} (${l.days || 1} দিন)</td>
                         <td class="p-3">${l.applicantType === "manager" ? "সরাসরি অ্যাডমিন/সুপার অ্যাডমিন" : "ম্যানেজার অনুমোদিত"}</td>
                         <td class="p-3">${l.prescription ? `<img src="${l.prescription}" class="h-10 w-10 object-cover rounded border">` : "-"}</td>
-                        <td class="p-3 text-right">
-                            <button onclick="adminFinalApprove('${l.leaveId}')" class="action-btn bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl font-bold">ফাইনাল অনুমোদন</button>
+                        <td class="p-3 text-right whitespace-nowrap space-x-1.5">
+                            <button onclick="adminFinalApprove('${l.leaveId}')" class="action-btn bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl font-bold">ফাইনাল অনুমোদন</button>
+                            <button onclick="adminRejectLeave('${l.leaveId}')" class="action-btn bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-1.5 rounded-xl font-bold">রিজেক্ট</button>
                         </td>
                     </tr>
                 `).join("");
         }
 
         async function adminFinalApprove(leaveId) {
-            const item = globalLeaves.find(l => l.leaveId === leaveId);
+            const item = globalLeaves.find(l => String(l.leaveId) === String(leaveId));
             if (!item) return;
             showBikeLoader("ফাইনাল অনুমোদন সেভ হচ্ছে...", "");
             item.finalApproved = true;
+            item.rejected = false;
             item.statusText = "ফাইনাল অনুমোদিত (উপস্থিতি নিশ্চিত)";
             localStorage.setItem("bm_leaves", JSON.stringify(globalLeaves));
 
@@ -1717,10 +1792,10 @@
                         leaveId,
                         managerApproved: true,
                         finalApproved: true,
+                        rejected: false,
                         statusText: item.statusText
                     })
                 });
-                await loadLeavesFromSheet();
             } catch {}
 
             updateApprovalBadges();
@@ -1731,6 +1806,34 @@
             renderStaffMonthlyCalendar();
             hideBikeLoader(100);
             showToast("ফাইনাল অনুমোদন সম্পন্ন", "উপস্থিতি নিশ্চিত ও ব্যালেন্স আপডেট হয়েছে");
+        }
+
+        async function adminRejectLeave(leaveId) {
+            const item = globalLeaves.find(l => String(l.leaveId) === String(leaveId));
+            if (!item) return;
+            showBikeLoader("আবেদন রিজেক্ট হচ্ছে...", "");
+            item.rejected = true;
+            item.finalApproved = false;
+            item.statusText = "অ্যাডমিন / সুপার অ্যাডমিন কর্তৃক রিজেক্টেড";
+            localStorage.setItem("bm_leaves", JSON.stringify(globalLeaves));
+            updateApprovalBadges();
+            renderFinalApprovals();
+            renderMyLeaves();
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "updateLeave",
+                        leaveId,
+                        managerApproved: item.managerApproved,
+                        finalApproved: false,
+                        rejected: true,
+                        statusText: item.statusText
+                    })
+                });
+            } catch {}
+            hideBikeLoader(100);
+            showToast("রিজেক্ট সম্পন্ন", "আবেদনটি বাতিল করা হয়েছে");
         }
 
         async function switchTab(role, tab) {
