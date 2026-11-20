@@ -299,10 +299,13 @@
             <div class="flex justify-end">
                 <div class="flex flex-wrap gap-2 bg-white/95 p-1.5 rounded-2xl border shadow-sm">
                     <button onclick="switchTab('staff', 'attendanceTab')" id="btnAttTab" class="action-btn bg-teal-700 text-white px-4 py-2 rounded-xl text-xs font-bold">
-                        <i class="fa-solid fa-calendar-check mr-1"></i> হাজিরা ও ৩০ দিনের চার্ট
+                        <i class="fa-solid fa-calendar-check mr-1"></i> হাজিরা হিস্ট্রি
                     </button>
-                    <button onclick="switchTab('staff', 'leaveTab')" id="btnLeaveTab" class="action-btn text-slate-700 hover:bg-slate-100 px-4 py-2 rounded-xl text-xs font-bold">
-                        <i class="fa-solid fa-file-signature mr-1"></i> হাজিরা / ছুটির আবেদন
+                    <button onclick="openApplicationMode('missing_attendance')" id="btnAttAppTab" class="action-btn bg-sky-700 hover:bg-sky-800 text-white px-4 py-2 rounded-xl text-xs font-bold">
+                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> হাজিরা আবেদন
+                    </button>
+                    <button onclick="openApplicationMode('casual')" id="btnLeaveAppTab" class="action-btn bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-xs font-bold">
+                        <i class="fa-solid fa-file-signature mr-1"></i> ছুটির আবেদন
                     </button>
                     <button id="managerLeaveTabBtn" onclick="switchTab('staff', 'mgrLeaveApprovalTab')" class="relative hidden action-btn bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2 rounded-xl text-xs font-extrabold">
                         <i class="fa-solid fa-check-double mr-1"></i> ১ম অনুমোদন (ম্যানেজার)
@@ -387,7 +390,7 @@
             <!-- LEAVE / MISSING ATTENDANCE APPLICATION -->
             <div id="staffLeaveSection" class="hidden fade-up space-y-6">
                 <div class="surface-card rounded-3xl p-6 max-w-2xl mx-auto space-y-5">
-                    <h3 class="text-lg font-bold text-slate-900 border-b pb-2.5">হাজিরা / ছুটির আবেদন</h3>
+                    <h3 id="applicationFormHeading" class="text-lg font-bold text-slate-900 border-b pb-2.5">হাজিরা / ছুটির আবেদন</h3>
 
                     <div class="grid grid-cols-3 gap-3 text-center">
                         <div class="p-3 rounded-2xl bg-rose-50 border border-rose-200">
@@ -408,25 +411,30 @@
                         <div>
                             <label class="block text-xs font-bold mb-1">আবেদনের ধরন</label>
                             <select id="leaveCategory" onchange="togglePrescriptionField()" class="w-full border px-3.5 py-2.5 rounded-xl text-sm bg-white font-semibold">
+                                <option value="missing_attendance">মিসিং হাজিরা উপস্থিতি নিশ্চিতকরণ</option>
                                 <option value="sick">অসুস্থতাজনিত ছুটি (১০ দিন)</option>
                                 <option value="casual">সাধারণ ছুটি (১০ দিন)</option>
                                 <option value="emergency">জরুরি ছুটি (৬ দিন)</option>
-                                <option value="missing_attendance">মিসিং হাজিরা উপস্থিতি নিশ্চিতকরণ</option>
                             </select>
                         </div>
 
                         <div class="grid sm:grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-bold mb-1">শুরুর তারিখ</label>
-                                <input type="date" id="leaveStart" required class="w-full border px-3.5 py-2.5 rounded-xl text-sm">
+                                <label class="block text-xs font-bold mb-1"><i class="fa-regular fa-clock text-teal-600 mr-1"></i> শুরুর তারিখ ও সময়</label>
+                                <input type="datetime-local" id="leaveStart" required onchange="updateCalculatedDaysPreview()" class="w-full border px-3 py-2 rounded-xl text-xs font-bold bg-white">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold mb-1">শেষ তারিখ</label>
-                                <input type="date" id="leaveEnd" required class="w-full border px-3.5 py-2.5 rounded-xl text-sm">
+                                <label class="block text-xs font-bold mb-1"><i class="fa-regular fa-clock text-amber-600 mr-1"></i> শেষ তারিখ ও সময়</label>
+                                <input type="datetime-local" id="leaveEnd" required onchange="updateCalculatedDaysPreview()" class="w-full border px-3 py-2 rounded-xl text-xs font-bold bg-white">
                             </div>
                         </div>
 
-                        <div id="prescriptionBox" class="p-4 rounded-2xl bg-rose-50/70 border border-rose-200 space-y-2">
+                        <div class="flex items-center justify-between bg-slate-100 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700">
+                            <span>নির্বাচিত সময়কাল অনুযায়ী মোট দিন:</span>
+                            <span id="calculatedDaysPreview" class="text-teal-700 font-extrabold">১ দিন</span>
+                        </div>
+
+                        <div id="prescriptionBox" class="hidden p-4 rounded-2xl bg-rose-50/70 border border-rose-200 space-y-2">
                             <label class="block text-xs font-bold text-rose-800">
                                 <i class="fa-solid fa-file-medical mr-1"></i> ডাক্তারের প্রেসক্রিপশনের ছবি আপলোড করুন
                             </label>
@@ -436,7 +444,7 @@
 
                         <div>
                             <label class="block text-xs font-bold mb-1">বিস্তারিত কারণ</label>
-                            <textarea id="leaveReason" rows="3" required placeholder="আবেদনের কারণ লিখুন..." class="w-full border p-3.5 rounded-xl text-sm"></textarea>
+                            <textarea id="leaveReason" rows="3" required placeholder="কেন হাজিরা মিস হয়েছে বা ছুটি প্রয়োজন তা লিখুন..." class="w-full border p-3.5 rounded-xl text-sm"></textarea>
                         </div>
 
                         <button type="submit" class="action-btn w-full bg-gradient-to-r from-teal-700 to-emerald-600 hover:from-teal-800 hover:to-emerald-700 text-white font-bold py-3 rounded-xl text-sm">
@@ -452,8 +460,9 @@
                             <thead class="bg-slate-100 text-slate-700">
                                 <tr>
                                     <th class="p-3">ধরন</th>
-                                    <th class="p-3">তারিখ</th>
-                                    <th class="p-3">দিন</th>
+                                    <th class="p-3">সময় ও তারিখ</th>
+                                    <th class="p-3">মোট দিন</th>
+                                    <th class="p-3">কারণ</th>
                                     <th class="p-3">প্রেসক্রিপশন</th>
                                     <th class="p-3">অনুমোদন স্ট্যাটাস</th>
                                 </tr>
@@ -474,9 +483,11 @@
                         <table class="w-full text-xs text-left">
                             <thead class="bg-amber-100 text-amber-950">
                                 <tr>
-                                    <th class="p-3">স্টাফ</th>
+                                    <th class="p-3">আবেদনকারী</th>
+                                    <th class="p-3">স্টাফ আইডি</th>
                                     <th class="p-3">ধরন</th>
-                                    <th class="p-3">সময়কাল</th>
+                                    <th class="p-3">সময় ও তারিখ</th>
+                                    <th class="p-3">মোট দিন</th>
                                     <th class="p-3">কারণ</th>
                                     <th class="p-3">প্রেসক্রিপশন</th>
                                     <th class="p-3 text-right">অ্যাকশন</th>
@@ -573,8 +584,11 @@
                         <thead class="bg-slate-900 text-white">
                             <tr>
                                 <th class="p-3">আবেদনকারী</th>
+                                <th class="p-3">স্টাফ আইডি</th>
                                 <th class="p-3">ধরন</th>
-                                <th class="p-3">তারিখ ও দিন</th>
+                                <th class="p-3">সময় ও তারিখ</th>
+                                <th class="p-3">মোট দিন</th>
+                                <th class="p-3">কারণ</th>
                                 <th class="p-3">ধাপ</th>
                                 <th class="p-3">প্রেসক্রিপশন</th>
                                 <th class="p-3 text-right">ফাইনাল অ্যাকশন</th>
@@ -959,6 +973,34 @@
             return s;
         }
 
+        /* COMPACT h:min dd/mm/yy FORMAT WITHOUT DAY NAME */
+        function formatCompactDateTime(raw) {
+            if (!raw || String(raw).trim() === "" || String(raw).trim() === "-") return "-";
+            const dt = new Date(raw);
+            if (!isNaN(dt.getTime())) {
+                const h = dt.getHours();
+                const min = String(dt.getMinutes()).padStart(2, "0");
+                const dd = String(dt.getDate()).padStart(2, "0");
+                const mm = String(dt.getMonth() + 1).padStart(2, "0");
+                const yy = String(dt.getFullYear()).slice(-2);
+                return `${h}:${min} ${dd}/${mm}/${yy}`;
+            }
+            const cleaned = String(raw).replace(/GMT.*$/i, "").replace(/\(.*\)/g, "").trim();
+            const m = cleaned.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i);
+            const dMatch = cleaned.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+            const timePart = m ? `${m[1]}:${m[2]}${m[3] ? " " + m[3].toUpperCase() : ""}` : "";
+            const datePart = dMatch ? `${String(dMatch[1]).padStart(2, "0")}/${String(dMatch[2]).padStart(2, "0")}/${String(dMatch[3]).slice(-2)}` : cleaned;
+            return [timePart, datePart].filter(Boolean).join(" ") || "-";
+        }
+
+        function formatLeaveRangeCompact(startVal, endVal) {
+            const s = formatCompactDateTime(startVal);
+            const e = formatCompactDateTime(endVal);
+            if (s === "-" && e === "-") return "-";
+            if (s === e) return s;
+            return `${s} - ${e}`;
+        }
+
         function parse12HourToMinutes(t12) {
             if (!t12 || t12 === "-") return null;
             let m = t12.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
@@ -1093,6 +1135,7 @@
                 leaveId: String(raw.leaveId || ("LV-" + Math.random().toString(36).slice(2, 8))),
                 applicantType: appType,
                 days: Number(raw.days || 1),
+                reason: raw.reason || raw.note || "কারণ উল্লেখ নেই",
                 managerApproved: mgrApproved,
                 finalApproved: finApproved,
                 rejected: rejected,
@@ -1546,6 +1589,21 @@
             else box.classList.add("hidden");
         }
 
+        async function openApplicationMode(defaultCategory) {
+            await switchTab("staff", "leaveTab");
+            const sel = document.getElementById("leaveCategory");
+            const heading = document.getElementById("applicationFormHeading");
+            if (defaultCategory === "missing_attendance") {
+                sel.value = "missing_attendance";
+                heading.innerText = "হাজিরা আবেদন (মিসিং হাজিরা উপস্থিতি নিশ্চিতকরণ)";
+            } else {
+                sel.value = "casual";
+                heading.innerText = "ছুটির আবেদন";
+            }
+            togglePrescriptionField();
+            updateCalculatedDaysPreview();
+        }
+
         function handlePrescriptionFile(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1563,7 +1621,18 @@
             const s = new Date(startStr);
             const e = new Date(endStr);
             if (isNaN(s) || isNaN(e) || e < s) return 1;
-            return Math.floor((e - s) / (1000 * 60 * 60 * 24)) + 1;
+            const sDay = new Date(s.getFullYear(), s.getMonth(), s.getDate());
+            const eDay = new Date(e.getFullYear(), e.getMonth(), e.getDate());
+            return Math.max(1, Math.floor((eDay - sDay) / (1000 * 60 * 60 * 24)) + 1);
+        }
+
+        function updateCalculatedDaysPreview() {
+            const s = document.getElementById("leaveStart").value;
+            const e = document.getElementById("leaveEnd").value;
+            const el = document.getElementById("calculatedDaysPreview");
+            if (!el) return;
+            const days = calcDayDiff(s, e);
+            el.innerText = `${days} দিন`;
         }
 
         async function submitLeaveApplication(e) {
@@ -1611,6 +1680,7 @@
             e.target.reset();
             prescriptionBase64 = "";
             document.getElementById("prescriptionPreview").classList.add("hidden");
+            updateCalculatedDaysPreview();
             updateApprovalBadges();
             renderMyLeaves();
             renderManagerPendingLeaves();
@@ -1629,7 +1699,7 @@
         function renderMyLeaves() {
             const mine = globalLeaves.filter(l => String(l.staffId) === String(currentUser.id));
             document.getElementById("myLeaveHistoryBody").innerHTML = mine.length === 0
-                ? `<tr><td colspan="5" class="p-4 text-center text-slate-400">কোনো আবেদন নেই</td></tr>`
+                ? `<tr><td colspan="6" class="p-4 text-center text-slate-400">কোনো আবেদন নেই</td></tr>`
                 : mine.map(l => {
                     const badgeCls = l.rejected
                         ? "bg-rose-100 text-rose-800"
@@ -1639,8 +1709,9 @@
                     return `
                         <tr>
                             <td class="p-3 font-bold">${getCategoryLabel(l.category)}</td>
-                            <td class="p-3">${l.startDate} থেকে ${l.endDate}</td>
-                            <td class="p-3 font-bold">${l.days || 1} দিন</td>
+                            <td class="p-3 whitespace-nowrap">${formatLeaveRangeCompact(l.startDate, l.endDate)}</td>
+                            <td class="p-3 font-extrabold text-teal-700 whitespace-nowrap">${l.days || 1} দিন</td>
+                            <td class="p-3 text-slate-700">${l.reason || "-"}</td>
                             <td class="p-3">${l.prescription ? `<img src="${l.prescription}" class="h-10 w-10 object-cover rounded border">` : "-"}</td>
                             <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${badgeCls}">${l.statusText}</span></td>
                         </tr>
@@ -1654,13 +1725,15 @@
             );
             updateApprovalBadges();
             document.getElementById("managerPendingLeavesBody").innerHTML = list.length === 0
-                ? `<tr><td colspan="6" class="p-4 text-center text-slate-400">১ম অনুমোদনের জন্য কোনো আবেদন নেই</td></tr>`
+                ? `<tr><td colspan="8" class="p-4 text-center text-slate-400">১ম অনুমোদনের জন্য কোনো আবেদন নেই</td></tr>`
                 : list.map(l => `
                     <tr>
-                        <td class="p-3 font-bold">${l.staffName} (${l.staffId})</td>
+                        <td class="p-3 font-bold">${l.staffName}</td>
+                        <td class="p-3 font-semibold text-teal-700">${l.staffId}</td>
                         <td class="p-3">${getCategoryLabel(l.category)}</td>
-                        <td class="p-3">${l.startDate} - ${l.endDate} (${l.days || 1} দিন)</td>
-                        <td class="p-3">${l.reason}</td>
+                        <td class="p-3 whitespace-nowrap">${formatLeaveRangeCompact(l.startDate, l.endDate)}</td>
+                        <td class="p-3 font-extrabold text-slate-900 whitespace-nowrap">${l.days || 1} দিন</td>
+                        <td class="p-3 text-slate-700">${l.reason || "-"}</td>
                         <td class="p-3">${l.prescription ? `<img src="${l.prescription}" class="h-10 w-10 object-cover rounded border">` : "-"}</td>
                         <td class="p-3 text-right whitespace-nowrap space-x-1.5">
                             <button onclick="managerFirstApprove('${l.leaveId}')" class="action-btn bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl font-bold">১ম অনুমোদন</button>
@@ -1733,12 +1806,15 @@
             );
             updateApprovalBadges();
             document.getElementById("adminFinalLeavesBody").innerHTML = list.length === 0
-                ? `<tr><td colspan="6" class="p-4 text-center text-slate-400">ফাইনাল অনুমোদনের কোনো আবেদন নেই</td></tr>`
+                ? `<tr><td colspan="9" class="p-4 text-center text-slate-400">ফাইনাল অনুমোদনের কোনো আবেদন নেই</td></tr>`
                 : list.map(l => `
                     <tr>
                         <td class="p-3 font-bold">${l.staffName} (${l.applicantType})</td>
+                        <td class="p-3 font-semibold text-teal-700">${l.staffId}</td>
                         <td class="p-3">${getCategoryLabel(l.category)}</td>
-                        <td class="p-3">${l.startDate} - ${l.endDate} (${l.days || 1} দিন)</td>
+                        <td class="p-3 whitespace-nowrap">${formatLeaveRangeCompact(l.startDate, l.endDate)}</td>
+                        <td class="p-3 font-extrabold text-slate-900 whitespace-nowrap">${l.days || 1} দিন</td>
+                        <td class="p-3 text-slate-700">${l.reason || "-"}</td>
                         <td class="p-3">${l.applicantType === "manager" ? "সরাসরি অ্যাডমিন/সুপার অ্যাডমিন" : "ম্যানেজার অনুমোদিত"}</td>
                         <td class="p-3">${l.prescription ? `<img src="${l.prescription}" class="h-10 w-10 object-cover rounded border">` : "-"}</td>
                         <td class="p-3 text-right whitespace-nowrap space-x-1.5">
@@ -1846,6 +1922,7 @@
                     document.getElementById("staffLeaveSection").classList.remove("hidden");
                     await loadLeavesFromSheet();
                     updateLeaveBalanceUI();
+                    updateCalculatedDaysPreview();
                     renderMyLeaves();
                 }
                 if (tab === "mgrLeaveApprovalTab") {
