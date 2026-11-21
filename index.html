@@ -357,8 +357,8 @@
                 <div class="surface-card rounded-3xl p-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3 border-b pb-3">
                         <div>
-                            <h3 class="text-lg font-bold text-slate-900">৩০/৩১ দিনের দৈনিক হাজিরা ও ডিউটি চার্ট</h3>
-                            <p class="text-xs text-slate-500">প্রতিটি দিনের মাঝে স্বতন্ত্র বর্ডার ও ১২ ঘণ্টা AM/PM সময়ে ডিউটি হিসাব</p>
+                            <h3 class="text-lg font-bold text-slate-900">মাসিক দৈনিক হাজিরা ও ডিউটি চার্ট</h3>
+                            <p class="text-xs text-slate-500">আপনার প্রতিদিনের হাজিরা নিশ্চিত করুন । মিস গেলে প্রমাণসহ ম্যানেজমেন্টের সাথে যোগাযোগ করুন</p>
                         </div>
                         <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border">
                             <label class="text-xs font-bold text-slate-700">মাস:</label>
@@ -666,7 +666,7 @@
                                     <option value="ডেসপাস">ডেসপাস</option>
                                     <option value="সার্ভিস">সার্ভিস</option>
                                     <option value="অফিস সহকারী">অফিস সহকারী</option>
-                                    <option value="অন্যান্য">অন্যান্য</option>
+                                    <option value="ম্যানেজমেন্ট">ম্যানেজমেন্ট</option>
                                 </select>
                             </div>
                             <div><label class="text-xs font-bold">ইউজার আইডি</label><input type="text" id="newStaffId" required placeholder="BM-105" class="w-full border px-3 py-2 rounded-xl text-sm mt-1"></div>
@@ -814,11 +814,11 @@
         let activeNoticeType = "";
         let currentApplicationMode = "leave";
 
-        const DEPT_OPTIONS = ["সেলস", "কালেকশন", "ডেসপাস", "সার্ভিস", "অফিস সহকারী", "অন্যান্য"];
+        const DEPT_OPTIONS = ["সেলস", "কালেকশন", "ডেসপাস", "সার্ভিস", "অফিস সহকারী", "ম্যানেজমেন্ট"];
 
         const DEFAULT_USERS = [
-            { id: "admin", name: "জিয়াউল হাসান", department: "অন্যান্য", role: "ম্যানেজিং ডিরেক্টর", phone: "", address: "", pass: "1234", photo: "", type: "admin" },
-            { id: "superadmin", name: "সুপার অ্যাডমিন", department: "অন্যান্য", role: "সুপার অ্যাডমিন", phone: "", address: "", pass: "1234", photo: "", type: "superadmin" },
+            { id: "admin", name: "জিয়াউল হাসান", department: "ম্যানেজমেন্ট", role: "ম্যানেজিং ডিরেক্টর", phone: "", address: "", pass: "1234", photo: "", type: "admin" },
+            { id: "superadmin", name: "সুপার অ্যাডমিন", department: "ম্যানেজমেন্ট", role: "সুপার অ্যাডমিন", phone: "", address: "", pass: "1234", photo: "", type: "superadmin" },
             { id: "manager", name: "মোঃ বোরহানউদ্দিন", department: "সেলস", role: "শোরুম ম্যানেজার", phone: "", address: "", pass: "1234", photo: "", type: "manager" },
             { id: "BM-101", name: "মামুন ভাই", department: "সেলস", role: "সেলস এক্সিকিউটিভ", phone: "", address: "", pass: "1234", photo: "", type: "staff" },
             { id: "BM-102", name: "রোমান", department: "সার্ভিস", role: "টেকনিশিয়ান", phone: "", address: "", pass: "1234", photo: "", type: "staff" }
@@ -1076,7 +1076,7 @@
             document.getElementById("headerUserName").innerText = user.name;
             document.getElementById("headerUserId").innerText = user.id;
             document.getElementById("headerUserRole").innerText = user.role || user.type;
-            document.getElementById("headerUserDept").innerText = user.department || "অন্যান্য";
+            document.getElementById("headerUserDept").innerText = user.department || "ম্যানেজমেন্ট";
             document.getElementById("headerUserPhone").innerText = user.phone || "ফোন যুক্ত নেই";
             document.getElementById("headerUserAddress").innerText = user.address || "ঠিকানা যুক্ত নেই";
 
@@ -2107,7 +2107,7 @@
                 <tr>
                     <td class="p-2 font-bold">${u.id}</td>
                     <td class="p-2"><input id="name_${u.id}" value="${u.name}" class="border px-2 py-1 rounded w-24"></td>
-                    <td class="p-2">${renderDeptSelectHTML(u.id, u.department || "অন্যান্য")}</td>
+                    <td class="p-2">${renderDeptSelectHTML(u.id, u.department || "ম্যানেজমেন্ট")}</td>
                     <td class="p-2"><input id="role_${u.id}" value="${u.role || ""}" class="border px-2 py-1 rounded w-24"></td>
                     <td class="p-2"><input id="phone_${u.id}" value="${u.phone || ""}" class="border px-2 py-1 rounded w-24"></td>
                     <td class="p-2"><input id="pass_${u.id}" value="${u.pass || ""}" class="border px-2 py-1 rounded w-16"></td>
