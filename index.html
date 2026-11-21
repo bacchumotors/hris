@@ -222,28 +222,27 @@
             </form>
         </div>
 
-        <!-- PROFILE SUMMARY CARD -->
-        <div id="topProfileCard" class="hidden fade-up max-w-2xl mx-auto surface-card rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-4 text-center sm:text-left">
-                <div class="w-20 h-20 rounded-2xl border-2 border-teal-600 shadow-md overflow-hidden flex items-center justify-center bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 font-extrabold text-2xl shrink-0">
+        <!-- CENTERED PROFILE SUMMARY CARD (WITHOUT DUPLICATE BUTTON) -->
+        <div id="topProfileCard" class="hidden fade-up max-w-xl mx-auto surface-card rounded-3xl p-6 border-t-4 border-teal-600">
+            <div class="flex flex-col items-center text-center space-y-2.5">
+                <div class="w-24 h-24 rounded-2xl border-2 border-teal-600 shadow-md overflow-hidden flex items-center justify-center bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 font-extrabold text-2xl">
                     <span id="profileAvatarText">BM</span>
                     <img id="profileAvatarImg" class="w-full h-full object-cover hidden">
                 </div>
                 <div>
                     <h2 id="headerUserName" class="text-xl font-bold text-slate-900"></h2>
-                    <p class="text-xs text-slate-500 mt-0.5">
-                        আইডি: <span id="headerUserId" class="font-bold text-teal-700"></span> | পদবী: <span id="headerUserRole" class="font-bold text-slate-700"></span> | বিভাগ: <span id="headerUserDept" class="font-bold text-slate-700"></span>
-                    </p>
-                    <p class="text-xs text-slate-600 mt-1">
-                        <i class="fa-solid fa-phone text-teal-600 mr-1"></i><span id="headerUserPhone" class="font-semibold">-</span>
-                        <span class="mx-2 text-slate-300">|</span>
-                        <i class="fa-solid fa-location-dot text-amber-600 mr-1"></i><span id="headerUserAddress" class="font-semibold">-</span>
-                    </p>
+                    <div class="flex flex-wrap items-center justify-center gap-2 mt-1.5 text-xs">
+                        <span class="bg-teal-50 text-teal-800 border border-teal-200 px-2.5 py-0.5 rounded-full font-bold">আইডি: <span id="headerUserId"></span></span>
+                        <span class="bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-0.5 rounded-full font-bold">পদবী: <span id="headerUserRole"></span></span>
+                        <span class="bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full font-bold">বিভাগ: <span id="headerUserDept"></span></span>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center justify-center gap-3 pt-1 text-xs text-slate-600">
+                    <span><i class="fa-solid fa-phone text-teal-600 mr-1"></i><span id="headerUserPhone" class="font-semibold">-</span></span>
+                    <span class="text-slate-300">|</span>
+                    <span><i class="fa-solid fa-location-dot text-amber-600 mr-1"></i><span id="headerUserAddress" class="font-semibold">-</span></span>
                 </div>
             </div>
-            <button onclick="openMyProfileModal()" class="action-btn bg-teal-700 hover:bg-teal-800 text-white text-xs px-4 py-2.5 rounded-xl font-bold shrink-0">
-                <i class="fa-solid fa-pen-to-square mr-1"></i> আমার প্রোফাইল
-            </button>
         </div>
 
         <!-- TWO NOTICE BOARDS -->
@@ -390,9 +389,9 @@
             <!-- LEAVE / MISSING ATTENDANCE APPLICATION -->
             <div id="staffLeaveSection" class="hidden fade-up space-y-6">
                 <div class="surface-card rounded-3xl p-6 max-w-2xl mx-auto space-y-5">
-                    <h3 id="applicationFormHeading" class="text-lg font-bold text-slate-900 border-b pb-2.5">হাজিরা / ছুটির আবেদন</h3>
+                    <h3 id="applicationFormHeading" class="text-lg font-bold text-slate-900 border-b pb-2.5">ছুটির আবেদন</h3>
 
-                    <div class="grid grid-cols-3 gap-3 text-center">
+                    <div id="leaveBalanceCardsRow" class="grid grid-cols-3 gap-3 text-center">
                         <div class="p-3 rounded-2xl bg-rose-50 border border-rose-200">
                             <p class="text-[11px] font-bold text-rose-800">অসুস্থতা ছুটি</p>
                             <p id="balSick" class="text-xl font-extrabold text-rose-700 mt-0.5">১০ দিন</p>
@@ -408,14 +407,17 @@
                     </div>
 
                     <form onsubmit="submitLeaveApplication(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold mb-1">আবেদনের ধরন</label>
+                        <div id="leaveTypeSelectWrapper">
+                            <label class="block text-xs font-bold mb-1">ছুটির ধরন</label>
                             <select id="leaveCategory" onchange="togglePrescriptionField()" class="w-full border px-3.5 py-2.5 rounded-xl text-sm bg-white font-semibold">
-                                <option value="missing_attendance">মিসিং হাজিরা উপস্থিতি নিশ্চিতকরণ</option>
-                                <option value="sick">অসুস্থতাজনিত ছুটি (১০ দিন)</option>
                                 <option value="casual">সাধারণ ছুটি (১০ দিন)</option>
+                                <option value="sick">অসুস্থতাজনিত ছুটি (১০ দিন)</option>
                                 <option value="emergency">জরুরি ছুটি (৬ দিন)</option>
                             </select>
+                        </div>
+
+                        <div id="attendanceTypeBadgeBox" class="hidden p-3 rounded-xl bg-sky-50 border border-sky-200 text-xs font-bold text-sky-900">
+                            <i class="fa-solid fa-clock-rotate-left mr-1.5"></i> মিসিং হাজিরা উপস্থিতি নিশ্চিতকরণ আবেদন
                         </div>
 
                         <div class="grid sm:grid-cols-2 gap-3">
@@ -643,8 +645,8 @@
                     </button>
                 </div>
 
-                <div class="grid lg:grid-cols-3 gap-6">
-                    <div class="surface-card rounded-3xl p-6">
+                <div class="grid lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-4 surface-card rounded-3xl p-6">
                         <h3 class="text-base font-bold border-b pb-3 mb-4 text-slate-900">নতুন অ্যাকাউন্ট তৈরি</h3>
                         <form onsubmit="createNewStaff(event)" class="space-y-3">
                             <div>
@@ -679,22 +681,22 @@
                         </form>
                     </div>
 
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="surface-card rounded-3xl p-6 border-t-4 border-indigo-600">
+                    <div class="lg:col-span-8 space-y-6 min-w-0">
+                        <div class="surface-card rounded-3xl p-5 border-t-4 border-indigo-600">
                             <h3 class="text-base font-bold text-indigo-950 mb-3">
                                 <i class="fa-solid fa-user-tie mr-1.5"></i> ম্যানেজমেন্ট ও অ্যাডমিন তালিকা
                             </h3>
-                            <div class="overflow-x-auto max-h-56 rounded-xl border">
-                                <table class="w-full text-xs text-left">
+                            <div class="overflow-x-auto max-h-64 rounded-xl border">
+                                <table class="w-full text-xs text-left whitespace-nowrap">
                                     <thead class="bg-indigo-100 text-indigo-950">
                                         <tr>
-                                            <th class="p-2.5">আইডি</th>
-                                            <th class="p-2.5">নাম</th>
-                                            <th class="p-2.5">ডিপার্টমেন্ট</th>
-                                            <th class="p-2.5">পদবি</th>
-                                            <th class="p-2.5">ফোন</th>
-                                            <th class="p-2.5">পাসওয়ার্ড</th>
-                                            <th class="p-2.5 text-right">অ্যাকশন</th>
+                                            <th class="p-2">আইডি</th>
+                                            <th class="p-2">নাম</th>
+                                            <th class="p-2">ডিপার্টমেন্ট</th>
+                                            <th class="p-2">পদবি</th>
+                                            <th class="p-2">ফোন</th>
+                                            <th class="p-2">পাসওয়ার্ড</th>
+                                            <th class="p-2 text-right">অ্যাকশন</th>
                                         </tr>
                                     </thead>
                                     <tbody id="managementAccountList" class="divide-y"></tbody>
@@ -702,21 +704,21 @@
                             </div>
                         </div>
 
-                        <div class="surface-card rounded-3xl p-6 border-t-4 border-teal-600">
+                        <div class="surface-card rounded-3xl p-5 border-t-4 border-teal-600">
                             <h3 class="text-base font-bold text-teal-950 mb-3">
                                 <i class="fa-solid fa-users mr-1.5"></i> স্টাফ তালিকা
                             </h3>
-                            <div class="overflow-x-auto max-h-56 rounded-xl border">
-                                <table class="w-full text-xs text-left">
+                            <div class="overflow-x-auto max-h-64 rounded-xl border">
+                                <table class="w-full text-xs text-left whitespace-nowrap">
                                     <thead class="bg-teal-100 text-teal-950">
                                         <tr>
-                                            <th class="p-2.5">আইডি</th>
-                                            <th class="p-2.5">নাম</th>
-                                            <th class="p-2.5">ডিপার্টমেন্ট</th>
-                                            <th class="p-2.5">পদবি</th>
-                                            <th class="p-2.5">ফোন</th>
-                                            <th class="p-2.5">পাসওয়ার্ড</th>
-                                            <th class="p-2.5 text-right">অ্যাকশন</th>
+                                            <th class="p-2">আইডি</th>
+                                            <th class="p-2">নাম</th>
+                                            <th class="p-2">ডিপার্টমেন্ট</th>
+                                            <th class="p-2">পদবি</th>
+                                            <th class="p-2">ফোন</th>
+                                            <th class="p-2">পাসওয়ার্ড</th>
+                                            <th class="p-2 text-right">অ্যাকশন</th>
                                         </tr>
                                     </thead>
                                     <tbody id="staffAccountList" class="divide-y"></tbody>
@@ -810,6 +812,7 @@
         let tempProfilePhoto = "";
         let currentGpsLocation = "অনলাইন";
         let activeNoticeType = "";
+        let currentApplicationMode = "leave";
 
         const DEPT_OPTIONS = ["সেলস", "কালেকশন", "ডেসপাস", "সার্ভিস", "অফিস সহকারী", "অন্যান্য"];
 
@@ -955,22 +958,37 @@
             return (nowDate.getHours() * 60 + nowDate.getMinutes()) > (ch * 60 + cm);
         }
 
+        /* STRICT hour:min AM/PM TIME ONLY FORMATTER */
         function formatStrict12Hour(val) {
             if (!val || String(val).trim() === "" || String(val).trim() === "-") return "-";
-            let s = String(val).replace(/GMT.*$/i, "").trim();
-            let m12 = s.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)/i);
+            const rawStr = String(val).trim();
+            if (/^late$/i.test(rawStr)) return "Late";
+            if (/^present$/i.test(rawStr)) return "Present";
+
+            const m12 = rawStr.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)/i);
             if (m12) {
-                let h = parseInt(m12[1], 10);
-                return `${String(h).padStart(2, "0")}:${m12[2]} ${m12[3].toUpperCase()}`;
+                const h = parseInt(m12[1], 10);
+                return `${h}:${m12[2]} ${m12[3].toUpperCase()}`;
             }
-            let m24 = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+
+            const dt = new Date(rawStr);
+            if (!isNaN(dt.getTime())) {
+                let h24 = dt.getHours();
+                const min = String(dt.getMinutes()).padStart(2, "0");
+                const mer = h24 >= 12 ? "PM" : "AM";
+                const h12 = h24 % 12 || 12;
+                return `${h12}:${min} ${mer}`;
+            }
+
+            const m24 = rawStr.match(/(\d{1,2}):(\d{2})(?::\d{2})?/);
             if (m24) {
-                let h = parseInt(m24[1], 10);
-                let mer = h >= 12 ? "PM" : "AM";
-                h = h % 12 || 12;
-                return `${String(h).padStart(2, "0")}:${m24[2]} ${mer}`;
+                let h24 = parseInt(m24[1], 10);
+                const mer = h24 >= 12 ? "PM" : "AM";
+                const h12 = h24 % 12 || 12;
+                return `${h12}:${m24[2]} ${mer}`;
             }
-            return s;
+
+            return rawStr;
         }
 
         /* COMPACT h:min dd/mm/yy FORMAT WITHOUT DAY NAME */
@@ -1001,8 +1019,33 @@
             return `${s} - ${e}`;
         }
 
+        /* FLEXIBLE DATE PARSER FOR SHEET DATES (dd/mm/yyyy, mm/dd/yyyy, yyyy-mm-dd, Date string) */
+        function parseRecordDateObj(dateStr) {
+            if (!dateStr) return null;
+            const s = String(dateStr).trim();
+            const slashMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (slashMatch) {
+                const a = parseInt(slashMatch[1], 10);
+                const b = parseInt(slashMatch[2], 10);
+                const y = parseInt(slashMatch[3], 10);
+                if (a > 12 && b <= 12) return new Date(y, b - 1, a);
+                if (b > 12 && a <= 12) return new Date(y, a - 1, b);
+                return new Date(y, a - 1, b);
+            }
+            const dt = new Date(s);
+            return isNaN(dt.getTime()) ? null : dt;
+        }
+
+        function isRecordLate(rec) {
+            if (!rec) return false;
+            if (String(rec.inStatus || "").toLowerCase() === "late") return true;
+            if (String(rec.lunchOut || "").toLowerCase() === "late") return true;
+            if (String(rec.inTime || "").toLowerCase().includes("late")) return true;
+            return false;
+        }
+
         function parse12HourToMinutes(t12) {
-            if (!t12 || t12 === "-") return null;
+            if (!t12 || t12 === "-" || /^late$/i.test(t12) || /^present$/i.test(t12)) return null;
             let m = t12.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
             if (!m) return null;
             let h = parseInt(m[1], 10);
@@ -1463,7 +1506,7 @@
             }
             el.innerHTML = recent.map(r => `
                 <div class="py-2 flex items-center justify-between gap-2">
-                    <span class="font-bold text-slate-700">${r.dateStr}</span>
+                    <span class="font-bold text-slate-700">${formatCompactDateTime(r.dateStr).split(" ").pop() || r.dateStr}</span>
                     <span class="text-emerald-700 font-semibold">ইন: ${formatStrict12Hour(r.inTime)}</span>
                     <span class="text-rose-700 font-semibold">আউট: ${formatStrict12Hour(r.outTime)}</span>
                     <span class="font-extrabold text-teal-700">${calculateDutyHoursOnly(r.inTime, r.outTime, r.totalDuty)}</span>
@@ -1488,8 +1531,8 @@
 
             for (let d = 1; d <= daysInMonth; d++) {
                 const match = myRecs.find(r => {
-                    const dt = new Date(r.dateStr);
-                    return !isNaN(dt) && dt.getDate() === d && (dt.getMonth() + 1) === month && dt.getFullYear() === year;
+                    const dt = parseRecordDateObj(r.dateStr);
+                    return dt && dt.getDate() === d && (dt.getMonth() + 1) === month && dt.getFullYear() === year;
                 });
 
                 const dateLabel = `${String(d).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year}`;
@@ -1506,10 +1549,10 @@
                     const mOut = parse12HourToMinutes(outT);
                     if (mIn !== null && mOut !== null && mOut >= mIn) totalMins += (mOut - mIn);
 
-                    const isLate = match.inStatus === "Late";
-                    if (isLate) lateDays++; else onTimeDays++;
+                    const lateFlag = isRecordLate(match);
+                    if (lateFlag) lateDays++; else onTimeDays++;
 
-                    const rowClass = isLate
+                    const rowClass = lateFlag
                         ? "bg-amber-100 text-amber-950 day-row-sep"
                         : "bg-emerald-100 text-emerald-950 day-row-sep";
 
@@ -1559,7 +1602,12 @@
         }
 
         function getLeaveBalance(userId) {
-            const approvedLeaves = globalLeaves.filter(l => String(l.staffId) === String(userId) && l.finalApproved === true && !l.rejected);
+            const approvedLeaves = globalLeaves.filter(l =>
+                String(l.staffId) === String(userId) &&
+                l.finalApproved === true &&
+                !l.rejected &&
+                l.category !== "missing_attendance"
+            );
             let sickUsed = 0, casualUsed = 0, emergencyUsed = 0;
             approvedLeaves.forEach(l => {
                 const days = Number(l.days || 1);
@@ -1589,18 +1637,35 @@
             else box.classList.add("hidden");
         }
 
-        async function openApplicationMode(defaultCategory) {
+        async function openApplicationMode(modeOrCategory) {
             await switchTab("staff", "leaveTab");
             const sel = document.getElementById("leaveCategory");
             const heading = document.getElementById("applicationFormHeading");
-            if (defaultCategory === "missing_attendance") {
-                sel.value = "missing_attendance";
-                heading.innerText = "হাজিরা আবেদন (মিসিং হাজিরা উপস্থিতি নিশ্চিতকরণ)";
+            const balanceRow = document.getElementById("leaveBalanceCardsRow");
+            const leaveSelectWrap = document.getElementById("leaveTypeSelectWrapper");
+            const attBadgeBox = document.getElementById("attendanceTypeBadgeBox");
+
+            if (modeOrCategory === "missing_attendance") {
+                currentApplicationMode = "attendance";
+                heading.innerText = "হাজিরা আবেদন";
+                balanceRow.classList.add("hidden");
+                leaveSelectWrap.classList.add("hidden");
+                attBadgeBox.classList.remove("hidden");
+                document.getElementById("prescriptionBox").classList.add("hidden");
             } else {
-                sel.value = "casual";
+                currentApplicationMode = "leave";
                 heading.innerText = "ছুটির আবেদন";
+                balanceRow.classList.remove("hidden");
+                leaveSelectWrap.classList.remove("hidden");
+                attBadgeBox.classList.add("hidden");
+                if (["casual", "sick", "emergency"].includes(modeOrCategory)) {
+                    sel.value = modeOrCategory;
+                } else {
+                    sel.value = "casual";
+                }
+                togglePrescriptionField();
             }
-            togglePrescriptionField();
+            updateLeaveBalanceUI();
             updateCalculatedDaysPreview();
         }
 
@@ -1637,7 +1702,9 @@
 
         async function submitLeaveApplication(e) {
             e.preventDefault();
-            const category = document.getElementById("leaveCategory").value;
+            const category = currentApplicationMode === "attendance"
+                ? "missing_attendance"
+                : document.getElementById("leaveCategory").value;
             const startDate = document.getElementById("leaveStart").value;
             const endDate = document.getElementById("leaveEnd").value;
             const reason = document.getElementById("leaveReason").value.trim();
@@ -1847,10 +1914,10 @@
                         staffId: item.staffId,
                         staffName: item.staffName,
                         dateStr: dStr,
-                        inTime: "09:00 AM",
+                        inTime: "9:00 AM",
                         lunchOut: "-",
                         lunchIn: "-",
-                        outTime: "06:00 PM",
+                        outTime: "6:00 PM",
                         inStatus: "Present",
                         totalDuty: "9 ঘণ্টা"
                     };
@@ -1967,7 +2034,7 @@
                 const rec = globalAttendance.find(r => String(r.staffId) === String(u.id) && String(r.dateStr) === String(targetDate));
                 if (rec) {
                     present++;
-                    if (rec.inStatus === "Late") {
+                    if (isRecordLate(rec)) {
                         late++;
                         html += `<tr class="bg-amber-100 text-amber-950"><td class="p-3">${u.id}</td><td class="p-3">${u.name}</td><td class="p-3">${u.role}</td><td class="p-3">${formatStrict12Hour(rec.inTime)}</td><td class="p-3">লেট</td></tr>`;
                     } else {
@@ -2002,16 +2069,16 @@
 
             const filtered = globalAttendance.filter(r => {
                 const matchStaff = staffId === "ALL" || String(r.staffId) === String(staffId);
-                const rDate = new Date(r.dateStr);
-                const matchFrom = !fromDate || isNaN(rDate) || rDate >= fromDate;
-                const matchTo = !toDate || isNaN(rDate) || rDate <= toDate;
+                const rDate = parseRecordDateObj(r.dateStr);
+                const matchFrom = !fromDate || !rDate || rDate >= fromDate;
+                const matchTo = !toDate || !rDate || rDate <= toDate;
                 return matchStaff && matchFrom && matchTo;
             });
 
             document.getElementById("superAdminIndividualReportContainer").innerHTML = filtered.length === 0
                 ? `<tr><td colspan="8" class="p-4 text-center text-slate-400">কোনো তথ্য পাওয়া যায়নি</td></tr>`
                 : filtered.map(r => {
-                    const cls = r.inStatus === "Late" ? "bg-amber-100 text-amber-950" : "bg-emerald-100 text-emerald-950";
+                    const cls = isRecordLate(r) ? "bg-amber-100 text-amber-950" : "bg-emerald-100 text-emerald-950";
                     return `
                         <tr class="${cls}">
                             <td class="p-3">${r.dateStr}</td>
@@ -2029,7 +2096,7 @@
 
         function renderDeptSelectHTML(userId, currentDept) {
             const opts = DEPT_OPTIONS.map(d => `<option value="${d}" ${currentDept === d ? "selected" : ""}>${d}</option>`).join("");
-            return `<select id="dept_${userId}" class="border px-2 py-1 rounded bg-white text-xs font-semibold">${opts}</select>`;
+            return `<select id="dept_${userId}" class="border px-1.5 py-1 rounded bg-white text-xs font-semibold">${opts}</select>`;
         }
 
         function renderSeparatedAccounts() {
@@ -2038,15 +2105,15 @@
 
             const buildRows = list => list.map(u => `
                 <tr>
-                    <td class="p-2.5 font-bold">${u.id}</td>
-                    <td class="p-2.5"><input id="name_${u.id}" value="${u.name}" class="border px-2 py-1 rounded w-24"></td>
-                    <td class="p-2.5">${renderDeptSelectHTML(u.id, u.department || "অন্যান্য")}</td>
-                    <td class="p-2.5"><input id="role_${u.id}" value="${u.role || ""}" class="border px-2 py-1 rounded w-24"></td>
-                    <td class="p-2.5"><input id="phone_${u.id}" value="${u.phone || ""}" class="border px-2 py-1 rounded w-24"></td>
-                    <td class="p-2.5"><input id="pass_${u.id}" value="${u.pass || ""}" class="border px-2 py-1 rounded w-16"></td>
-                    <td class="p-2.5 text-right space-x-1">
-                        <button onclick="saveAccountEdit('${u.id}')" class="bg-teal-700 text-white px-2.5 py-1 rounded font-bold">সেভ</button>
-                        <button onclick="deleteAccountSafe('${u.id}')" class="bg-rose-600 text-white px-2.5 py-1 rounded font-bold">ডিলিট</button>
+                    <td class="p-2 font-bold">${u.id}</td>
+                    <td class="p-2"><input id="name_${u.id}" value="${u.name}" class="border px-2 py-1 rounded w-24"></td>
+                    <td class="p-2">${renderDeptSelectHTML(u.id, u.department || "অন্যান্য")}</td>
+                    <td class="p-2"><input id="role_${u.id}" value="${u.role || ""}" class="border px-2 py-1 rounded w-24"></td>
+                    <td class="p-2"><input id="phone_${u.id}" value="${u.phone || ""}" class="border px-2 py-1 rounded w-24"></td>
+                    <td class="p-2"><input id="pass_${u.id}" value="${u.pass || ""}" class="border px-2 py-1 rounded w-16"></td>
+                    <td class="p-2 text-right space-x-1">
+                        <button onclick="saveAccountEdit('${u.id}')" class="bg-teal-700 text-white px-2 py-1 rounded font-bold">সেভ</button>
+                        <button onclick="deleteAccountSafe('${u.id}')" class="bg-rose-600 text-white px-2 py-1 rounded font-bold">ডিলিট</button>
                     </td>
                 </tr>
             `).join("");
