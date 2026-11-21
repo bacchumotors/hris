@@ -3,182 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>বাচ্চু মটরস - স্মার্ট হাজিরা ও স্টাফ পোর্টাল</title>
+    <title>বাচ্চু মটরস — স্টাফ ও অ্যাডমিন পোর্টাল</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap');
         body {
             font-family: 'Hind Siliguri', sans-serif;
-            background:
-                radial-gradient(circle at 10% 10%, rgba(13, 148, 136, 0.11), transparent 38%),
-                radial-gradient(circle at 90% 14%, rgba(217, 119, 6, 0.12), transparent 40%),
-                linear-gradient(155deg, #f8fafc 0%, #eff6ff 52%, #f0fdfa 100%);
+            background: linear-gradient(135deg, #eef6f4 0%, #f8fafc 45%, #fef9ec 100%);
             min-height: 100vh;
             color: #0f172a;
-            overflow-x: hidden;
         }
-
         .surface-card {
             background: rgba(255, 255, 255, 0.94);
-            backdrop-filter: blur(14px);
-            border: 1px solid rgba(203, 213, 225, 0.75);
-            box-shadow: 0 14px 32px -12px rgba(15, 23, 42, 0.09);
-            transition: transform 0.22s ease, box-shadow 0.22s ease;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(203, 213, 225, 0.7);
+            box-shadow: 0 12px 30px -10px rgba(15, 23, 42, 0.09);
         }
-
-        .surface-card:hover {
-            box-shadow: 0 18px 40px -12px rgba(15, 23, 42, 0.13);
-        }
-
         .action-btn {
-            transition: transform 0.16s ease, box-shadow 0.2s ease, filter 0.2s ease;
-            box-shadow: 0 6px 14px -4px rgba(15, 23, 42, 0.16);
+            transition: transform 0.16s ease, box-shadow 0.2s ease, background-color 0.2s ease;
         }
-
         .action-btn:hover {
-            transform: translateY(-1.5px);
-            filter: brightness(1.04);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px -6px rgba(15, 23, 42, 0.22);
         }
-
         .action-btn:active {
-            transform: translateY(0) scale(0.985);
+            transform: translateY(0);
         }
-
-        @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(10px); }
+        .fade-up {
+            animation: fadeUp 0.3s ease both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        .fade-up {
-            animation: fadeSlideUp 0.3s ease-out forwards;
-        }
-
-        /* UNIQUE DAY SEPARATOR BORDER IN ATTENDANCE HISTORY */
         .day-row-sep {
-            border-bottom: 2.5px solid #0f766e !important;
-            box-shadow: inset 0 -2px 0 rgba(245, 158, 11, 0.45);
+            border-bottom: 3px solid #ffffff !important;
         }
-
-        /* SMOOTH ONE-WAY FULL-SCREEN LOADER */
-        @keyframes smoothTrackGlide {
-            0% { transform: translate3d(-190px, 0, 0); }
-            100% { transform: translate3d(calc(100vw + 190px), 0, 0); }
+        .loader-ring {
+            width: 58px;
+            height: 58px;
+            border: 4px solid rgba(20, 184, 166, 0.2);
+            border-top-color: #14b8a6;
+            border-right-color: #f59e0b;
+            border-radius: 50%;
+            animation: spinRing 0.9s linear infinite;
         }
-
-        @keyframes trackLineFlow {
-            0% { background-position: 0 0; }
-            100% { background-position: -140px 0; }
-        }
-
-        .loader-bike-glide {
-            position: absolute;
-            left: 0;
-            bottom: 24px;
-            animation: smoothTrackGlide 2.3s linear infinite;
-            will-change: transform;
-        }
-
-        .loader-track-line {
-            background-image: repeating-linear-gradient(
-                90deg,
-                rgba(45, 212, 191, 0.85) 0px,
-                rgba(45, 212, 191, 0.85) 44px,
-                transparent 44px,
-                transparent 72px
-            );
-            background-size: 140px 3px;
-            animation: trackLineFlow 0.48s linear infinite;
-        }
-
-        #toastBox {
-            transition: transform 0.28s ease, opacity 0.28s ease;
+        @keyframes spinRing {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="relative">
+<body>
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEMllq0XFk6FLgaI1TCQRu8alHvLo3G8RCXhwi0CggzLgbkNVcKl1QUzUjEHIbxMoD4g/exec";
-        const SESSION_KEY = "bm_active_session_v2";
-        const LATE_CUTOFF_KEY = "bm_late_cutoff_time";
-    </script>
-
-    <!-- FULL-SCREEN SMOOTH LOADER -->
-    <div id="loadingScreen" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex flex-col items-center justify-between py-10 text-white transition-opacity duration-300 overflow-hidden">
-        <div class="px-4">
-            <span class="inline-flex items-center gap-2 bg-teal-500/15 border border-teal-400/35 text-teal-300 text-xs font-bold px-4 py-1.5 rounded-full">
-                <i class="fa-solid fa-motorcycle"></i> বাচ্চু মটরস • TVS Authorized Portal
-            </span>
+    <!-- LOADING SCREEN -->
+    <div id="loadingScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-md text-white transition-opacity duration-200">
+        <div class="relative flex items-center justify-center mb-4">
+            <div class="loader-ring"></div>
+            <i class="fa-solid fa-motorcycle text-amber-400 text-xl absolute"></i>
         </div>
-
-        <div class="text-center px-4">
-            <h2 id="loadingTitle" class="text-2xl md:text-3xl font-bold tracking-wide text-white">তথ্য লোড হচ্ছে...</h2>
-            <p id="loadingSubtitle" class="text-xs md:text-sm text-slate-400 mt-1">অনুগ্রহ করে অপেক্ষা করুন</p>
-        </div>
-
-        <div class="relative w-full h-28 overflow-hidden">
-            <div class="loader-bike-glide flex items-center gap-3">
-                <div class="w-16 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-teal-400 rounded-full"></div>
-                <div class="text-teal-400 text-6xl drop-shadow-[0_8px_18px_rgba(45,212,191,0.45)]">
-                    <i class="fa-solid fa-motorcycle"></i>
-                </div>
-            </div>
-            <div class="absolute bottom-3 inset-x-0 h-1 bg-slate-800">
-                <div class="w-full h-full loader-track-line"></div>
-            </div>
-        </div>
+        <p id="loadingTitle" class="text-sm font-bold tracking-wide text-teal-200">তথ্য লোড হচ্ছে...</p>
+        <p id="loadingSubtitle" class="text-[11px] text-slate-400 mt-1">অনুগ্রহ করে অপেক্ষা করুন</p>
     </div>
 
-    <!-- TOAST -->
-    <div id="toastBox" class="fixed top-5 right-5 z-50 transform translate-x-[130%] opacity-0 max-w-sm w-full bg-slate-900 text-white rounded-2xl shadow-2xl border border-slate-700 p-4 flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-lg shrink-0">
-            <i class="fa-solid fa-circle-check"></i>
+    <!-- TOAST NOTIFICATION -->
+    <div id="toastBox" class="fixed top-5 right-5 z-50 max-w-sm bg-slate-900 text-white border border-teal-500/40 rounded-2xl shadow-2xl p-4 flex items-start gap-3 transition-all duration-300 translate-x-[130%] opacity-0">
+        <div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center shrink-0 mt-0.5">
+            <i class="fa-solid fa-circle-info"></i>
         </div>
         <div class="flex-1 min-w-0">
-            <h4 id="toastTitle" class="font-bold text-sm"></h4>
-            <p id="toastMessage" class="text-xs text-slate-300 mt-0.5"></p>
+            <p id="toastTitle" class="text-xs font-extrabold text-amber-300">নোটিফিকেশন</p>
+            <p id="toastMessage" class="text-xs text-slate-200 mt-0.5 leading-snug"></p>
         </div>
-        <button onclick="hideToast()" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="hideToast()" class="text-slate-400 hover:text-white text-xs">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
     </div>
 
-    <!-- TOP NAVBAR -->
-    <nav class="bg-gradient-to-r from-slate-950 via-teal-900 to-emerald-900 text-white shadow-xl sticky top-0 z-40 border-b border-teal-500/25">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 flex items-center justify-center font-extrabold text-lg shadow-lg border-2 border-white">
-                    BM
+    <!-- MAIN CONTAINER -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 space-y-6">
+
+        <!-- TOP HEADER -->
+        <header class="surface-card rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b-4 border-teal-700">
+            <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-700 via-emerald-600 to-slate-900 text-white flex items-center justify-center text-xl shadow-lg">
+                    <i class="fa-solid fa-motorcycle"></i>
                 </div>
                 <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-lg md:text-xl font-bold tracking-wide">বাচ্চু মটরস</h1>
-                        <span class="hidden sm:inline-block bg-teal-500/20 text-teal-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-teal-300/30">TVS Authorized</span>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h1 class="text-lg sm:text-xl font-extrabold text-slate-900">বাচ্চু মটরস</h1>
+                        <span class="text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-full">Authorized TVS</span>
                     </div>
-                    <p class="text-[11px] text-teal-100/85">টু হুইলার বিজনেস, মাদারীপুর</p>
+                    <p id="liveClockDisplay" class="text-xs font-semibold text-slate-500 mt-0.5"></p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2.5">
-                <div id="liveClockDisplay" class="hidden md:flex items-center bg-black/30 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-amber-300 border border-white/15"></div>
-                <div id="userBadge" class="hidden flex items-center gap-2">
-                    <button onclick="openMyProfileModal()" class="action-btn bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs px-3.5 py-1.5 rounded-xl font-extrabold flex items-center gap-1.5">
-                        <i class="fa-solid fa-id-badge"></i> আমার প্রোফাইল
-                    </button>
-                    <span id="roleTag" class="hidden sm:inline-block px-3 py-1 rounded-xl text-xs font-bold bg-white/15 text-teal-100 border border-white/20"></span>
-                    <button onclick="logout()" class="action-btn bg-rose-600 hover:bg-rose-700 text-white text-xs px-3.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5">
-                        <i class="fa-solid fa-right-from-bracket"></i> লগআউট
-                    </button>
-                </div>
+            <!-- LOGGED IN USER CONTROLS -->
+            <div id="userBadge" class="hidden flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
+                <span id="roleTag" class="bg-slate-900 text-amber-300 text-xs font-extrabold px-3 py-1.5 rounded-xl"></span>
+                <button onclick="openMyProfileModal()" class="action-btn bg-teal-700 hover:bg-teal-800 text-white text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-id-badge"></i>
+                    <span>আমার প্রোফাইল</span>
+                </button>
+                <button onclick="openChangePasswordModal()" class="action-btn bg-sky-600 hover:bg-sky-700 text-white text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-key"></i>
+                    <span>পাসওয়ার্ড পরিবর্তন</span>
+                </button>
+                <button onclick="logout()" class="action-btn bg-rose-600 hover:bg-rose-700 text-white text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>লগআউট</span>
+                </button>
             </div>
-        </div>
-    </nav>
+        </header>
 
-    <div class="max-w-7xl mx-auto p-4 md:p-6 relative z-10 space-y-6">
-
-        <!-- STAFF OF THE MONTH -->
-        <div id="trophyBanner" class="hidden fade-up max-w-4xl mx-auto bg-gradient-to-r from-slate-950 via-slate-900 to-teal-950 text-white rounded-3xl shadow-xl p-5 flex items-center justify-between border border-amber-400/60">
+        <!-- STAFF OF THE MONTH BANNER -->
+        <div id="trophyBanner" class="hidden fade-up bg-gradient-to-r from-slate-950 via-slate-900 to-teal-950 text-white rounded-3xl shadow-xl p-5 flex items-center justify-between border border-amber-400/60">
             <div class="flex items-center gap-4">
                 <img id="winnerAvatarImg" src="https://ui-avatars.com/api/?name=Winner&background=f59e0b&color=0f172a&size=128" alt="Winner" class="w-16 h-16 rounded-2xl object-cover border-2 border-amber-400 shadow-lg">
                 <div>
@@ -222,7 +162,7 @@
             </form>
         </div>
 
-        <!-- CENTERED PROFILE SUMMARY CARD (WITHOUT DUPLICATE BUTTON) -->
+        <!-- CENTERED PROFILE SUMMARY CARD -->
         <div id="topProfileCard" class="hidden fade-up max-w-xl mx-auto surface-card rounded-3xl p-6 border-t-4 border-teal-600">
             <div class="flex flex-col items-center text-center space-y-2.5">
                 <div class="w-24 h-24 rounded-2xl border-2 border-teal-600 shadow-md overflow-hidden flex items-center justify-center bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 font-extrabold text-2xl">
@@ -357,8 +297,8 @@
                 <div class="surface-card rounded-3xl p-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3 border-b pb-3">
                         <div>
-                            <h3 class="text-lg font-bold text-slate-900">মাসিক দৈনিক হাজিরা ও ডিউটি চার্ট</h3>
-                            <p class="text-xs text-slate-500">আপনার প্রতিদিনের হাজিরা নিশ্চিত করুন । মিস গেলে প্রমাণসহ ম্যানেজমেন্টের সাথে যোগাযোগ করুন</p>
+                            <h3 class="text-lg font-bold text-slate-900">৩০/৩১ দিনের দৈনিক হাজিরা ও ডিউটি চার্ট</h3>
+                            <p class="text-xs text-slate-500">প্রতিটি দিনের মাঝে স্বতন্ত্র বর্ডার ও ১২ ঘণ্টা AM/PM সময়ে ডিউটি হিসাব</p>
                         </div>
                         <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border">
                             <label class="text-xs font-bold text-slate-700">মাস:</label>
@@ -666,7 +606,7 @@
                                     <option value="ডেসপাস">ডেসপাস</option>
                                     <option value="সার্ভিস">সার্ভিস</option>
                                     <option value="অফিস সহকারী">অফিস সহকারী</option>
-                                    <option value="ম্যানেজমেন্ট">ম্যানেজমেন্ট</option>
+                                    <option value="অন্যান্য">অন্যান্য</option>
                                 </select>
                             </div>
                             <div><label class="text-xs font-bold">ইউজার আইডি</label><input type="text" id="newStaffId" required placeholder="BM-105" class="w-full border px-3 py-2 rounded-xl text-sm mt-1"></div>
@@ -728,6 +668,41 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- CHANGE PASSWORD MODAL -->
+    <div id="changePasswordModal" class="hidden fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl fade-up">
+            <div class="flex items-center justify-between border-b pb-2.5">
+                <h3 class="text-lg font-bold text-slate-900">
+                    <i class="fa-solid fa-key text-sky-600 mr-2"></i>পাসওয়ার্ড পরিবর্তন
+                </h3>
+                <button type="button" onclick="closeChangePasswordModal()" class="text-slate-400 hover:text-slate-800">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleChangePassword(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">পুরাতন পাসওয়ার্ড</label>
+                    <input type="password" id="oldPasswordInput" required placeholder="বর্তমান পাসওয়ার্ড লিখুন" class="w-full border px-3.5 py-2.5 rounded-xl text-sm font-semibold">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">নতুন পাসওয়ার্ড</label>
+                    <input type="password" id="newPasswordInput" required placeholder="নতুন পাসওয়ার্ড লিখুন" class="w-full border px-3.5 py-2.5 rounded-xl text-sm font-semibold">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">নতুন পাসওয়ার্ড পুনরায় লিখুন</label>
+                    <input type="password" id="confirmNewPasswordInput" required placeholder="নতুন পাসওয়ার্ড আবার লিখুন" class="w-full border px-3.5 py-2.5 rounded-xl text-sm font-semibold">
+                </div>
+                <p id="passwordMatchHint" class="text-[11px] font-bold text-slate-500"></p>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeChangePasswordModal()" class="action-btn bg-slate-200 text-slate-800 px-4 py-2 rounded-xl text-xs font-bold">বাতিল</button>
+                    <button type="submit" class="action-btn bg-sky-600 hover:bg-sky-700 text-white px-5 py-2 rounded-xl text-xs font-bold">পাসওয়ার্ড আপডেট করুন</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -802,6 +777,10 @@
     </div>
 
     <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+        const SESSION_KEY = "bm_session_user";
+        const LATE_CUTOFF_KEY = "bm_late_cutoff_time";
+
         let currentUser = null;
         let globalUsers = [];
         let globalAttendance = [];
@@ -814,11 +793,11 @@
         let activeNoticeType = "";
         let currentApplicationMode = "leave";
 
-        const DEPT_OPTIONS = ["সেলস", "কালেকশন", "ডেসপাস", "সার্ভিস", "অফিস সহকারী", "ম্যানেজমেন্ট"];
+        const DEPT_OPTIONS = ["সেলস", "কালেকশন", "ডেসপাস", "সার্ভিস", "অফিস সহকারী", "অন্যান্য"];
 
         const DEFAULT_USERS = [
-            { id: "admin", name: "জিয়াউল হাসান", department: "ম্যানেজমেন্ট", role: "ম্যানেজিং ডিরেক্টর", phone: "", address: "", pass: "1234", photo: "", type: "admin" },
-            { id: "superadmin", name: "সুপার অ্যাডমিন", department: "ম্যানেজমেন্ট", role: "সুপার অ্যাডমিন", phone: "", address: "", pass: "1234", photo: "", type: "superadmin" },
+            { id: "admin", name: "জিয়াউল হাসান", department: "অন্যান্য", role: "ম্যানেজিং ডিরেক্টর", phone: "", address: "", pass: "1234", photo: "", type: "admin" },
+            { id: "superadmin", name: "সুপার অ্যাডমিন", department: "অন্যান্য", role: "সুপার অ্যাডমিন", phone: "", address: "", pass: "1234", photo: "", type: "superadmin" },
             { id: "manager", name: "মোঃ বোরহানউদ্দিন", department: "সেলস", role: "শোরুম ম্যানেজার", phone: "", address: "", pass: "1234", photo: "", type: "manager" },
             { id: "BM-101", name: "মামুন ভাই", department: "সেলস", role: "সেলস এক্সিকিউটিভ", phone: "", address: "", pass: "1234", photo: "", type: "staff" },
             { id: "BM-102", name: "রোমান", department: "সার্ভিস", role: "টেকনিশিয়ান", phone: "", address: "", pass: "1234", photo: "", type: "staff" }
@@ -829,6 +808,87 @@
         document.getElementById("dailyReportDatePick").valueAsDate = new Date();
         initGPS();
         setInterval(updateLiveClock, 1000);
+
+        document.getElementById("newPasswordInput").addEventListener("input", checkNewPasswordMatchUI);
+        document.getElementById("confirmNewPasswordInput").addEventListener("input", checkNewPasswordMatchUI);
+
+        function openChangePasswordModal() {
+            if (!currentUser) return;
+            document.getElementById("oldPasswordInput").value = "";
+            document.getElementById("newPasswordInput").value = "";
+            document.getElementById("confirmNewPasswordInput").value = "";
+            document.getElementById("passwordMatchHint").innerText = "";
+            document.getElementById("changePasswordModal").classList.remove("hidden");
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById("changePasswordModal").classList.add("hidden");
+        }
+
+        function checkNewPasswordMatchUI() {
+            const p1 = document.getElementById("newPasswordInput").value;
+            const p2 = document.getElementById("confirmNewPasswordInput").value;
+            const hint = document.getElementById("passwordMatchHint");
+            if (!p1 && !p2) {
+                hint.innerText = "";
+                return;
+            }
+            if (p1 === p2) {
+                hint.className = "text-[11px] font-bold text-emerald-600";
+                hint.innerText = "✓ নতুন পাসওয়ার্ড দুটি মিলেছে";
+            } else {
+                hint.className = "text-[11px] font-bold text-rose-600";
+                hint.innerText = "✕ নতুন পাসওয়ার্ড দুটি মিলেনি";
+            }
+        }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const oldPass = document.getElementById("oldPasswordInput").value.trim();
+            const newPass = document.getElementById("newPasswordInput").value.trim();
+            const confirmPass = document.getElementById("confirmNewPasswordInput").value.trim();
+
+            const storedUser = globalUsers.find(u => String(u.id).toLowerCase() === String(currentUser.id).toLowerCase());
+            const actualCurrentPass = String((storedUser && storedUser.pass) || currentUser.pass || "");
+
+            if (oldPass !== actualCurrentPass) {
+                return showToast("ভেরিফিকেশন ব্যর্থ", "পুরাতন পাসওয়ার্ড সঠিক নয়");
+            }
+            if (newPass.length < 4) {
+                return showToast("দুর্বল পাসওয়ার্ড", "নতুন পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে");
+            }
+            if (newPass !== confirmPass) {
+                return showToast("পাসওয়ার্ড মেলেনি", "নতুন পাসওয়ার্ড দুটি অবশ্যই একই হতে হবে");
+            }
+
+            showBikeLoader("পাসওয়ার্ড পরিবর্তন হচ্ছে...", "");
+            currentUser.pass = newPass;
+            localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+
+            if (storedUser) storedUser.pass = newPass;
+            localStorage.setItem("bm_users", JSON.stringify(globalUsers));
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "updateUser",
+                        id: currentUser.id,
+                        pass: newPass
+                    })
+                });
+            } catch {}
+
+            if (currentUser.type === "superadmin") {
+                renderSeparatedAccounts();
+            }
+
+            closeChangePasswordModal();
+            hideBikeLoader(100);
+            showToast("সফল", "আপনার পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে");
+        }
 
         function showBikeLoader(title = "তথ্য লোড হচ্ছে...", subtitle = "অনুগ্রহ করে অপেক্ষা করুন") {
             const el = document.getElementById("loadingScreen");
@@ -909,7 +969,6 @@
             }
         }
 
-        /* SUPER ADMIN LATE CUTOFF TIME LOGIC */
         function getLateCutoff24() {
             const saved = localStorage.getItem(LATE_CUTOFF_KEY);
             return (saved && /^\d{2}:\d{2}$/.test(saved)) ? saved : "09:30";
@@ -958,7 +1017,6 @@
             return (nowDate.getHours() * 60 + nowDate.getMinutes()) > (ch * 60 + cm);
         }
 
-        /* STRICT hour:min AM/PM TIME ONLY FORMATTER */
         function formatStrict12Hour(val) {
             if (!val || String(val).trim() === "" || String(val).trim() === "-") return "-";
             const rawStr = String(val).trim();
@@ -991,7 +1049,6 @@
             return rawStr;
         }
 
-        /* COMPACT h:min dd/mm/yy FORMAT WITHOUT DAY NAME */
         function formatCompactDateTime(raw) {
             if (!raw || String(raw).trim() === "" || String(raw).trim() === "-") return "-";
             const dt = new Date(raw);
@@ -1019,7 +1076,6 @@
             return `${s} - ${e}`;
         }
 
-        /* FLEXIBLE DATE PARSER FOR SHEET DATES (dd/mm/yyyy, mm/dd/yyyy, yyyy-mm-dd, Date string) */
         function parseRecordDateObj(dateStr) {
             if (!dateStr) return null;
             const s = String(dateStr).trim();
@@ -1076,7 +1132,7 @@
             document.getElementById("headerUserName").innerText = user.name;
             document.getElementById("headerUserId").innerText = user.id;
             document.getElementById("headerUserRole").innerText = user.role || user.type;
-            document.getElementById("headerUserDept").innerText = user.department || "ম্যানেজমেন্ট";
+            document.getElementById("headerUserDept").innerText = user.department || "অন্যান্য";
             document.getElementById("headerUserPhone").innerText = user.phone || "ফোন যুক্ত নেই";
             document.getElementById("headerUserAddress").innerText = user.address || "ঠিকানা যুক্ত নেই";
 
@@ -2107,7 +2163,7 @@
                 <tr>
                     <td class="p-2 font-bold">${u.id}</td>
                     <td class="p-2"><input id="name_${u.id}" value="${u.name}" class="border px-2 py-1 rounded w-24"></td>
-                    <td class="p-2">${renderDeptSelectHTML(u.id, u.department || "ম্যানেজমেন্ট")}</td>
+                    <td class="p-2">${renderDeptSelectHTML(u.id, u.department || "অন্যান্য")}</td>
                     <td class="p-2"><input id="role_${u.id}" value="${u.role || ""}" class="border px-2 py-1 rounded w-24"></td>
                     <td class="p-2"><input id="phone_${u.id}" value="${u.phone || ""}" class="border px-2 py-1 rounded w-24"></td>
                     <td class="p-2"><input id="pass_${u.id}" value="${u.pass || ""}" class="border px-2 py-1 rounded w-16"></td>
@@ -2160,6 +2216,10 @@
             };
             const u = globalUsers.find(x => String(x.id) === String(id));
             if (u) Object.assign(u, updated);
+            if (currentUser && String(currentUser.id) === String(id)) {
+                currentUser.pass = updated.pass;
+                localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+            }
             localStorage.setItem("bm_users", JSON.stringify(globalUsers));
             try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(updated) }); } catch {}
             hideBikeLoader(100);
