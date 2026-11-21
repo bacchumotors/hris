@@ -3,247 +3,348 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>বাচ্চু মটরস — স্টাফ ও অ্যাডমিন পোর্টাল</title>
+    <title>বাচ্চু মটরস - স্মার্ট হাজিরা ও লিভ পোর্টাল</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap');
         body {
             font-family: 'Hind Siliguri', sans-serif;
-            background: linear-gradient(135deg, #eef6f4 0%, #f8fafc 45%, #fef9ec 100%);
-            min-height: 100vh;
+            background: radial-gradient(circle at top right, #ecfdf5 0%, #f8fafc 45%, #f1f5f9 100%);
             color: #0f172a;
+            min-height: 100vh;
         }
-        .surface-card {
-            background: rgba(255, 255, 255, 0.94);
+
+        .glass-header {
+            background: linear-gradient(120deg, rgba(15, 23, 42, 0.96), rgba(15, 118, 110, 0.92));
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(203, 213, 225, 0.7);
-            box-shadow: 0 12px 30px -10px rgba(15, 23, 42, 0.09);
         }
+
+        .surface-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.12);
+        }
+
         .action-btn {
-            transition: transform 0.16s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         .action-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 8px 18px -6px rgba(15, 23, 42, 0.22);
+            box-shadow: 0 8px 18px -6px rgba(15, 118, 110, 0.35);
         }
+
         .action-btn:active {
-            transform: translateY(0);
+            transform: scale(0.98);
         }
-        .fade-up {
-            animation: fadeUp 0.3s ease both;
-        }
+
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        .fade-up {
+            animation: fadeUp 0.32s ease-out;
+        }
+
         .day-row-sep {
-            border-bottom: 3px solid #ffffff !important;
+            border-bottom: 3px solid #334155 !important;
         }
-        .loader-ring {
-            width: 58px;
-            height: 58px;
-            border: 4px solid rgba(20, 184, 166, 0.2);
-            border-top-color: #14b8a6;
-            border-right-color: #f59e0b;
-            border-radius: 50%;
-            animation: spinRing 0.9s linear infinite;
+
+        #loadingScreen {
+            background: linear-gradient(135deg, #06131a 0%, #0f2933 55%, #06131a 100%);
         }
-        @keyframes spinRing {
-            to { transform: rotate(360deg); }
+
+        @keyframes roadScroll {
+            0% { background-position: 0 0; }
+            100% { background-position: -160px 0; }
+        }
+
+        @keyframes bikeRide {
+            0%, 100% { transform: translateY(0px) rotate(-0.6deg); }
+            50% { transform: translateY(-3px) rotate(0.6deg); }
+        }
+
+        @keyframes wheelSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes exhaustPuff {
+            0% { opacity: 0.65; transform: translate(0, 0) scale(0.6); }
+            100% { opacity: 0; transform: translate(-26px, -10px) scale(1.45); }
+        }
+
+        .bike-track-road {
+            background-image: repeating-linear-gradient(
+                90deg,
+                rgba(45, 212, 191, 0.65) 0px,
+                rgba(45, 212, 191, 0.65) 26px,
+                transparent 26px,
+                transparent 52px
+            );
+            background-size: 160px 3px;
+            animation: roadScroll 0.55s linear infinite;
+        }
+
+        .bike-body-anim {
+            animation: bikeRide 0.45s ease-in-out infinite;
+        }
+
+        .wheel-spin-anim {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: wheelSpin 0.42s linear infinite;
+        }
+
+        .exhaust-smoke {
+            animation: exhaustPuff 0.75s ease-out infinite;
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
 
-    <!-- LOADING SCREEN -->
-    <div id="loadingScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-md text-white transition-opacity duration-200">
-        <div class="relative flex items-center justify-center mb-4">
-            <div class="loader-ring"></div>
-            <i class="fa-solid fa-motorcycle text-amber-400 text-xl absolute"></i>
+    <!-- BRANDED LOADING SCREEN WITH LOGO & RUNNING BIKE -->
+    <div id="loadingScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center text-white transition-opacity duration-300 px-4">
+        <div class="text-center space-y-4 max-w-md w-full">
+            <div class="mx-auto w-24 h-24 rounded-3xl bg-white/95 p-2 shadow-2xl border-2 border-amber-400 flex items-center justify-center overflow-hidden">
+                <img src="Glossy_Crowned_BN_Business_Emblem-removebg-preview.jpg" alt="বাচ্চু মটরস লোগো" class="w-full h-full object-contain">
+            </div>
+
+            <div class="relative w-full h-24 rounded-2xl bg-slate-900/75 border border-teal-500/30 overflow-hidden flex flex-col justify-end px-4 pb-3 shadow-inner">
+                <div class="bike-body-anim relative z-10 flex items-center justify-center mb-1">
+                    <svg width="118" height="58" viewBox="0 0 128 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="ছুটে চলা বাইক">
+                        <circle cx="18" cy="43" r="4" fill="#94a3b8" class="exhaust-smoke"/>
+                        <circle cx="10" cy="39" r="3" fill="#cbd5e1" class="exhaust-smoke" style="animation-delay:0.25s"/>
+
+                        <g class="wheel-spin-anim">
+                            <circle cx="28" cy="48" r="11" stroke="#38bdf8" stroke-width="3.2" fill="#0f172a"/>
+                            <circle cx="28" cy="48" r="3" fill="#f59e0b"/>
+                            <line x1="28" y1="37" x2="28" y2="59" stroke="#94a3b8" stroke-width="1.4"/>
+                            <line x1="17" y1="48" x2="39" y2="48" stroke="#94a3b8" stroke-width="1.4"/>
+                        </g>
+
+                        <g class="wheel-spin-anim">
+                            <circle cx="98" cy="48" r="11" stroke="#38bdf8" stroke-width="3.2" fill="#0f172a"/>
+                            <circle cx="98" cy="48" r="3" fill="#f59e0b"/>
+                            <line x1="98" y1="37" x2="98" y2="59" stroke="#94a3b8" stroke-width="1.4"/>
+                            <line x1="87" y1="48" x2="109" y2="48" stroke="#94a3b8" stroke-width="1.4"/>
+                        </g>
+
+                        <path d="M28 48L52 46L74 28L98 48" stroke="#2dd4bf" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M52 46L64 25H80" stroke="#f59e0b" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M44 25H64L70 31H48C44 31 42 28 44 25Z" fill="#ef4444"/>
+                        <path d="M74 28L85 16L94 18" stroke="#e2e8f0" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M88 17L98 48" stroke="#cbd5e1" stroke-width="2.6" stroke-linecap="round"/>
+                        <circle cx="96" cy="24" r="3.5" fill="#fde047"/>
+                        <path d="M99 24L114 21" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+                    </svg>
+                </div>
+                <div class="bike-track-road w-full h-[3px] rounded-full"></div>
+            </div>
+
+            <h2 id="loadingTitle" class="text-xl font-bold tracking-wide text-amber-300">বাচ্চু মটরস</h2>
+            <p id="loadingSubtitle" class="text-xs text-teal-100/80">সিস্টেম প্রস্তুত হচ্ছে...</p>
         </div>
-        <p id="loadingTitle" class="text-sm font-bold tracking-wide text-teal-200">তথ্য লোড হচ্ছে...</p>
-        <p id="loadingSubtitle" class="text-[11px] text-slate-400 mt-1">অনুগ্রহ করে অপেক্ষা করুন</p>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toastBox" class="fixed top-5 right-5 z-50 max-w-sm bg-slate-900 text-white border border-teal-500/40 rounded-2xl shadow-2xl p-4 flex items-start gap-3 transition-all duration-300 translate-x-[130%] opacity-0">
-        <div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center shrink-0 mt-0.5">
-            <i class="fa-solid fa-circle-info"></i>
+    <!-- TOAST -->
+    <div id="toastBox" class="fixed top-5 right-5 z-50 translate-x-[130%] opacity-0 transition-all duration-300 max-w-sm w-full bg-slate-900 text-white border-l-4 border-amber-400 rounded-2xl shadow-2xl p-4 flex items-start gap-3">
+        <div class="w-8 h-8 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0 mt-0.5">
+            <i class="fa-solid fa-bell text-sm"></i>
         </div>
         <div class="flex-1 min-w-0">
             <p id="toastTitle" class="text-xs font-extrabold text-amber-300">নোটিফিকেশন</p>
-            <p id="toastMessage" class="text-xs text-slate-200 mt-0.5 leading-snug"></p>
+            <p id="toastMessage" class="text-xs text-slate-100 mt-0.5 leading-relaxed"></p>
         </div>
         <button onclick="hideToast()" class="text-slate-400 hover:text-white text-xs">
             <i class="fa-solid fa-xmark"></i>
         </button>
     </div>
 
-    <!-- MAIN CONTAINER -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 space-y-6">
-
-        <!-- TOP HEADER -->
-        <header class="surface-card rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b-4 border-teal-700">
-            <div class="flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-700 via-emerald-600 to-slate-900 text-white flex items-center justify-center text-xl shadow-lg">
-                    <i class="fa-solid fa-motorcycle"></i>
+    <!-- HEADER -->
+    <header class="glass-header text-white shadow-xl sticky top-0 z-30 border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-white p-1 flex items-center justify-center shadow-lg border border-amber-300/60 overflow-hidden">
+                    <img src="Glossy_Crowned_BN_Business_Emblem-removebg-preview.jpg" alt="বাচ্চু মটরস লোগো" class="w-full h-full object-contain">
                 </div>
                 <div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <h1 class="text-lg sm:text-xl font-extrabold text-slate-900">বাচ্চু মটরস</h1>
-                        <span class="text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-full">Authorized TVS</span>
-                    </div>
-                    <p id="liveClockDisplay" class="text-xs font-semibold text-slate-500 mt-0.5"></p>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-wide leading-tight">বাচ্চু মটরস <span class="text-amber-300 text-xs sm:text-sm font-semibold">(TVS Authorized)</span></h1>
+                    <p class="text-[11px] sm:text-xs text-teal-100/90">স্মার্ট হাজিরা, ডিউটি ও ছুটি ব্যবস্থাপনা পোর্টাল</p>
                 </div>
             </div>
 
-            <!-- LOGGED IN USER CONTROLS -->
-            <div id="userBadge" class="hidden flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
-                <span id="roleTag" class="bg-slate-900 text-amber-300 text-xs font-extrabold px-3 py-1.5 rounded-xl"></span>
-                <button onclick="openMyProfileModal()" class="action-btn bg-teal-700 hover:bg-teal-800 text-white text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5">
-                    <i class="fa-solid fa-id-badge"></i>
-                    <span>আমার প্রোফাইল</span>
-                </button>
-                <button onclick="openChangePasswordModal()" class="action-btn bg-sky-600 hover:bg-sky-700 text-white text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5">
-                    <i class="fa-solid fa-key"></i>
-                    <span>পাসওয়ার্ড পরিবর্তন</span>
-                </button>
-                <button onclick="logout()" class="action-btn bg-rose-600 hover:bg-rose-700 text-white text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>লগআউট</span>
-                </button>
-            </div>
-        </header>
-
-        <!-- STAFF OF THE MONTH BANNER -->
-        <div id="trophyBanner" class="hidden fade-up bg-gradient-to-r from-slate-950 via-slate-900 to-teal-950 text-white rounded-3xl shadow-xl p-5 flex items-center justify-between border border-amber-400/60">
-            <div class="flex items-center gap-4">
-                <img id="winnerAvatarImg" src="https://ui-avatars.com/api/?name=Winner&background=f59e0b&color=0f172a&size=128" alt="Winner" class="w-16 h-16 rounded-2xl object-cover border-2 border-amber-400 shadow-lg">
-                <div>
-                    <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">
-                        <i class="fa-solid fa-trophy mr-1"></i> Staff of the Month
-                    </span>
-                    <h3 id="winnerDisplayInfo" class="text-base md:text-lg font-extrabold text-amber-300 mt-1">হিসাব সম্পন্ন</h3>
+            <div class="flex items-center flex-wrap gap-2 sm:gap-3">
+                <div id="liveClockDisplay" class="text-xs font-semibold bg-black/30 px-3 py-1.5 rounded-full border border-white/10"></div>
+                <div id="userBadge" class="hidden items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full border border-white/15">
+                    <span id="roleTag" class="text-xs font-bold text-amber-300"></span>
+                    <button onclick="openChangePasswordModal()" class="action-btn bg-sky-500 hover:bg-sky-600 text-white text-xs px-3 py-1 rounded-full font-bold">
+                        <i class="fa-solid fa-key mr-1"></i>পাসওয়ার্ড পরিবর্তন
+                    </button>
+                    <button onclick="logout()" class="action-btn bg-rose-500 hover:bg-rose-600 text-white text-xs px-3 py-1 rounded-full font-bold">
+                        লগআউট
+                    </button>
                 </div>
             </div>
-            <span class="hidden sm:inline-block bg-amber-400 text-slate-950 text-xs font-extrabold px-4 py-1.5 rounded-full shadow">👑 WINNER</span>
         </div>
+    </header>
+	<!-- MAIN CONTAINER -->
+    <div class="max-w-7xl mx-auto px-4 py-6 space-y-6 flex-1 w-full">
 
         <!-- LOGIN CARD -->
-        <div id="loginSection" class="fade-up max-w-md mx-auto my-8 surface-card rounded-3xl p-7 md:p-9">
+        <div id="loginSection" class="max-w-md mx-auto surface-card rounded-3xl p-7 mt-4 fade-up">
             <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-gradient-to-tr from-teal-700 via-emerald-600 to-teal-500 text-white rounded-2xl flex items-center justify-center mx-auto text-2xl mb-3 shadow-lg shadow-teal-600/30">
-                    <i class="fa-solid fa-user-shield"></i>
+                <div class="w-20 h-20 rounded-3xl bg-white p-2 mx-auto mb-3 shadow-md border border-teal-200 flex items-center justify-center overflow-hidden">
+                    <img src="Glossy_Crowned_BN_Business_Emblem-removebg-preview.jpg" alt="বাচ্চু মটরস লোগো" class="w-full h-full object-contain">
                 </div>
                 <h2 class="text-2xl font-bold text-slate-900">পোর্টাল লগইন</h2>
-                <p class="text-xs text-slate-500 mt-1">একবার লগইন করলে লগআউট না দেওয়া পর্যন্ত সক্রিয় থাকবে</p>
+                <p class="text-xs text-slate-500 mt-1">আপনার স্টাফ বা অ্যাডমিন আইডি ও পাসওয়ার্ড দিন</p>
             </div>
-
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">ইউজার / স্টাফ আইডি</label>
-                    <input type="text" id="username" required placeholder="যেমন: BM-101, manager, admin বা superadmin" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none">
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">ইউজার আইডি</label>
+                    <input type="text" id="username" required placeholder="যেমন: BM-101 বা admin"
+                        class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-600 focus:border-teal-600 outline-none text-sm font-medium bg-white">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1.5">পাসওয়ার্ড</label>
                     <div class="relative">
-                        <input type="password" id="password" required placeholder="••••••••" class="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none">
-                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3.5 text-slate-400 hover:text-slate-700">
-                            <i id="passEyeIcon" class="fa-solid fa-eye"></i>
+                        <input type="password" id="password" required placeholder="••••••••"
+                            class="w-full px-4 py-2.5 pr-11 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-600 focus:border-teal-600 outline-none text-sm font-medium bg-white">
+                        <button type="button" onclick="togglePasswordVisibility()" aria-label="পাসওয়ার্ড দেখুন"
+                            class="absolute inset-y-0 right-0 px-3.5 flex items-center text-slate-500 hover:text-teal-700">
+                            <i id="passEyeIcon" class="fa-solid fa-eye text-sm"></i>
                         </button>
                     </div>
                 </div>
-                <button type="submit" id="loginBtn" class="action-btn w-full bg-gradient-to-r from-teal-700 to-emerald-600 hover:from-teal-800 hover:to-emerald-700 text-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
-                    <span>লগইন করুন</span>
-                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                <button type="submit" class="action-btn w-full bg-gradient-to-r from-teal-700 to-emerald-600 hover:from-teal-800 hover:to-emerald-700 text-white font-bold py-3 rounded-xl shadow-md text-sm">
+                    <i class="fa-solid fa-right-to-bracket mr-1.5"></i> লগইন করুন
                 </button>
             </form>
         </div>
 
-        <!-- CENTERED PROFILE SUMMARY CARD -->
-        <div id="topProfileCard" class="hidden fade-up max-w-xl mx-auto surface-card rounded-3xl p-6 border-t-4 border-teal-600">
-            <div class="flex flex-col items-center text-center space-y-2.5">
-                <div class="w-24 h-24 rounded-2xl border-2 border-teal-600 shadow-md overflow-hidden flex items-center justify-center bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 font-extrabold text-2xl">
-                    <span id="profileAvatarText">BM</span>
-                    <img id="profileAvatarImg" class="w-full h-full object-cover hidden">
-                </div>
-                <div>
-                    <h2 id="headerUserName" class="text-xl font-bold text-slate-900"></h2>
-                    <div class="flex flex-wrap items-center justify-center gap-2 mt-1.5 text-xs">
-                        <span class="bg-teal-50 text-teal-800 border border-teal-200 px-2.5 py-0.5 rounded-full font-bold">আইডি: <span id="headerUserId"></span></span>
-                        <span class="bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-0.5 rounded-full font-bold">পদবী: <span id="headerUserRole"></span></span>
-                        <span class="bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full font-bold">বিভাগ: <span id="headerUserDept"></span></span>
+        <!-- COMPACT TOP PROFILE SUMMARY CARD -->
+        <div id="topProfileCard" class="hidden surface-card rounded-3xl p-4 sm:p-5 fade-up">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5 min-w-0">
+                    <div id="profileAvatarBox" class="w-14 h-14 rounded-2xl border-2 border-teal-600 overflow-hidden flex items-center justify-center bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 font-extrabold text-lg shrink-0 shadow">
+                        <span id="profileAvatarText">BM</span>
+                        <img id="profileAvatarImg" class="w-full h-full object-cover hidden" alt="প্রোফাইল ছবি">
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h2 id="headerUserName" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">নাম</h2>
+                            <span id="headerUserId" class="text-[11px] font-bold bg-teal-100 text-teal-800 px-2.5 py-0.5 rounded-full">ID</span>
+                            <span id="headerUserDept" class="text-[11px] font-bold bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full">ডিপার্টমেন্ট</span>
+                        </div>
+                        <p id="headerUserRole" class="text-xs font-semibold text-teal-700 mt-0.5">পদবি</p>
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-600 mt-1">
+                            <span><i class="fa-solid fa-phone text-teal-600 mr-1"></i><span id="headerUserPhone">ফোন যুক্ত নেই</span></span>
+                            <span class="truncate max-w-xs"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i><span id="headerUserAddress">ঠিকানা যুক্ত নেই</span></span>
+                        </div>
                     </div>
                 </div>
-                <div class="flex flex-wrap items-center justify-center gap-3 pt-1 text-xs text-slate-600">
-                    <span><i class="fa-solid fa-phone text-teal-600 mr-1"></i><span id="headerUserPhone" class="font-semibold">-</span></span>
-                    <span class="text-slate-300">|</span>
-                    <span><i class="fa-solid fa-location-dot text-amber-600 mr-1"></i><span id="headerUserAddress" class="font-semibold">-</span></span>
-                </div>
+                <button onclick="openMyProfileModal()" class="action-btn bg-slate-900 hover:bg-slate-800 text-white text-xs px-4 py-2.5 rounded-xl font-bold shrink-0 self-start sm:self-center">
+                    <i class="fa-solid fa-user-pen mr-1.5"></i>আমার প্রোফাইল
+                </button>
             </div>
         </div>
 
-        <!-- TWO NOTICE BOARDS -->
-        <div id="noticeBoardsContainer" class="hidden fade-up grid md:grid-cols-2 gap-5">
-            <div class="surface-card rounded-3xl p-5 border-l-4 border-amber-500 bg-amber-50/50 space-y-2.5">
-                <div class="flex justify-between items-center border-b border-amber-200/80 pb-2">
-                    <span class="font-bold text-amber-950 text-xs md:text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-bullhorn text-amber-600"></i> ঊর্ধ্বতন কর্তৃপক্ষ নোটিশ
-                    </span>
-                    <button id="editAuthNoticeBtn" onclick="openNoticeModal('authority')" class="hidden action-btn bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded-xl font-bold">
-                        নোটিশ আপডেট
-                    </button>
-                </div>
-                <div id="authNoticeDisplay" class="text-xs text-slate-800 space-y-1.5">কোনো নোটিশ প্রকাশিত হয়নি।</div>
-            </div>
-
-            <div class="surface-card rounded-3xl p-5 border-l-4 border-teal-600 bg-teal-50/50 space-y-2.5">
-                <div class="flex justify-between items-center border-b border-teal-200/80 pb-2">
-                    <span class="font-bold text-teal-950 text-xs md:text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-clipboard-check text-teal-600"></i> ম্যানেজমেন্ট নোটিশ
-                    </span>
-                    <button id="editMgmtNoticeBtn" onclick="openNoticeModal('management')" class="hidden action-btn bg-teal-600 hover:bg-teal-700 text-white text-xs px-3 py-1.5 rounded-xl font-bold">
-                        নোটিশ আপডেট
-                    </button>
-                </div>
-                <div id="mgmtNoticeDisplay" class="text-xs text-slate-800 space-y-1.5">কোনো নোটিশ প্রকাশিত হয়নি।</div>
-            </div>
-        </div>
-
-        <!-- SUPER ADMIN ONLY: LATE CUTOFF TIME CONFIGURATION -->
-        <div id="superAdminLateCutoffCard" class="hidden fade-up surface-card rounded-3xl p-5 border-l-4 border-amber-500">
+        <!-- SUPER ADMIN LATE CUTOFF TIME SETTING CARD -->
+        <div id="superAdminLateCutoffCard" class="hidden surface-card rounded-3xl p-4 sm:p-5 fade-up border-l-4 border-amber-500">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                    <h3 class="text-base font-bold text-slate-900">
-                        <i class="fa-solid fa-clock text-amber-600 mr-1.5"></i> লেট টাইম সেটিংস (শুধুমাত্র সুপার অ্যাডমিন)
+                    <h3 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-business-time text-amber-600"></i>
+                        <span>দৈনিক লেট টাইম নির্ধারণ (শুধুমাত্র সুপার অ্যাডমিন)</span>
                     </h3>
-                    <p class="text-xs text-slate-500">
-                        এই সময়ের পরে ইন-টাইম করলে স্বয়ংক্রিয়ভাবে লেট ধরা হবে। বর্তমান নির্ধারিত সময়:
-                        <strong id="currentLateCutoffBadge" class="text-amber-700">09:30 AM</strong>
+                    <p class="text-xs text-slate-600 mt-0.5">
+                        বর্তমান নির্ধারিত লেট টাইম: <span id="currentLateCutoffBadge" class="font-extrabold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">09:30 AM</span> — এর পরে ইন-টাইম করলে স্বয়ংক্রিয়ভাবে <strong>লেট</strong> গণ্য হবে।
                     </p>
                 </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <input type="time" id="lateCutoffTimeInput" value="09:30" class="border border-slate-300 bg-white px-3 py-2 rounded-xl text-xs font-bold text-slate-800">
-                    <button onclick="saveLateCutoffTime()" class="action-btn bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-2 rounded-xl font-extrabold">
-                        <i class="fa-solid fa-check mr-1"></i> সেভ করুন
+                <div class="flex items-center gap-2 shrink-0">
+                    <input type="time" id="lateCutoffTimeInput" class="border border-slate-300 px-3 py-2 rounded-xl text-xs font-bold bg-white">
+                    <button type="button" onclick="saveLateCutoffTime()" class="action-btn bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-2 rounded-xl font-extrabold">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i>লেট টাইম সেভ
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- STAFF & MANAGER WORKSPACE -->
-        <div id="staffPanel" class="hidden fade-up space-y-6">
-            <div class="flex justify-end">
-                <div class="flex flex-wrap gap-2 bg-white/95 p-1.5 rounded-2xl border shadow-sm">
-                    <button onclick="switchTab('staff', 'attendanceTab')" id="btnAttTab" class="action-btn bg-teal-700 text-white px-4 py-2 rounded-xl text-xs font-bold">
-                        <i class="fa-solid fa-calendar-check mr-1"></i> হাজিরা হিস্ট্রি
+        <!-- TWO SEPARATE NOTICE BOARDS -->
+        <div id="noticeBoardsContainer" class="hidden grid md:grid-cols-2 gap-5 fade-up">
+            <div class="surface-card rounded-3xl p-5 border-t-4 border-amber-500 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-2 pb-2.5 mb-3 border-b border-slate-200">
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                                <i class="fa-solid fa-crown text-sm"></i>
+                            </span>
+                            <div>
+                                <h3 class="text-sm font-extrabold text-slate-900">ঊর্ধ্বতন কর্তৃপক্ষের নোটিশ বোর্ড</h3>
+                                <p class="text-[11px] text-slate-500">অ্যাডমিন ও পরিচালনা পর্ষদ</p>
+                            </div>
+                        </div>
+                        <button id="editAuthNoticeBtn" onclick="openNoticeModal('authority')" class="hidden action-btn bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-3 py-1.5 rounded-xl font-bold">
+                            <i class="fa-solid fa-pen mr-1"></i>নোটিশ দিন
+                        </button>
+                    </div>
+                    <div id="authNoticeDisplay" class="space-y-2 text-xs text-slate-700">
+                        <p class="text-slate-400 italic">ঊর্ধ্বতন কর্তৃপক্ষের কোনো নোটিশ নেই।</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="surface-card rounded-3xl p-5 border-t-4 border-teal-600 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-2 pb-2.5 mb-3 border-b border-slate-200">
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center">
+                                <i class="fa-solid fa-bullhorn text-sm"></i>
+                            </span>
+                            <div>
+                                <h3 class="text-sm font-extrabold text-slate-900">ম্যানেজমেন্ট নোটিশ বোর্ড</h3>
+                                <p class="text-[11px] text-slate-500">ম্যানেজার ও সুপার অ্যাডমিন</p>
+                            </div>
+                        </div>
+                        <button id="editMgmtNoticeBtn" onclick="openNoticeModal('management')" class="hidden action-btn bg-teal-700 hover:bg-teal-800 text-white text-xs px-3 py-1.5 rounded-xl font-bold">
+                            <i class="fa-solid fa-pen mr-1"></i>নোটিশ দিন
+                        </button>
+                    </div>
+                    <div id="mgmtNoticeDisplay" class="space-y-2 text-xs text-slate-700">
+                        <p class="text-slate-400 italic">ম্যানেজমেন্টের কোনো নোটিশ নেই।</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WINNER BANNER -->
+        <div id="trophyBanner" class="hidden bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 rounded-3xl shadow-lg p-4 flex items-center justify-between fade-up border border-amber-300">
+            <div class="flex items-center gap-4">
+                <img id="winnerAvatarImg" src="" alt="Winner" class="w-14 h-14 rounded-2xl border-2 border-white shadow object-cover bg-white">
+                <div>
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider bg-slate-950 text-amber-300 px-2.5 py-0.5 rounded-full">সেরা কর্মী • সেরা ডিউটি</span>
+                    <h3 id="winnerDisplayInfo" class="text-base sm:text-lg font-extrabold mt-1">তথ্য লোড হচ্ছে...</h3>
+                </div>
+            </div>
+            <i class="fa-solid fa-trophy text-3xl sm:text-4xl text-slate-900/80 mr-2"></i>
+        </div>
+
+        <!-- STAFF & MANAGER PANEL -->
+        <div id="staffPanel" class="hidden space-y-6 fade-up">
+            <div class="surface-card p-4 rounded-3xl flex flex-wrap gap-2.5 items-center justify-between">
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="switchTab('staff', 'attendanceTab')" class="action-btn bg-teal-700 text-white px-4 py-2 rounded-xl text-xs font-bold">
+                        <i class="fa-solid fa-fingerprint mr-1"></i> হাজিরা ও চার্ট
                     </button>
-                    <button onclick="openApplicationMode('missing_attendance')" id="btnAttAppTab" class="action-btn bg-sky-700 hover:bg-sky-800 text-white px-4 py-2 rounded-xl text-xs font-bold">
+                    <button onclick="openApplicationMode('missing_attendance')" class="action-btn bg-sky-700 hover:bg-sky-800 text-white px-4 py-2 rounded-xl text-xs font-bold">
                         <i class="fa-solid fa-clock-rotate-left mr-1"></i> হাজিরা আবেদন
                     </button>
-                    <button onclick="openApplicationMode('casual')" id="btnLeaveAppTab" class="action-btn bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-xs font-bold">
+                    <button onclick="openApplicationMode('leave')" class="action-btn bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold">
                         <i class="fa-solid fa-file-signature mr-1"></i> ছুটির আবেদন
                     </button>
                     <button id="managerLeaveTabBtn" onclick="switchTab('staff', 'mgrLeaveApprovalTab')" class="relative hidden action-btn bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2 rounded-xl text-xs font-extrabold">
@@ -252,8 +353,7 @@
                     </button>
                 </div>
             </div>
-
-            <div id="staffAttendanceSection" class="fade-up space-y-6">
+			<div id="staffAttendanceSection" class="fade-up space-y-6">
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="surface-card rounded-3xl p-6 space-y-4">
                         <h3 class="text-base font-bold border-b pb-2.5 text-slate-800 flex justify-between items-center">
@@ -441,8 +541,7 @@
                 </div>
             </div>
         </div>
-
-        <!-- ADMIN & SUPER ADMIN PANEL -->
+		<!-- ADMIN & SUPER ADMIN PANEL -->
         <div id="superAdminPanel" class="hidden fade-up space-y-6">
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-gradient-to-r from-slate-950 via-teal-950 to-slate-900 text-white rounded-3xl shadow-xl p-5 gap-4">
                 <div>
@@ -775,8 +874,7 @@
             </div>
         </div>
     </div>
-
-    <script>
+	<script>
         const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
         const SESSION_KEY = "bm_session_user";
         const LATE_CUTOFF_KEY = "bm_late_cutoff_time";
@@ -898,11 +996,11 @@
             el.classList.remove("opacity-0");
         }
 
-        function hideBikeLoader(delay = 100) {
+        function hideBikeLoader(delay = 260) {
             setTimeout(() => {
                 const el = document.getElementById("loadingScreen");
                 el.classList.add("opacity-0");
-                setTimeout(() => { el.style.display = "none"; }, 220);
+                setTimeout(() => { el.style.display = "none"; }, 240);
             }, delay);
         }
 
@@ -918,7 +1016,7 @@
                     }
                 } catch {}
             }
-            hideBikeLoader(160);
+            hideBikeLoader(650);
         });
 
         function togglePasswordVisibility() {
@@ -1127,8 +1225,7 @@
             }
             return fallback || "-";
         }
-
-        function renderProfileSummaryUI(user) {
+		function renderProfileSummaryUI(user) {
             document.getElementById("headerUserName").innerText = user.name;
             document.getElementById("headerUserId").innerText = user.id;
             document.getElementById("headerUserRole").innerText = user.role || user.type;
@@ -1324,7 +1421,7 @@
             renderMyLeaves();
             renderFinalApprovals();
             calculateWinner();
-            hideBikeLoader(100);
+            hideBikeLoader(120);
             if (!silent) showToast("স্বাগতম", `${user.name} লগইন করেছেন`);
         }
 
@@ -1356,7 +1453,7 @@
             localStorage.removeItem(SESSION_KEY);
             currentUser = null;
             showBikeLoader("লগআউট হচ্ছে...", "");
-            setTimeout(() => location.reload(), 200);
+            setTimeout(() => location.reload(), 220);
         }
 
         async function loadAttendanceData() {
@@ -1656,8 +1753,7 @@
             document.getElementById("monthlySummaryBadge").innerHTML =
                 `মাসিক মোট ডিউটি: <span class="text-teal-700">${totalMins > 0 ? formatHoursOnly(totalMins) : "০ ঘণ্টা"}</span> (${daysInMonth} দিনের হিসাব)`;
         }
-
-        function getLeaveBalance(userId) {
+		function getLeaveBalance(userId) {
             const approvedLeaves = globalLeaves.filter(l =>
                 String(l.staffId) === String(userId) &&
                 l.finalApproved === true &&
