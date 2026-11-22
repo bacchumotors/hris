@@ -1621,7 +1621,27 @@ function setActionStatus(state, customText = "") {
                 admBadge.classList.toggle("hidden", admCount === 0);
             }
         }
+async function loadAttendanceData() {
+    try {
+        if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_SCRIPT_ID")) {
+            globalAttendance = JSON.parse(localStorage.getItem("bm_attendance") || "[]");
+            return;
+        }
+        const res = await fetch(`${SCRIPT_URL}?action=getAttendance&_t=${Date.now()}`);
+        const d = await res.json();
+        const list = Array.isArray(d)
+            ? d
+            : (Array.isArray(d?.attendance) ? d.attendance : (Array.isArray(d?.data) ? d.data : null));
 
+        if (list) {
+            globalAttendance = list;
+            localStorage.setItem("bm_attendance", JSON.stringify(list));
+        }
+    } catch (err) {
+        console.warn("loadAttendanceData fallback:", err);
+        globalAttendance = JSON.parse(localStorage.getItem("bm_attendance") || "[]");
+    }
+}
         async function activateUserSession(user, silent = false) {
             currentUser = user;
             localStorage.setItem(SESSION_KEY, JSON.stringify(user));
