@@ -1417,38 +1417,26 @@ function setActionStatus(state, customText = '') {
 
                 const data = await res.json().catch(() => ({ success: true }));
                 if (data && (data.success === true || data.status === "success" || !("success" in data))) {
-                    setActionStatus("success", "সফল হয়েছে");
-                    if (typeof closeEditProfileModal === "function") closeEditProfileModal();
-                    if (typeof renderProfileView === "function") renderProfileView();
-                } else {
-                    setActionStatus("error", "সমস্যা হয়েছে আবার চেষ্টা করুন");
-                }
-            } catch (err) {
+          }
+           } catch (err) {
                 console.error("Profile update error:", err);
                 setActionStatus("error", "সমস্যা হয়েছে আবার চেষ্টা করুন");
             }
-        }
-            renderProfileSummaryUI(currentUser);
-            closeMyProfileModal();
-            hideBikeLoader(100);
-            showToast("আপডেট সম্পন্ন", "আপনার প্রোফাইল তথ্য সংরক্ষিত হয়েছে");
-        }
 
+            if (typeof renderProfileSummaryUI === "function") {
+                renderProfileSummaryUI(currentUser);
+            }
+            if (typeof closeMyProfileModal === "function") {
+                closeMyProfileModal();
+            }
+        }
+		
         function isTruthyFlag(val) {
             return val === true || String(val).toLowerCase() === "true" || val === 1 || String(val) === "1";
         }
 
         function normalizeLeaveItem(raw) {
-            const mgrApproved = isTruthyFlag(raw.managerApproved);
-            const finApproved = isTruthyFlag(raw.finalApproved);
-            const rejected = isTruthyFlag(raw.rejected);
-            const appType = String(raw.applicantType || "staff").toLowerCase();
-            return {
-                ...raw,
-                leaveId: String(raw.leaveId || ("LV-" + Math.random().toString(36).slice(2, 8))),
-                applicantType: appType,
-                days: Number(raw.days || 1),
-                reason: raw.reason || raw.note || "কারণ উল্লেখ নেই",
+            const mgrApproved = isTruthyFlag(raw.managerApproved);                reason: raw.reason || raw.note || "কারণ উল্লেখ নেই",
                 managerApproved: mgrApproved,
                 finalApproved: finApproved,
                 rejected: rejected,
