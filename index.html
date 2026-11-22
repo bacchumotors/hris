@@ -1698,7 +1698,30 @@ async function loadAttendanceData() {
             hideBikeLoader(120);
             if (!silent) showToast("স্বাগতম", `${user.name} লগইন করেছেন`);
         }
+function logout() {
+    try {
+        if (typeof SESSION_KEY !== "undefined" && SESSION_KEY) {
+            localStorage.removeItem(SESSION_KEY);
+        }
+        localStorage.removeItem("bm_session");
+        localStorage.removeItem("currentUser");
+    } catch (err) {
+        console.warn("Logout storage clear error:", err);
+    }
 
+    currentUser = null;
+
+    const loginEl = document.getElementById("loginSection");
+    if (loginEl) loginEl.classList.remove("hidden");
+
+    if (typeof showBikeLoader === "function") {
+        showBikeLoader("লগআউট হচ্ছে...", "");
+    }
+
+    setTimeout(() => {
+        window.location.reload();
+    }, 200);
+}
       async function handleLogin(e) {
             e.preventDefault();
             showBikeLoader("লগইন হচ্ছে...", "তথ্য যাচাই করা হচ্ছে");
