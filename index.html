@@ -1415,43 +1415,50 @@ function setActionStatus(state, customText = '') {
 
                 if (!res.ok) throw new Error("Network error");
 
-                const data = await res.json().catch(() => ({ success: true }));
-                if (data && (data.success === true || data.status === "success" || !("success" in data))) {
-          }
-           } catch (err) {
-                console.error("Profile update error:", err);
+      const data = await res.json().catch(() => ({ success: true }));
+            if (data && (data.success === true || data.status === "success" || !("success" in data))) {
+                setActionStatus("success", "সফল হয়েছে");
+                if (typeof renderProfileSummaryUI === "function") {
+                    renderProfileSummaryUI(currentUser);
+                }
+                if (typeof closeMyProfileModal === "function") {
+                    closeMyProfileModal();
+                }
+            } else {
                 setActionStatus("error", "সমস্যা হয়েছে আবার চেষ্টা করুন");
             }
-
-            if (typeof renderProfileSummaryUI === "function") {
-                renderProfileSummaryUI(currentUser);
-            }
-            if (typeof closeMyProfileModal === "function") {
-                closeMyProfileModal();
-            }
+        } catch (err) {
+            console.error("Profile update error:", err);
+            setActionStatus("error", "সমস্যা হয়েছে আবার চেষ্টা করুন");
         }
-		
-        function isTruthyFlag(val) {
-            return val === true || String(val).toLowerCase() === "true" || val === 1 || String(val) === "1";
-        }
+    }
 
-        function normalizeLeaveItem(raw) {
-            const mgrApproved = isTruthyFlag(raw.managerApproved);                reason: raw.reason || raw.note || "কারণ উল্লেখ নেই",
-                managerApproved: mgrApproved,
-                finalApproved: finApproved,
-                rejected: rejected,
-                statusText: raw.statusText || (
-                    rejected
-                        ? "রিজেক্ট করা হয়েছে"
-                        : finApproved
-                            ? "ফাইনাল অনুমোদিত (উপস্থিতি নিশ্চিত)"
-                            : (appType === "manager" || mgrApproved)
-                                ? "অ্যাডমিন / সুপার অ্যাডমিনের অনুমোদনের অপেক্ষায়"
-                                : "ম্যানেজারের ১ম অনুমোদনের অপেক্ষায়"
-                )
-            };
-        }
+    function isTruthyFlag(val) {
+        return val === true || String(val).toLowerCase() === "true" || val === 1 || String(val) === "1";
+    }
 
+    function normalizeLeaveItem(raw) {
+        const mgrApproved = isTruthyFlag(raw.managerApproved);
+        const finApproved = isTruthyFlag(raw.finalApproved || raw.adminApproved);
+        const rejected = isTruthyFlag(raw.rejected || raw.isRejected);
+        const appType = String(raw.applicantType || raw.role || "").toLowerCase();
+        return {
+            ...raw,
+            reason: raw.reason || raw.note || "কারণ উল্লেখ নেই",
+            managerApproved: mgrApproved,
+            finalApproved: finApproved,
+            rejected: rejected,
+            statusText: raw.statusText || (
+                rejected
+                    ? "রিজেক্ট করা হয়েছে"
+                    : finApproved
+                        ? "ফাইনাল অনুমোদিত (উপস্থিতি নিশ্চিত)"
+                        : (appType === "manager" || mgrApproved)
+                            ? "অ্যাডমিন / সুপার অ্যাডমিনের অনুমোদনের অপেক্ষায়"
+                            : "ম্যানেজারের ১ম অনুমোদনের অপেক্ষায়"
+            )
+        };
+    }
         function updateApprovalBadges() {
             const mgrCount = globalLeaves.filter(l =>
                 l.applicantType === "staff" && !l.managerApproved && !l.finalApproved && !l.rejected
