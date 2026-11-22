@@ -15,6 +15,24 @@
             background: radial-gradient(circle at top right, #ecfdf5 0%, #f8fafc 45%, #f1f5f9 100%);
             color: #0f172a;
             min-height: 100vh;
+		   @keyframes logoSpinSmooth {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-logo-spin {
+            animation: logoSpinSmooth 1.1s linear infinite;
+        }
+
+        @keyframes popInBadge {
+            0% { transform: scale(0.5); opacity: 0; }
+            80% { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .status-pop-in {
+            animation: popInBadge 0.3s ease-out forwards;
+        }
         }
 .date-clear,
         input[type="date"],
@@ -906,6 +924,53 @@
         </div>
     </div>
 	<script>
+		let statusHideTimer = null;
+
+function setActionStatus(state, customText = '') {
+    const overlay = document.getElementById('actionStatusOverlay');
+    const spinnerBox = document.getElementById('statusSpinnerBox');
+    const successBox = document.getElementById('statusSuccessBox');
+    const errorBox = document.getElementById('statusErrorBox');
+    const msgText = document.getElementById('statusMessageText');
+
+    if (!overlay) return;
+    if (statusHideTimer) clearTimeout(statusHideTimer);
+
+    overlay.classList.remove('hidden');
+    overlay.classList.add('flex');
+
+    spinnerBox.classList.add('hidden');
+    spinnerBox.classList.remove('flex');
+    successBox.classList.add('hidden');
+    successBox.classList.remove('flex');
+    errorBox.classList.add('hidden');
+    errorBox.classList.remove('flex');
+
+    if (state === 'loading') {
+        spinnerBox.classList.remove('hidden');
+        spinnerBox.classList.add('flex');
+        msgText.className = 'font-bold text-base text-slate-800';
+        msgText.textContent = customText || 'আপলোড হচ্ছে...';
+    } else if (state === 'success') {
+        successBox.classList.remove('hidden');
+        successBox.classList.add('flex');
+        msgText.className = 'font-bold text-base text-emerald-700';
+        msgText.textContent = customText || 'সফল হয়েছে';
+        statusHideTimer = setTimeout(() => {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }, 1300);
+    } else if (state === 'error') {
+        errorBox.classList.remove('hidden');
+        errorBox.classList.add('flex');
+        msgText.className = 'font-bold text-base text-red-600';
+        msgText.textContent = customText || 'সমস্যা হয়েছে আবার চেষ্টা করুন';
+        statusHideTimer = setTimeout(() => {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }, 2200);
+    }
+}
         const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
         const SESSION_KEY = "bm_session_user";
         const LATE_CUTOFF_KEY = "bm_late_cutoff_time";
@@ -1317,14 +1382,14 @@
             reader.readAsDataURL(file);
         }
 
-        async function saveMyProfileChanges() {
+       async function saveMyProfileChanges() {
             if (!currentUser) return;
             const name = document.getElementById("editProfileName").value.trim();
             const phone = document.getElementById("editProfilePhone").value.trim();
             const address = document.getElementById("editProfileAddress").value.trim();
             if (!name) return showToast("সতর্কতা", "নাম খালি রাখা যাবে না");
 
-            showBikeLoader("প্রোফাইল সেভ হচ্ছে...", "");
+            setActionStatus("loading", "প্রোফাইল সেভ হচ্ছে...");
             currentUser.name = name;
             currentUser.phone = phone;
             currentUser.address = address;
@@ -1336,12 +1401,33 @@
             localStorage.setItem("bm_users", JSON.stringify(globalUsers));
 
             try {
-                await fetch(SCRIPT_URL, {
+                const res = await fetch(SCRIPT_URL, {
                     method: "POST",
-                    body: JSON.stringify({ action: "updateUser", id: currentUser.id, name, phone, address, photo: tempProfilePhoto })
+                    body: JSON.stringify({
+                        action: "updateUser",
+                        id: currentUser.id,
+                        name,
+                        phone,
+                        address,
+                        photo: tempProfilePhoto
+                    })
                 });
-            } catch {}
 
+                if (!res.ok) throw new Error("Network error");
+
+                const data = await res.json().catch(() => ({ success: true }));
+                if (data && (data.success === true || data.status === "success" || !("success" in data))) {
+                    setActionStatus("success", "সফল হয়েছে");
+                    if (typeof closeEditProfileModal === "function") closeEditProfileModal();
+                    if (typeof renderProfileView === "function") renderProfileView();
+                } else {
+                    setActionStatus("error", "সমস্যা হয়েছে আবার চেষ্টা করুন");
+                }
+            } catch (err) {
+                console.error("Profile update error:", err);
+                setActionStatus("error", "সমস্যা হয়েছে আবার চেষ্টা করুন");
+            }
+        }
             renderProfileSummaryUI(currentUser);
             closeMyProfileModal();
             hideBikeLoader(100);
@@ -2456,5 +2542,29 @@
             document.getElementById("winnerDisplayInfo").innerText = `${bestName} • ${bestMins > 0 ? formatHoursOnly(bestMins) : "সক্রিয় পারফর্মার"}`;
         }
     </script>
+	<!-- TOP LOGO STATUS LOADER (NO BACKGROUND BLUR) -->
+<div id="actionStatusOverlay" class="fixed inset-0 z-[9999] hidden items-center justify-center pointer-events-auto bg-transparent">
+    <div id="actionStatusCard" class="bg-white/95 text-slate-800 px-7 py-6 rounded-2xl shadow-2xl border border-slate-200 flex flex-col items-center gap-3 min-w-[240px] max-w-xs text-center status-pop-in">
+        
+        <!-- Spinning Logo State -->
+        <div id="statusSpinnerBox" class="relative w-16 h-16 flex items-center justify-center">
+            <div class="absolute inset-0 rounded-full border-4 border-amber-400/30 border-t-amber-500 status-logo-spin"></div>
+            <img src="logo.png" alt="বাচ্চু মটরস লোগো" class="w-12 h-12 rounded-full object-contain status-logo-spin">
+        </div>
+
+        <!-- Success Icon State -->
+        <div id="statusSuccessBox" class="hidden w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 items-center justify-center text-3xl status-pop-in">
+            <i class="fa-solid fa-check"></i>
+        </div>
+
+        <!-- Error Icon State -->
+        <div id="statusErrorBox" class="hidden w-16 h-16 rounded-full bg-red-100 text-red-600 items-center justify-center text-3xl status-pop-in">
+            <i class="fa-solid fa-xmark"></i>
+        </div>
+
+        <!-- Status Text -->
+        <p id="statusMessageText" class="font-bold text-base text-slate-800">অপেক্ষা করুন...</p>
+    </div>
+</div>
 </body>
 </html>
