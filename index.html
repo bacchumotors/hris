@@ -331,6 +331,9 @@
                     <span id="roleTag" class="text-xs font-bold text-amber-300"></span>
                     <button onclick="openChangePasswordModal()" class="action-btn bg-sky-500 hover:bg-sky-600 text-white text-xs px-3 py-1 rounded-full font-bold">
                         <i class="fa-solid fa-key mr-1"></i>পাসওয়ার্ড পরিবর্তন
+                   </button>
+                    <button onclick="openMyProfileModal()" class="action-btn bg-teal-600 hover:bg-teal-700 text-white text-xs px-3 py-1 rounded-full font-bold">
+                        আমার প্রোফাইল
                     </button>
                     <button onclick="logout()" class="action-btn bg-rose-500 hover:bg-rose-600 text-white text-xs px-3 py-1 rounded-full font-bold">
                         লগআউট
@@ -338,8 +341,7 @@
                 </div>
             </div>
         </div>
-    </header>
-	<!-- MAIN CONTAINER -->
+    </header>	<!-- MAIN CONTAINER -->
     <div class="max-w-7xl mx-auto px-4 py-6 space-y-6 flex-1 w-full">
 
         <!-- LOGIN CARD -->
@@ -382,22 +384,19 @@
                         <span id="profileAvatarText">BM</span>
                         <img id="profileAvatarImg" class="w-full h-full object-cover hidden" alt="প্রোফাইল ছবি">
                     </div>
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-2 flex-wrap">
+                 <div class="min-w-0 flex-1 text-center">
+                        <div class="flex items-center justify-center gap-2 flex-wrap">
                             <h2 id="headerUserName" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">নাম</h2>
                             <span id="headerUserId" class="text-[11px] font-bold bg-teal-100 text-teal-800 px-2.5 py-0.5 rounded-full date-clear">ID</span>
                             <span id="headerUserDept" class="text-[11px] font-bold bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full">ডিপার্টমেন্ট</span>
                         </div>
                         <p id="headerUserRole" class="text-xs font-semibold text-teal-700 mt-0.5">পদবি</p>
-                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-600 mt-1 date-clear">
+                        <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-slate-600 mt-1 date-clear">
                             <span><i class="fa-solid fa-phone text-teal-600 mr-1"></i><span id="headerUserPhone">ফোন যুক্ত নেই</span></span>
                             <span class="truncate max-w-xs"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i><span id="headerUserAddress">ঠিকানা যুক্ত নেই</span></span>
                         </div>
                     </div>
                 </div>
-                <button onclick="openMyProfileModal()" class="action-btn bg-teal-700 hover:bg-teal-800 text-white text-xs px-4 py-2.5 rounded-xl font-extrabold shrink-0 self-start sm:self-center shadow">
-                    <i class="fa-solid fa-user-pen mr-1.5"></i>আমার প্রোফাইল
-                </button>
             </div>
         </div>
 		
@@ -1487,57 +1486,95 @@ function setActionStatus(state, customText = "") {
             reader.readAsDataURL(file);
         }
 
-       async function saveMyProfileChanges() {
-            if (!currentUser) return;
-            const name = document.getElementById("editProfileName").value.trim();
-            const phone = document.getElementById("editProfilePhone").value.trim();
-            const address = document.getElementById("editProfileAddress").value.trim();
-            if (!name) return showToast("সতর্কতা", "নাম খালি রাখা যাবে না");
+    async function saveMyProfileChanges() {
+    if (!currentUser) return;
 
-            setActionStatus("loading", "প্রোফাইল সেভ হচ্ছে...");
-            currentUser.name = name;
-            currentUser.phone = phone;
-            currentUser.address = address;
-            currentUser.photo = tempProfilePhoto;
+    const nameEl = document.getElementById("editProfileName");
+    const phoneEl = document.getElementById("editProfilePhone");
+    const addressEl = document.getElementById("editProfileAddress");
 
-            localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
-            const u = globalUsers.find(x => String(x.id) === String(currentUser.id));
-            if (u) Object.assign(u, { name, phone, address, photo: tempProfilePhoto });
-            localStorage.setItem("bm_users", JSON.stringify(globalUsers));
+    const name = nameEl ? nameEl.value.trim() : (currentUser.name || "");
+    const phone = phoneEl ? phoneEl.value.trim() : (currentUser.phone || "");
+    const address = addressEl ? addressEl.value.trim() : (currentUser.address || "");
 
-            try {
-                const res = await fetch(SCRIPT_URL, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        action: "updateUser",
-                        id: currentUser.id,
-                        name,
-                        phone,
-                        address,
-                        photo: tempProfilePhoto
-                    })
-                });
+    const newPhoto =
+        (typeof tempProfilePhoto !== "undefined" && tempProfilePhoto) ||
+        (typeof newProfilePhotoBase64 !== "undefined" && newProfilePhotoBase64) ||
+        (typeof selectedProfilePhoto !== "undefined" && selectedProfilePhoto) ||
+        currentUser.photo ||
+        "";
 
-                if (!res.ok) throw new Error("Network error");
+    if (!name) {
+        setActionStatus("error", "নাম খালি রাখা যাবে না");
+        return;
+    }
 
-      const data = await res.json().catch(() => ({ success: true }));
-            if (data && (data.success === true || data.status === "success" || !("success" in data))) {
-                setActionStatus("success", "সফল হয়েছে");
-                if (typeof renderProfileSummaryUI === "function") {
-                    renderProfileSummaryUI(currentUser);
-                }
+    setActionStatus("loading", "প্রোফাইল সেভ হচ্ছে...");
+
+    currentUser.name = name;
+    currentUser.phone = phone;
+    currentUser.address = address;
+    currentUser.photo = newPhoto;
+
+    if (typeof SESSION_KEY !== "undefined") {
+        localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+    }
+    if (Array.isArray(globalUsers)) {
+        const u = globalUsers.find(x => String(x.id) === String(currentUser.id));
+        if (u) {
+            Object.assign(u, { name, phone, address, photo: newPhoto });
+        }
+        localStorage.setItem("bm_users", JSON.stringify(globalUsers));
+    }
+
+    if (typeof renderProfileSummaryUI === "function") {
+        renderProfileSummaryUI(currentUser);
+    }
+
+    try {
+        const res = await fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+                action: "updateUser",
+                id: currentUser.id,
+                name: name,
+                phone: phone,
+                address: address,
+                photo: newPhoto
+            })
+        });
+
+        const rawText = await res.text();
+        let data = {};
+        try {
+            data = rawText ? JSON.parse(rawText) : { success: true };
+        } catch {
+            data = { success: res.ok };
+        }
+
+        const isFailed =
+            !res.ok ||
+            data?.success === false ||
+            data?.status === "error" ||
+            Boolean(data?.error);
+
+        if (!isFailed) {
+            setActionStatus("success", "সফল হয়েছে");
+            setTimeout(() => {
                 if (typeof closeMyProfileModal === "function") {
                     closeMyProfileModal();
                 }
-            } else {
-                setActionStatus("error", "সমস্যা হয়েছে আবার চেষ্টা করুন");
-            }
-        } catch (err) {
-            console.error("Profile update error:", err);
+            }, 900);
+        } else {
+            console.warn("Server updateUser response:", data);
             setActionStatus("error", "সমস্যা হয়েছে আবার চেষ্টা করুন");
         }
+    } catch (err) {
+        console.error("Profile update error:", err);
+        setActionStatus("error", "সমস্যা হয়েছে আবার চেষ্টা করুন");
     }
-
+}
     function isTruthyFlag(val) {
         return val === true || String(val).toLowerCase() === "true" || val === 1 || String(val) === "1";
     }
@@ -1642,7 +1679,7 @@ function setActionStatus(state, customText = "") {
             if (!silent) showToast("স্বাগতম", `${user.name} লগইন করেছেন`);
         }
 
-        async function handleLogin(e) {
+      async function handleLogin(e) {
             e.preventDefault();
             showBikeLoader("লগইন হচ্ছে...", "তথ্য যাচাই করা হচ্ছে");
             const uid = document.getElementById("username").value.trim();
@@ -1651,39 +1688,28 @@ function setActionStatus(state, customText = "") {
             try {
                 const res = await fetch(`${SCRIPT_URL}?action=getUsers&_t=${Date.now()}`);
                 const data = await res.json();
-                globalUsers = Array.isArray(data) && data.length > 0 ? data : DEFAULT_USERS;
+                const list = Array.isArray(data)
+                    ? data
+                    : (Array.isArray(data?.users) ? data.users : (Array.isArray(data?.data) ? data.data : null));
+
+                globalUsers = list && list.length > 0 ? list : DEFAULT_USERS;
                 localStorage.setItem("bm_users", JSON.stringify(globalUsers));
             } catch {
                 globalUsers = JSON.parse(localStorage.getItem("bm_users") || "null") || DEFAULT_USERS;
             }
 
-            const user = globalUsers.find(u => String(u.id).toLowerCase() === uid.toLowerCase() && String(u.pass) === pass);
+            const user = (globalUsers || []).find(u => {
+                const userId = String(u?.id ?? u?.userId ?? u?.username ?? "").trim().toLowerCase();
+                const userPass = String(u?.pass ?? u?.password ?? u?.pin ?? u?.passcode ?? "").trim();
+                return userId === uid.toLowerCase() && userPass === pass;
+            });
+
             if (!user) {
                 hideBikeLoader(100);
-                return showToast("লগইন ব্যর্থ", "ইউজার আইডি বা পাসওয়ার্ড সঠিক নয়");
+                return showToast("লগইন ব্যর্থ", "ইউজার আইডি বা পাসওয়ার্ড সঠিক নয়");
             }
 
             await activateUserSession(user, false);
-        }
-
-        function logout() {
-            localStorage.removeItem(SESSION_KEY);
-            currentUser = null;
-            showBikeLoader("লগআউট হচ্ছে...", "");
-            setTimeout(() => location.reload(), 220);
-        }
-
-        async function loadAttendanceData() {
-            try {
-                const res = await fetch(`${SCRIPT_URL}?action=getAttendance&_t=${Date.now()}`);
-                const d = await res.json();
-                if (Array.isArray(d)) {
-                    globalAttendance = d;
-                    localStorage.setItem("bm_attendance", JSON.stringify(d));
-                }
-            } catch {
-                globalAttendance = JSON.parse(localStorage.getItem("bm_attendance") || "[]");
-            }
         }
 
         async function loadNoticesData() {
