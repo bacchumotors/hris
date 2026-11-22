@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>বাচ্চু মটরস - স্মার্ট হাজিরা ও লিভ পোর্টাল</title>
+   <title>বাচ্চু মটরস - স্মার্ট হাজিরা ও লিভ পোর্টাল</title>
+    <link rel="preload" as="image" href="ronin.gif">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -72,20 +73,19 @@
             100% { background-position: -160px 0; }
         }
 
-        @keyframes bikeCrossScreen {
+      @keyframes bikeCrossScreen {
             0% {
-                left: -130px;
+                left: -110px;
                 transform: translateY(0px);
             }
             50% {
                 transform: translateY(-2px);
             }
             100% {
-                left: calc(100% + 20px);
+                left: 100%;
                 transform: translateY(0px);
             }
         }
-
         .bike-loader-track {
             position: relative;
             width: 100%;
@@ -141,7 +141,10 @@
          <!-- SMALL BIKE + ANIMATED ROAD TRACK -->
             <div class="bike-loader-track shadow-inner">
                 <div class="bike-runner-small">
-                    <img src="ronin.gif" alt="TVS Ronin Bike">
+                   <img id="loaderBikeImg" src="ronin.gif" alt="TVS Ronin Bike"
+    class="opacity-0 transition-opacity duration-200"
+    onload="this.classList.remove('opacity-0');"
+    onerror="this.classList.add('hidden');">
                 </div>
                 <div class="animated-road-strip"></div>
             </div>
