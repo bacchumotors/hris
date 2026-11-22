@@ -1682,9 +1682,11 @@ function setActionStatus(state, customText = "") {
       async function handleLogin(e) {
             e.preventDefault();
             showBikeLoader("লগইন হচ্ছে...", "তথ্য যাচাই করা হচ্ছে");
+
             const uid = document.getElementById("username").value.trim();
             const pass = document.getElementById("password").value.trim();
 
+            let fetchedUsers = null;
             try {
                 const res = await fetch(`${SCRIPT_URL}?action=getUsers&_t=${Date.now()}`);
                 const data = await res.json();
@@ -1692,17 +1694,33 @@ function setActionStatus(state, customText = "") {
                     ? data
                     : (Array.isArray(data?.users) ? data.users : (Array.isArray(data?.data) ? data.data : null));
 
-                globalUsers = list && list.length > 0 ? list : DEFAULT_USERS;
-                localStorage.setItem("bm_users", JSON.stringify(globalUsers));
-            } catch {
-                globalUsers = JSON.parse(localStorage.getItem("bm_users") || "null") || DEFAULT_USERS;
+                if (list && list.length > 0) {
+                    fetchedUsers = list;
+                    localStorage.setItem("bm_users", JSON.stringify(list));
+                }
+            } catch (err) {
+                console.warn("getUsers fetch failed, checking fallback users:", err);
             }
 
-            const user = (globalUsers || []).find(u => {
-                const userId = String(u?.id ?? u?.userId ?? u?.username ?? "").trim().toLowerCase();
-                const userPass = String(u?.pass ?? u?.password ?? u?.pin ?? u?.passcode ?? "").trim();
+            const cachedUsers = JSON.parse(localStorage.getItem("bm_users") || "[]");
+            const fallbackDefaults = Array.isArray(DEFAULT_USERS) ? DEFAULT_USERS : [];
+
+            const combinedPool = [
+                ...(fetchedUsers || []),
+                ...cachedUsers,
+                ...fallbackDefaults
+            ];
+
+            const user = combinedPool.find(u => {
+                if (!u) return false;
+                const userId = String(u.id ?? u.userId ?? u.username ?? u.uid ?? "").trim().toLowerCase();
+                const userPass = String(u.pass ?? u.password ?? u.pin ?? u.passcode ?? "").trim();
                 return userId === uid.toLowerCase() && userPass === pass;
             });
+
+            globalUsers = (fetchedUsers && fetchedUsers.length > 0)
+                ? fetchedUsers
+                : (cachedUsers.length > 0 ? cachedUsers : fallbackDefaults);
 
             if (!user) {
                 hideBikeLoader(100);
@@ -1711,7 +1729,6 @@ function setActionStatus(state, customText = "") {
 
             await activateUserSession(user, false);
         }
-
         async function loadNoticesData() {
             try {
                 const res = await fetch(`${SCRIPT_URL}?action=getNotices&_t=${Date.now()}`);
