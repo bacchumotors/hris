@@ -70,10 +70,10 @@
 
        @keyframes roadDashMove {
             0% { background-position: 0 0; }
-            100% { background-position: -160px 0; }
+            100% { background-position: -220px 0; }
         }
 
-      @keyframes bikeCrossScreen {
+        @keyframes bikeCrossScreen {
             0% {
                 left: -110px;
                 transform: translateY(0px);
@@ -86,20 +86,19 @@
                 transform: translateY(0px);
             }
         }
+
         .bike-loader-track {
             position: relative;
             width: 100%;
-            height: 84px;
-            border-radius: 16px;
-            background: #06131a;
-            border: 1px solid rgba(45, 212, 191, 0.35);
+            height: 92px;
             overflow: hidden;
+            background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.35) 56%, rgba(15, 23, 42, 0.85) 56%, rgba(2, 6, 23, 0.98) 100%);
         }
 
         .bike-runner-small {
             position: absolute;
-            bottom: 14px;
-            left: -130px;
+            bottom: 22px;
+            left: -110px;
             z-index: 10;
             animation: bikeCrossScreen 2.6s linear infinite;
         }
@@ -110,45 +109,70 @@
             object-fit: contain;
             display: block;
             border-radius: 8px;
+            filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.75));
+        }
+
+        .realistic-road-surface {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 55%, #020617 100%);
+            border-top: 2px solid rgba(148, 163, 184, 0.35);
+            box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.7);
         }
 
         .animated-road-strip {
             position: absolute;
-            bottom: 7px;
+            top: 50%;
             left: 0;
             right: 0;
-            height: 4px;
+            height: 3px;
+            transform: translateY(-50%);
             background-image: repeating-linear-gradient(
                 90deg,
-                #2dd4bf 0px,
-                #2dd4bf 24px,
-                transparent 24px,
-                transparent 46px
+                rgba(248, 250, 252, 0.88) 0px,
+                rgba(248, 250, 252, 0.88) 32px,
+                transparent 32px,
+                transparent 62px
             );
-            background-size: 160px 4px;
-            animation: roadDashMove 0.42s linear infinite;
+            background-size: 220px 3px;
+            animation: roadDashMove 0.38s linear infinite;
+        }
+
+        .road-edge-line {
+            position: absolute;
+            bottom: 3px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(250, 204, 21, 0.45);
         }    </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
     <!-- BRANDED LOADING SCREEN WITH LOGO & RUNNING BIKE -->
-    <div id="loadingScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center text-white transition-opacity duration-300 px-4">
+   <div id="loadingScreen" class="fixed inset-0 overflow-x-hidden z-50 flex flex-col items-center justify-center ...">
         <div class="text-center space-y-4 max-w-md w-full">
             <div class="mx-auto w-24 h-24 rounded-3xl bg-white/95 p-2 shadow-2xl border-2 border-amber-400 flex items-center justify-center overflow-hidden">
                 <img src="logo.png" alt="বাচ্চু মটরস লোগো" class="w-full h-full object-contain">
             </div>
 
          <!-- SMALL BIKE + ANIMATED ROAD TRACK -->
-            <div class="bike-loader-track shadow-inner">
+          <!-- FULL-WIDTH REALISTIC ROAD + BIKE -->
+            <div class="bike-loader-track w-screen max-w-none">
                 <div class="bike-runner-small">
-                   <img id="loaderBikeImg" src="ronin.gif" alt="TVS Ronin Bike"
-    class="opacity-0 transition-opacity duration-200"
-    onload="this.classList.remove('opacity-0');"
-    onerror="this.classList.add('hidden');">
+                    <img id="loaderBikeImg" src="ronin.gif" alt="TVS Ronin Bike"
+                        class="opacity-0 transition-opacity duration-200"
+                        onload="this.classList.remove('opacity-0');"
+                        onerror="this.classList.add('hidden');">
                 </div>
-                <div class="animated-road-strip"></div>
-            </div>
-			
+                <div class="realistic-road-surface">
+                    <div class="animated-road-strip"></div>
+                    <div class="road-edge-line"></div>
+                </div>
+            </div>			
             <h2 id="loadingTitle" class="text-xl font-bold tracking-wide text-amber-300">বাচ্চু মটরস</h2>
             <p id="loadingSubtitle" class="text-xs text-teal-100/80">সিস্টেম প্রস্তুত হচ্ছে...</p>
         </div>
