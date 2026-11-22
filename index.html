@@ -67,65 +67,66 @@
             background: linear-gradient(135deg, #06131a 0%, #0f2933 55%, #06131a 100%);
         }
 
-        @keyframes roadScroll {
+       @keyframes roadDashMove {
             0% { background-position: 0 0; }
             100% { background-position: -160px 0; }
         }
 
-        @keyframes roadScroll {
-            0% { background-position: 0 0; }
-            100% { background-position: -180px 0; }
-        }
-
-        @keyframes sportsBikeCross {
+        @keyframes bikeCrossScreen {
             0% {
-                left: -165px;
-                transform: translateY(0px) rotate(-0.8deg);
-            }
-            25% {
-                transform: translateY(-3px) rotate(0.7deg);
+                left: -130px;
+                transform: translateY(0px);
             }
             50% {
-                transform: translateY(0px) rotate(-0.7deg);
-            }
-            75% {
-                transform: translateY(-3px) rotate(0.7deg);
+                transform: translateY(-2px);
             }
             100% {
                 left: calc(100% + 20px);
-                transform: translateY(0px) rotate(-0.8deg);
+                transform: translateY(0px);
             }
         }
 
-        @keyframes wheelSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .bike-loader-track {
+            position: relative;
+            width: 100%;
+            height: 84px;
+            border-radius: 16px;
+            background: #06131a;
+            border: 1px solid rgba(45, 212, 191, 0.35);
+            overflow: hidden;
         }
 
-        .bike-track-road {
+        .bike-runner-small {
+            position: absolute;
+            bottom: 14px;
+            left: -130px;
+            z-index: 10;
+            animation: bikeCrossScreen 2.6s linear infinite;
+        }
+
+        .bike-runner-small img {
+            height: 54px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .animated-road-strip {
+            position: absolute;
+            bottom: 7px;
+            left: 0;
+            right: 0;
+            height: 4px;
             background-image: repeating-linear-gradient(
                 90deg,
-                rgba(45, 212, 191, 0.8) 0px,
-                rgba(45, 212, 191, 0.8) 28px,
-                transparent 28px,
-                transparent 56px
+                #2dd4bf 0px,
+                #2dd4bf 24px,
+                transparent 24px,
+                transparent 46px
             );
-            background-size: 180px 3px;
-            animation: roadScroll 0.45s linear infinite;
-        }
-
-        .sports-bike-runner {
-            position: absolute;
-            bottom: 8px;
-            left: -165px;
-            z-index: 10;
-            animation: sportsBikeCross 2.5s linear infinite;
-        }
-
-        .wheel-spin-anim {
-            transform-box: fill-box;
-            transform-origin: center;
-            animation: wheelSpin 0.28s linear infinite;
+            background-size: 160px 4px;
+            animation: roadDashMove 0.42s linear infinite;
         }    </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -137,34 +138,12 @@
                 <img src="logo.png" alt="বাচ্চু মটরস লোগো" class="w-full h-full object-contain">
             </div>
 
-           <div class="relative w-full h-28 rounded-2xl bg-slate-900/80 border border-teal-500/35 overflow-hidden flex flex-col justify-end shadow-inner">
-                <div class="sports-bike-runner">
-                    <svg width="148" height="70" viewBox="0 0 160 76" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="স্পোর্টস বাইক">
-                        <g class="wheel-spin-anim">
-                            <circle cx="32" cy="55" r="14" stroke="#e2e8f0" stroke-width="4" fill="#0f172a"/>
-                            <circle cx="32" cy="55" r="9" stroke="#38bdf8" stroke-width="2" fill="none"/>
-                            <circle cx="32" cy="55" r="3.5" fill="#f59e0b"/>
-                            <line x1="32" y1="41" x2="32" y2="69" stroke="#94a3b8" stroke-width="1.6"/>
-                            <line x1="18" y1="55" x2="46" y2="55" stroke="#94a3b8" stroke-width="1.6"/>
-                        </g>
-                        <g class="wheel-spin-anim">
-                            <circle cx="126" cy="55" r="14" stroke="#e2e8f0" stroke-width="4" fill="#0f172a"/>
-                            <circle cx="126" cy="55" r="9" stroke="#38bdf8" stroke-width="2" fill="none"/>
-                            <circle cx="126" cy="55" r="3.5" fill="#f59e0b"/>
-                            <line x1="126" y1="41" x2="126" y2="69" stroke="#94a3b8" stroke-width="1.6"/>
-                            <line x1="112" y1="55" x2="140" y2="55" stroke="#94a3b8" stroke-width="1.6"/>
-                        </g>
-                        <path d="M20 48L54 50L60 45" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
-                        <path d="M32 55L66 52L82 34L126 55" stroke="#2dd4bf" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M52 44L74 28H96L104 38H64L52 44Z" fill="#ef4444"/>
-                        <path d="M34 38H56L62 44H38L34 38Z" fill="#f59e0b"/>
-                        <path d="M84 34L106 18L124 24L114 38L84 34Z" fill="#0ea5e9"/>
-                        <path d="M106 18L128 21L136 27" stroke="#e2e8f0" stroke-width="2.6" stroke-linecap="round"/>
-                        <path d="M108 26L126 55" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
-                        <path d="M124 25L138 28L126 33Z" fill="#fde047"/>
-                    </svg>
+         <!-- SMALL BIKE + ANIMATED ROAD TRACK -->
+            <div class="bike-loader-track shadow-inner">
+                <div class="bike-runner-small">
+                    <img src="ronin.jpg" alt="TVS Ronin Bike">
                 </div>
-                <div class="bike-track-road w-full h-[3px] rounded-full"></div>
+                <div class="animated-road-strip"></div>
             </div>
 			
             <h2 id="loadingTitle" class="text-xl font-bold tracking-wide text-amber-300">বাচ্চু মটরস</h2>
