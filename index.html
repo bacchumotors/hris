@@ -49,7 +49,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 12px 10px 12px;
+    padding: 0 12px 6px 12px;
+    margin-top: -2px;
     box-sizing: border-box;
 }
 
@@ -65,36 +66,60 @@
     z-index: 20;
 }
 
-.bm-lanyard-strap {
-    width: 30px;
-    height: 36px;
+/* গলায় ঝুলানোর ফিতার দুই মাথা: ওপরে হেডারে লাগানো, নিচে এসে ক্লিপে যুক্ত */
+.bm-lanyard-neck-strap {
+    position: relative;
+    width: 150px;
+    height: 40px;
+    pointer-events: none;
+}
+
+.bm-lanyard-neck-strap::before,
+.bm-lanyard-neck-strap::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 16px;
+    height: 42px;
     background:
         repeating-linear-gradient(
             90deg,
             rgba(255, 255, 255, 0.16) 0px,
             rgba(255, 255, 255, 0.16) 2px,
             transparent 2px,
-            transparent 7px
+            transparent 6px
         ),
         linear-gradient(90deg, #0f766e, #14b8a6, #0d9488, #0f766e);
-    border-left: 1.5px solid rgba(255, 255, 255, 0.35);
-    border-right: 1.5px solid rgba(0, 0, 0, 0.5);
-    border-radius: 0 0 6px 6px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+    border-left: 1px solid rgba(255, 255, 255, 0.35);
+    border-right: 1px solid rgba(0, 0, 0, 0.45);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.bm-lanyard-neck-strap::before {
+    left: 24px;
+    transform: rotate(-28deg);
+    transform-origin: top center;
+    border-radius: 0 0 4px 4px;
+}
+
+.bm-lanyard-neck-strap::after {
+    right: 24px;
+    transform: rotate(28deg);
+    transform-origin: top center;
+    border-radius: 0 0 4px 4px;
 }
 
 .bm-lanyard-clip {
-    width: 38px;
-    height: 11px;
-    background: linear-gradient(180deg, #f1f5f9, #64748b);
-    border: 1px solid #94a3b8;
-    border-radius: 4px;
-    margin-top: -2px;
+    width: 44px;
+    height: 12px;
+    background: linear-gradient(180deg, #f8fafc, #94a3b8 55%, #475569);
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    margin-top: -3px;
     margin-bottom: -4px;
-    z-index: 2;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+    z-index: 3;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
 }
-
 .bm-profile-id-card {
     width: 100%;
     max-width: 315px;
@@ -547,9 +572,9 @@
         </div>
 
       <!-- TOP PROFILE BAR (ALWAYS AT THE TOP WHEN LOGGED IN) -->
-  <div id="topProfileCard" class="hidden">
+ <div id="topProfileCard" class="hidden">
     <div class="bm-lanyard-wrap">
-        <div class="bm-lanyard-strap"></div>
+        <div class="bm-lanyard-neck-strap"></div>
         <div class="bm-lanyard-clip"></div>
 
         <div class="bm-profile-id-card">
