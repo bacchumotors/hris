@@ -40,8 +40,23 @@
     100% { transform: rotate(-1.8deg); }
 }
 
+#topProfileCard.hidden {
+    display: none !important;
+}
+
+#topProfileCard {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 12px 10px 12px;
+    box-sizing: border-box;
+}
+
 .bm-lanyard-wrap {
     position: relative;
+    width: 100%;
+    max-width: 315px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -92,6 +107,7 @@
     padding: 16px 16px 14px;
     text-align: center;
     color: #f8fafc;
+    box-sizing: border-box;
 }
 
 .bm-profile-photo-frame {
@@ -106,6 +122,69 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.bm-card-name {
+    font-size: 19px;
+    font-weight: 800;
+    color: #fbbf24;
+    line-height: 1.3;
+    margin: 0;
+}
+
+.bm-card-badges {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.bm-badge-id {
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(245, 158, 11, 0.16);
+    color: #fcd34d;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    padding: 2px 9px;
+    border-radius: 9999px;
+}
+
+.bm-badge-dept {
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(20, 184, 166, 0.16);
+    color: #99f6e4;
+    border: 1px solid rgba(45, 212, 191, 0.35);
+    padding: 2px 9px;
+    border-radius: 9999px;
+}
+
+.bm-card-role {
+    font-size: 12px;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin: 6px 0 0 0;
+}
+
+.bm-card-meta {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(100, 116, 139, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    font-size: 12px;
+    color: #e2e8f0;
+}
+
+.bm-card-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
 }
 
 #noticeBoardsContainer {
@@ -468,8 +547,8 @@
         </div>
 
       <!-- TOP PROFILE BAR (ALWAYS AT THE TOP WHEN LOGGED IN) -->
-     <div id="topProfileCard" class="hidden w-full flex flex-col items-center px-3 sm:px-4 pt-0 pb-2">
-    <div class="bm-lanyard-wrap w-full max-w-[315px]">
+  <div id="topProfileCard" class="hidden">
+    <div class="bm-lanyard-wrap">
         <div class="bm-lanyard-strap"></div>
         <div class="bm-lanyard-clip"></div>
 
@@ -481,21 +560,21 @@
                 </div>
             </div>
 
-            <h2 id="headerUserName" class="text-lg sm:text-xl font-extrabold text-amber-400 tracking-wide">নাম</h2>
+            <h2 id="headerUserName" class="bm-card-name">নাম</h2>
 
-            <div class="flex items-center justify-center gap-1.5 flex-wrap mt-1 date-clear">
-                <span id="headerUserId" class="text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-400/35 px-2 py-0.5 rounded-full">owner</span>
-                <span id="headerUserDept" class="text-[11px] font-bold bg-teal-500/15 text-teal-200 border border-teal-400/35 px-2 py-0.5 rounded-full">ম্যানেজমেন্ট</span>
+            <div class="bm-card-badges date-clear">
+                <span id="headerUserId" class="bm-badge-id">owner</span>
+                <span id="headerUserDept" class="bm-badge-dept">ম্যানেজমেন্ট</span>
             </div>
 
-            <p id="headerUserRole" class="text-xs font-semibold text-slate-200 mt-1">সুপার অ্যাডমিন</p>
+            <p id="headerUserRole" class="bm-card-role">সুপার অ্যাডমিন</p>
 
-            <div class="mt-3 pt-2.5 border-t border-slate-700/70 flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1 text-xs text-slate-200 date-clear">
-                <span class="inline-flex items-center gap-1">
+            <div class="bm-card-meta date-clear">
+                <span class="bm-card-meta-item">
                     <i class="fa-solid fa-phone text-rose-400 text-[11px]"></i>
                     <span id="headerUserPhone">1321225213</span>
                 </span>
-                <span class="inline-flex items-center gap-1">
+                <span class="bm-card-meta-item">
                     <i class="fa-solid fa-location-dot text-emerald-400 text-xs"></i>
                     <span id="headerUserAddress">মাদারীপুর</span>
                 </span>
@@ -503,78 +582,27 @@
         </div>
     </div>
 </div>
-            <h2 id="headerUserName" class="text-lg sm:text-xl font-extrabold text-amber-400 tracking-wide">নাম</h2>
 
-            <div class="flex items-center justify-center gap-1.5 flex-wrap mt-1 date-clear">
-                <span id="headerUserId" class="text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-400/35 px-2 py-0.5 rounded-full">owner</span>
-                <span id="headerUserDept" class="text-[11px] font-bold bg-teal-500/15 text-teal-200 border border-teal-400/35 px-2 py-0.5 rounded-full">ম্যানেজমেন্ট</span>
-            </div>
-
-            <p id="headerUserRole" class="text-xs font-semibold text-slate-200 mt-1">সুপার অ্যাডমিন</p>
-
-            <div class="mt-3 pt-2.5 border-t border-slate-700/70 flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1 text-xs text-slate-200 date-clear">
-                <span class="inline-flex items-center gap-1">
-                    <i class="fa-solid fa-phone text-rose-400 text-[11px]"></i>
-                    <span id="headerUserPhone">1321225213</span>
-                </span>
-                <span class="inline-flex items-center gap-1">
-                    <i class="fa-solid fa-location-dot text-emerald-400 text-xs"></i>
-                    <span id="headerUserAddress">মাদারীপুর</span>
-                </span>
-            </div>
-        </div>
-    </div>
-</div>
-            <h2 id="headerUserName" class="text-xl sm:text-2xl font-extrabold text-amber-400 tracking-wide">নাম</h2>
-
-            <div class="flex items-center justify-center gap-1.5 flex-wrap mt-1.5 date-clear">
-                <span id="headerUserId" class="text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-400/35 px-2.5 py-0.5 rounded-full">owner</span>
-                <span id="headerUserDept" class="text-[11px] font-bold bg-teal-500/15 text-teal-200 border border-teal-400/35 px-2.5 py-0.5 rounded-full">ম্যানেজমেন্ট</span>
-            </div>
-
-            <p id="headerUserRole" class="text-xs sm:text-sm font-semibold text-slate-200 mt-1.5">সুপার অ্যাডমিন</p>
-
-            <div class="w-3/4 h-[1px] bg-gradient-to-r from-transparent via-amber-400/70 to-transparent mx-auto my-3"></div>
-
-            <p class="text-[11px] leading-relaxed text-slate-300 px-1">
-                <span class="font-bold text-white">বাচ্চু মটরস (TVS Authorized Dealer)</span> — স্মার্ট হাজিরা, ডিউটি ও ছুটি ব্যবস্থাপনা পোর্টাল।
+<!-- SUPER ADMIN LATE CUTOFF TIME SETTING CARD -->
+<div id="superAdminLateCutoffCard" class="hidden surface-card rounded-3xl p-4 sm:p-5 fade-up border-l-4 border-amber-500">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+            <h3 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-business-time text-amber-600"></i>
+                <span>দৈনিক লেট টাইম নির্ধারণ (শুধুমাত্র সুপার অ্যাডমিন)</span>
+            </h3>
+            <p class="text-xs text-slate-600 mt-0.5">
+                বর্তমান নির্ধারিত লেট টাইম: <span id="currentLateCutoffBadge" class="font-extrabold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">09:30 AM</span> — এর পরে ইন-টাইম করলে স্বয়ংক্রিয়ভাবে <strong>লেট</strong> গণ্য হবে।
             </p>
-
-            <div class="mt-3.5 pt-3 border-t border-slate-700/70 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-slate-200 date-clear">
-                <span class="inline-flex items-center gap-1.5">
-                    <i class="fa-solid fa-phone text-rose-400 text-[11px]"></i>
-                    <span id="headerUserPhone">1321225213</span>
-                </span>
-                <span class="inline-flex items-center gap-1.5">
-                    <i class="fa-solid fa-location-dot text-emerald-400 text-xs"></i>
-                    <span id="headerUserAddress">মাদারীপুর</span>
-                </span>
-            </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <input type="time" id="lateCutoffTimeInput" class="border border-slate-300 px-3 py-2 rounded-xl text-xs font-bold bg-white">
+            <button type="button" onclick="saveLateCutoffTime()" class="action-btn bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-2 rounded-xl font-extrabold">
+                <i class="fa-solid fa-floppy-disk mr-1"></i>লেট টাইম সেভ
+            </button>
         </div>
     </div>
 </div>
-		
-        <!-- SUPER ADMIN LATE CUTOFF TIME SETTING CARD -->
-        <div id="superAdminLateCutoffCard" class="hidden surface-card rounded-3xl p-4 sm:p-5 fade-up border-l-4 border-amber-500">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                    <h3 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-business-time text-amber-600"></i>
-                        <span>দৈনিক লেট টাইম নির্ধারণ (শুধুমাত্র সুপার অ্যাডমিন)</span>
-                    </h3>
-                    <p class="text-xs text-slate-600 mt-0.5">
-                        বর্তমান নির্ধারিত লেট টাইম: <span id="currentLateCutoffBadge" class="font-extrabold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">09:30 AM</span> — এর পরে ইন-টাইম করলে স্বয়ংক্রিয়ভাবে <strong>লেট</strong> গণ্য হবে।
-                    </p>
-                </div>
-                <div class="flex items-center gap-2 shrink-0">
-                    <input type="time" id="lateCutoffTimeInput" class="border border-slate-300 px-3 py-2 rounded-xl text-xs font-bold bg-white">
-                    <button type="button" onclick="saveLateCutoffTime()" class="action-btn bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-2 rounded-xl font-extrabold">
-                        <i class="fa-solid fa-floppy-disk mr-1"></i>লেট টাইম সেভ
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <!-- TWO SEPARATE NOTICE BOARDS -->
         <div id="noticeBoardsContainer" class="hidden grid md:grid-cols-2 gap-5 fade-up">
             <div class="surface-card rounded-3xl p-5 border-t-4 border-amber-500 flex flex-col justify-between">
