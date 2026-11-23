@@ -35,9 +35,9 @@
     100% { transform: scale(1); opacity: 1; }
 }
 @keyframes bmLanyardSwing {
-    0%   { transform: rotate(-2deg); }
-    50%  { transform: rotate(2deg); }
-    100% { transform: rotate(-2deg); }
+    0%   { transform: rotate(-1.8deg); }
+    50%  { transform: rotate(1.8deg); }
+    100% { transform: rotate(-1.8deg); }
 }
 
 .bm-lanyard-wrap {
@@ -46,32 +46,32 @@
     flex-direction: column;
     align-items: center;
     transform-origin: top center;
-    animation: bmLanyardSwing 3.6s ease-in-out infinite;
-    margin-top: -12px;
+    animation: bmLanyardSwing 3.8s ease-in-out infinite;
+    z-index: 20;
 }
 
 .bm-lanyard-strap {
-    width: 24px;
-    height: 44px;
+    width: 30px;
+    height: 36px;
     background:
         repeating-linear-gradient(
             90deg,
-            rgba(255, 255, 255, 0.14) 0px,
-            rgba(255, 255, 255, 0.14) 2px,
+            rgba(255, 255, 255, 0.16) 0px,
+            rgba(255, 255, 255, 0.16) 2px,
             transparent 2px,
-            transparent 6px
+            transparent 7px
         ),
         linear-gradient(90deg, #0f766e, #14b8a6, #0d9488, #0f766e);
-    border-left: 1px solid rgba(255, 255, 255, 0.3);
-    border-right: 1px solid rgba(0, 0, 0, 0.45);
-    border-radius: 0 0 5px 5px;
+    border-left: 1.5px solid rgba(255, 255, 255, 0.35);
+    border-right: 1.5px solid rgba(0, 0, 0, 0.5);
+    border-radius: 0 0 6px 6px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
 }
 
 .bm-lanyard-clip {
-    width: 34px;
+    width: 38px;
     height: 11px;
-    background: linear-gradient(180deg, #e2e8f0, #64748b);
+    background: linear-gradient(180deg, #f1f5f9, #64748b);
     border: 1px solid #94a3b8;
     border-radius: 4px;
     margin-top: -2px;
@@ -89,14 +89,14 @@
         0 0 0 2px rgba(255, 255, 255, 0.14),
         0 14px 28px rgba(2, 6, 23, 0.5);
     border-radius: 20px;
-    padding: 18px 16px 16px;
+    padding: 16px 16px 14px;
     text-align: center;
     color: #f8fafc;
 }
 
 .bm-profile-photo-frame {
-    width: 86px;
-    height: 86px;
+    width: 82px;
+    height: 82px;
     margin: 0 auto 10px;
     border-radius: 9999px;
     overflow: hidden;
@@ -106,6 +106,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+#noticeBoardsContainer {
+    margin-top: 8px !important;
 }
 		#actionStatusOverlay {
     position: fixed;
@@ -464,7 +468,7 @@
         </div>
 
       <!-- TOP PROFILE BAR (ALWAYS AT THE TOP WHEN LOGGED IN) -->
-     <div id="topProfileCard" class="hidden w-full flex justify-center px-3 sm:px-4 mt-0 mb-3">
+     <div id="topProfileCard" class="hidden w-full flex flex-col items-center px-3 sm:px-4 pt-0 pb-2">
     <div class="bm-lanyard-wrap w-full max-w-[315px]">
         <div class="bm-lanyard-strap"></div>
         <div class="bm-lanyard-clip"></div>
@@ -477,6 +481,28 @@
                 </div>
             </div>
 
+            <h2 id="headerUserName" class="text-lg sm:text-xl font-extrabold text-amber-400 tracking-wide">নাম</h2>
+
+            <div class="flex items-center justify-center gap-1.5 flex-wrap mt-1 date-clear">
+                <span id="headerUserId" class="text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-400/35 px-2 py-0.5 rounded-full">owner</span>
+                <span id="headerUserDept" class="text-[11px] font-bold bg-teal-500/15 text-teal-200 border border-teal-400/35 px-2 py-0.5 rounded-full">ম্যানেজমেন্ট</span>
+            </div>
+
+            <p id="headerUserRole" class="text-xs font-semibold text-slate-200 mt-1">সুপার অ্যাডমিন</p>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-700/70 flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1 text-xs text-slate-200 date-clear">
+                <span class="inline-flex items-center gap-1">
+                    <i class="fa-solid fa-phone text-rose-400 text-[11px]"></i>
+                    <span id="headerUserPhone">1321225213</span>
+                </span>
+                <span class="inline-flex items-center gap-1">
+                    <i class="fa-solid fa-location-dot text-emerald-400 text-xs"></i>
+                    <span id="headerUserAddress">মাদারীপুর</span>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
             <h2 id="headerUserName" class="text-lg sm:text-xl font-extrabold text-amber-400 tracking-wide">নাম</h2>
 
             <div class="flex items-center justify-center gap-1.5 flex-wrap mt-1 date-clear">
@@ -523,22 +549,6 @@
                     <i class="fa-solid fa-location-dot text-emerald-400 text-xs"></i>
                     <span id="headerUserAddress">মাদারীপুর</span>
                 </span>
-            </div>
-        </div>
-    </div>
-</div>
-
-            <div class="flex items-center justify-center gap-1.5 flex-wrap">
-                <h2 id="headerUserName" class="text-sm sm:text-base font-extrabold text-slate-900 truncate max-w-[180px]">নাম</h2>
-                <span id="headerUserId" class="text-[10px] font-bold bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full date-clear">ID</span>
-                <span id="headerUserDept" class="text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">ডিপার্টমেন্ট</span>
-            </div>
-
-            <p id="headerUserRole" class="text-[11px] font-semibold text-teal-700 mt-0.5">পদবি</p>
-
-            <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-0.5 text-[11px] text-slate-600 mt-1 date-clear">
-                <span><i class="fa-solid fa-phone text-teal-600 mr-1 text-[10px]"></i><span id="headerUserPhone">ফোন যুক্ত নেই</span></span>
-                <span class="truncate max-w-[190px]"><i class="fa-solid fa-location-dot text-rose-500 mr-1 text-[10px]"></i><span id="headerUserAddress">ঠিকানা যুক্ত নেই</span></span>
             </div>
         </div>
     </div>
