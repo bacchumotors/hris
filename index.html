@@ -50,27 +50,16 @@
     flex-direction: column;
     align-items: center;
     padding: 0 12px 6px 12px;
-    margin-top: -2px;
+    margin-top: -4px;
     box-sizing: border-box;
+    overflow: visible;
 }
 
-.bm-lanyard-wrap {
-    position: relative;
-    width: 100%;
-    max-width: 315px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transform-origin: top center;
-    animation: bmLanyardSwing 3.8s ease-in-out infinite;
-    z-index: 20;
-}
-
-/* গলায় ঝুলানোর ফিতার দুই মাথা: ওপরে হেডারে লাগানো, নিচে এসে ক্লিপে যুক্ত */
 .bm-lanyard-neck-strap {
     position: relative;
-    width: 150px;
-    height: 40px;
+    width: 156px;
+    height: 44px;
+    margin-top: -2px;
     pointer-events: none;
 }
 
@@ -78,9 +67,9 @@
 .bm-lanyard-neck-strap::after {
     content: "";
     position: absolute;
-    top: 0;
+    top: -4px;
     width: 16px;
-    height: 42px;
+    height: 48px;
     background:
         repeating-linear-gradient(
             90deg,
@@ -96,19 +85,18 @@
 }
 
 .bm-lanyard-neck-strap::before {
-    left: 24px;
+    left: 26px;
     transform: rotate(-28deg);
     transform-origin: top center;
     border-radius: 0 0 4px 4px;
 }
 
 .bm-lanyard-neck-strap::after {
-    right: 24px;
+    right: 26px;
     transform: rotate(28deg);
     transform-origin: top center;
     border-radius: 0 0 4px 4px;
 }
-
 .bm-lanyard-clip {
     width: 44px;
     height: 12px;
