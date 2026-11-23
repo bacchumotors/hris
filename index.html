@@ -57,11 +57,12 @@
 
 .bm-lanyard-neck-strap {
     position: relative;
-    width: 156px;
-    height: 54px;
+    width: 100%;
+    max-width: 315px;
+    height: 46px;
     margin-top: 0;
     pointer-events: none;
-    z-index: 2;
+    z-index: 3;
 }
 
 .bm-lanyard-neck-strap::before,
@@ -69,8 +70,8 @@
     content: "";
     position: absolute;
     top: -12px;
-    width: 16px;
-    height: 64px;
+    width: 15px;
+    height: 58px;
     background:
         repeating-linear-gradient(
             90deg,
@@ -86,15 +87,15 @@
 }
 
 .bm-lanyard-neck-strap::before {
-    left: 26px;
-    transform: rotate(-28deg);
+    left: calc(50% - 26px);
+    transform: rotate(-25deg);
     transform-origin: top center;
     border-radius: 0 0 4px 4px;
 }
 
 .bm-lanyard-neck-strap::after {
-    right: 26px;
-    transform: rotate(28deg);
+    right: calc(50% - 26px);
+    transform: rotate(25deg);
     transform-origin: top center;
     border-radius: 0 0 4px 4px;
 }
@@ -106,9 +107,9 @@
     background: linear-gradient(180deg, #f8fafc, #94a3b8 55%, #475569);
     border: 1px solid #cbd5e1;
     border-radius: 5px;
-    margin-top: -6px;
-    margin-bottom: -6px;
-    z-index: 6;
+    margin-top: -5px;
+    margin-bottom: -7px;
+    z-index: 8;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
 }
 		.bm-profile-id-card {
@@ -3135,4 +3136,5 @@ async function activateUserSession(user, silent = false) {
 </div>
 </body>
 </html>
+
 
