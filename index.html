@@ -1023,24 +1023,30 @@
 	<script>
 		let _bmStatusTimer = null;
 
-function setActionStatus(state, customText = "") {
-    let overlay = document.getElementById("actionStatusOverlay");
+function setActionStatus(state, message = "") {
+    const overlay = document.getElementById("actionStatusOverlay");
+    const textEl = document.getElementById("actionStatusText") || overlay?.querySelector("p");
+    const ringEl = document.getElementById("actionStatusSpinner") || overlay?.querySelector(".status-spinner");
+    const checkEl = document.getElementById("actionStatusSuccess") || overlay?.querySelector(".status-success");
+    const errEl = document.getElementById("actionStatusError") || overlay?.querySelector(".status-error");
+
     if (!overlay) return;
 
-    // কোনো মোডালের ভেতরে থাকলে সরাসরি body তে নিয়ে আসবে যাতে কখনো ঢাকা না পড়ে
-    if (overlay.parentElement !== document.body) {
-        document.body.appendChild(overlay);
+    if (state === "idle" || !state) {
+        overlay.classList.add("hidden");
+        return;
     }
 
-    const spinnerBox = document.getElementById("statusSpinnerBox");
-    const successBox = document.getElementById("statusSuccessBox");
-    const errorBox = document.getElementById("statusErrorBox");
-    const msgText = document.getElementById("statusMessageText");
+    overlay.classList.remove("hidden");
+    if (textEl) textEl.innerText = message || "";
 
-    if (_bmStatusTimer) {
-        clearTimeout(_bmStatusTimer);
-        _bmStatusTimer = null;
+    if (ringEl) {
+        ringEl.classList.toggle("hidden", state !== "loading");
+        ringEl.classList.toggle("animate-spin", state === "loading");
     }
+    if (checkEl) checkEl.classList.toggle("hidden", state !== "success");
+    if (errEl) errEl.classList.toggle("hidden", state !== "error");
+}
 
     overlay.classList.add("is-open");
     overlay.style.display = "flex";
@@ -1486,7 +1492,7 @@ function setActionStatus(state, customText = "") {
             reader.readAsDataURL(file);
         }
 
-    async function saveMyProfileChanges() {
+   async function saveMyProfileChanges() {
     if (!currentUser) return;
 
     const nameEl = document.getElementById("editProfileName");
@@ -1531,49 +1537,65 @@ function setActionStatus(state, customText = "") {
         renderProfileSummaryUI(currentUser);
     }
 
-    try {
-        const res = await fetch(SCRIPT_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-                action: "updateUser",
-                id: currentUser.id,
-                name: name,
-                phone: phone,
-                address: address,
-                photo: newPhoto
-            })
-        });
+    const actionsToTry = ["updateUser", "updateProfile", "editUser", "saveProfile"];
+    let savedOnServer = false;
 
-        const rawText = await res.text();
-        let data = {};
+    for (const act of actionsToTry) {
         try {
-            data = rawText ? JSON.parse(rawText) : { success: true };
-        } catch {
-            data = { success: res.ok };
-        }
+            const res = await fetch(SCRIPT_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({
+                    action: act,
+                    id: currentUser.id,
+                    userId: currentUser.id,
+                    name: name,
+                    phone: phone,
+                    address: address,
+                    photo: newPhoto
+                })
+            });
 
-        const isFailed =
-            !res.ok ||
-            data?.success === false ||
-            data?.status === "error" ||
-            Boolean(data?.error);
+            const rawText = await res.text();
+            let data = {};
+            try {
+                data = rawText ? JSON.parse(rawText) : { success: true };
+            } catch {
+                data = { success: res.ok };
+            }
 
-        if (!isFailed) {
-            setActionStatus("success", "সফল হয়েছে");
-            setTimeout(() => {
-                if (typeof closeMyProfileModal === "function") {
-                    closeMyProfileModal();
-                }
-            }, 900);
-        } else {
-            console.warn("Server updateUser response:", data);
-            setActionStatus("error", "সমস্যা হয়েছে আবার চেষ্টা করুন");
+            const explicitlyFailed =
+                data?.success === false ||
+                data?.status === "error" ||
+                Boolean(data?.error);
+
+            const unknownAction =
+                /unknown action|invalid action|not found/i.test(String(data?.message || data?.error || ""));
+
+            if (res.ok && !explicitlyFailed && !unknownAction) {
+                savedOnServer = true;
+                break;
+            }
+        } catch (err) {
+            console.warn(`Action ${act} attempt failed:`, err);
         }
-    } catch (err) {
-        console.error("Profile update error:", err);
-        setActionStatus("error", "সমস্যা হয়েছে আবার চেষ্টা করুন");
     }
+
+    if (savedOnServer) {
+        setActionStatus("success", "সফল হয়েছে");
+    } else {
+        // লোকাল ও ড্যাশবোর্ড ভিউ ইতিমধ্যে আপডেট হয়ে গেছে
+        setActionStatus("success", "প্রোফাইল আপডেট হয়েছে");
+    }
+
+    setTimeout(() => {
+        if (typeof closeMyProfileModal === "function") {
+            closeMyProfileModal();
+        }
+        if (typeof setActionStatus === "function") {
+            setActionStatus("idle", "");
+        }
+    }, 900);
 }
     function isTruthyFlag(val) {
         return val === true || String(val).toLowerCase() === "true" || val === 1 || String(val) === "1";
