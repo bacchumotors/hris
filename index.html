@@ -10,9 +10,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-		@keyframes bmSpin360 {
+		@keyframes bmSpin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.bm-spinner-ring {
+    width: 58px;
+    height: 58px;
+    border: 4px solid rgba(13, 148, 136, 0.2);
+    border-top-color: #0d9488;
+    border-radius: 50%;
+    animation: bmSpin 0.8s linear infinite !important;
+}
+
+#actionStatusOverlay .animate-spin,
+#actionStatusOverlay .fa-spinner,
+#actionStatusOverlay svg.spin {
+    animation: bmSpin 0.8s linear infinite !important;
 }
 
 @keyframes bmPopScale {
@@ -1024,7 +1039,47 @@
         </div>
     </div>
 	<script>
+function resizeImageFileToDataURL(file, maxSize = 400, quality = 0.75) {
+    return new Promise((resolve, reject) => {
+        if (!file || !file.type.startsWith("image/")) {
+            return reject(new Error("অনুগ্রহ করে একটি বৈধ ছবি (JPG/PNG/WEBP) নির্বাচন করুন"));
+        }
 
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("ফাইলটি ব্রাউজারে পড়া যাচ্ছে না"));
+        reader.onload = () => {
+            const img = new Image();
+            img.onerror = () => reject(new Error("ছবিটি লোড বা ডিকোড করা যাচ্ছে না"));
+            img.onload = () => {
+                let { width, height } = img;
+                if (width > maxSize || height > maxSize) {
+                    if (width > height) {
+                        height = Math.round((height * maxSize) / width);
+                        width = maxSize;
+                    } else {
+                        width = Math.round((width * maxSize) / height);
+                        height = maxSize;
+                    }
+                }
+
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                try {
+                    const compressed = canvas.toDataURL("image/jpeg", quality);
+                    resolve(compressed);
+                } catch (err) {
+                    reject(new Error("ছবি রিসাইজ করতে সমস্যা হয়েছে"));
+                }
+            };
+            img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
 let _bmStatusTimer = null;
 
 function setActionStatus(state, message = "") {
@@ -1070,7 +1125,7 @@ function setActionStatus(state, message = "") {
     if (spinnerBox) {
         spinnerBox.style.display = "none";
         spinnerBox.classList.add("hidden");
-        spinnerBox.classList.remove("animate-spin");
+        spinnerBox.style.animation = "none";
     }
     if (successBox) {
         successBox.style.display = "none";
@@ -1087,12 +1142,19 @@ function setActionStatus(state, message = "") {
         if (spinnerBox) {
             spinnerBox.classList.remove("hidden");
             spinnerBox.style.display = "flex";
-            spinnerBox.classList.add("animate-spin");
-            const innerSpin = spinnerBox.querySelector(".spinner-ring, .fa-spinner, svg");
-            if (innerSpin) innerSpin.classList.add("animate-spin");
+            spinnerBox.style.alignItems = "center";
+            spinnerBox.style.justifyContent = "center";
+            if (spinnerBox.classList.contains("bm-spinner-ring") || spinnerBox.dataset.spin === "true") {
+                spinnerBox.style.animation = "bmSpin 0.8s linear infinite";
+            }
+            const innerSpin = spinnerBox.querySelector(".bm-spinner-ring, .spinner-ring, .fa-spinner, svg");
+            if (innerSpin) {
+                innerSpin.style.animation = "bmSpin 0.8s linear infinite";
+            }
         }
         if (msgText) {
             msgText.style.color = "#0f172a";
+            msgText.style.fontWeight = "700";
             msgText.textContent = message || "প্রোফাইল সেভ হচ্ছে...";
         }
     } else if (state === "success") {
@@ -1103,6 +1165,7 @@ function setActionStatus(state, message = "") {
         }
         if (msgText) {
             msgText.style.color = "#15803d";
+            msgText.style.fontWeight = "700";
             msgText.textContent = message || "সফল হয়েছে";
         }
         _bmStatusTimer = setTimeout(() => {
@@ -1118,13 +1181,14 @@ function setActionStatus(state, message = "") {
         }
         if (msgText) {
             msgText.style.color = "#dc2626";
+            msgText.style.fontWeight = "700";
             msgText.textContent = message || "সমস্যা হয়েছে আবার চেষ্টা করুন";
         }
         _bmStatusTimer = setTimeout(() => {
             overlay.classList.remove("is-open");
             overlay.classList.add("hidden");
             overlay.style.display = "none";
-        }, 2200);
+        }, 3200);
     }
 }
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEMllq0XFk6FLgaI1TCQRu8alHvLo3G8RCXhwi0CggzLgbkNVcKl1QUzUjEHIbxMoD4g/exec";
@@ -1478,27 +1542,66 @@ function setActionStatus(state, message = "") {
             return fallback || "-";
         }
 		function renderProfileSummaryUI(user) {
-            document.getElementById("headerUserName").innerText = user.name;
-            document.getElementById("headerUserId").innerText = user.id;
-            document.getElementById("headerUserRole").innerText = user.role || user.type;
-            document.getElementById("headerUserDept").innerText = user.department || "অন্যান্য";
-            document.getElementById("headerUserPhone").innerText = user.phone || "ফোন যুক্ত নেই";
-            document.getElementById("headerUserAddress").innerText = user.address || "ঠিকানা যুক্ত নেই";
+    if (!user) return;
 
-            const img = document.getElementById("profileAvatarImg");
-            const txt = document.getElementById("profileAvatarText");
-            if (user.photo) {
-                img.src = user.photo;
-                img.classList.remove("hidden");
-                txt.classList.add("hidden");
-            } else {
-                img.classList.add("hidden");
-                txt.classList.remove("hidden");
-                txt.innerText = (user.name || "BM").slice(0, 2);
+    const name = user.name || user.fullName || user.username || user.id || "ব্যবহারকারী";
+    const id = user.id || user.userId || user.username || "";
+    const dept = user.dept || user.department || "বাচ্চু মটরস";
+    const role = user.role || user.designation || user.type || "";
+    const phone = user.phone || user.mobile || "ফোন যুক্ত নেই";
+    const address = user.address || "ঠিকানা যুক্ত নেই";
+    const photo = user.photo || user.photoUrl || user.image || "";
+
+    const nameEl = document.getElementById("headerUserName") || document.getElementById("profileSummaryName");
+    const idEl = document.getElementById("headerUserId") || document.getElementById("profileSummaryId");
+    const deptEl = document.getElementById("headerUserDept") || document.getElementById("profileSummaryDept");
+    const roleEl = document.getElementById("headerUserRole") || document.getElementById("profileSummaryRole");
+    const phoneEl = document.getElementById("headerUserPhone") || document.getElementById("profileSummaryPhone");
+    const addrEl = document.getElementById("headerUserAddress") || document.getElementById("profileSummaryAddress");
+
+    if (nameEl) nameEl.innerText = name;
+    if (idEl) idEl.innerText = id;
+    if (deptEl) deptEl.innerText = dept;
+    if (roleEl) roleEl.innerText = role;
+    if (phoneEl) phoneEl.innerText = phone;
+    if (addrEl) addrEl.innerText = address;
+
+    const imgEl = document.getElementById("headerUserPhoto") || document.getElementById("profileSummaryPhoto");
+    const avatarBox = document.getElementById("headerUserAvatarFallback") || document.getElementById("profileSummaryFallback");
+    const initialEl = document.getElementById("headerUserInitial") || document.getElementById("profileSummaryInitial");
+
+    if (initialEl) {
+        initialEl.innerText = String(name).trim().charAt(0).toUpperCase() || "U";
+    }
+
+    if (imgEl) {
+        if (photo && String(photo).trim().length > 10) {
+            imgEl.src = photo;
+            imgEl.classList.remove("hidden");
+            imgEl.style.display = "block";
+            if (avatarBox) {
+                avatarBox.classList.add("hidden");
+                avatarBox.style.display = "none";
+            }
+            imgEl.onerror = () => {
+                imgEl.classList.add("hidden");
+                imgEl.style.display = "none";
+                if (avatarBox) {
+                    avatarBox.classList.remove("hidden");
+                    avatarBox.style.display = "flex";
+                }
+            };
+        } else {
+            imgEl.classList.add("hidden");
+            imgEl.style.display = "none";
+            if (avatarBox) {
+                avatarBox.classList.remove("hidden");
+                avatarBox.style.display = "flex";
             }
         }
-
-        function openMyProfileModal() {
+    }
+}
+		function openMyProfileModal() {
             if (!currentUser) return;
             tempProfilePhoto = currentUser.photo || "";
             document.getElementById("editProfileName").value = currentUser.name || "";
@@ -1689,84 +1792,104 @@ function setActionStatus(state, message = "") {
                 admBadge.classList.toggle("hidden", admCount === 0);
             }
         }
-async function loadAttendanceData() {
-    try {
-        if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_SCRIPT_ID")) {
-            globalAttendance = JSON.parse(localStorage.getItem("bm_attendance") || "[]");
-            return;
-        }
-        const res = await fetch(`${SCRIPT_URL}?action=getAttendance&_t=${Date.now()}`);
-        const d = await res.json();
-        const list = Array.isArray(d)
-            ? d
-            : (Array.isArray(d?.attendance) ? d.attendance : (Array.isArray(d?.data) ? d.data : null));
-
-        if (list) {
-            globalAttendance = list;
-            localStorage.setItem("bm_attendance", JSON.stringify(list));
-        }
-    } catch (err) {
-        console.warn("loadAttendanceData fallback:", err);
-        globalAttendance = JSON.parse(localStorage.getItem("bm_attendance") || "[]");
-    }
-}
-        async function activateUserSession(user, silent = false) {
+async function activateUserSession(user, silent = false) {
             currentUser = user;
-            localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-
-            document.getElementById("loginSection").classList.add("hidden");
-            document.getElementById("userBadge").classList.remove("hidden");
-            document.getElementById("topProfileCard").classList.remove("hidden");
-            document.getElementById("noticeBoardsContainer").classList.remove("hidden");
-            document.getElementById("roleTag").innerText = user.role || user.type;
-            renderProfileSummaryUI(user);
-
-            await Promise.all([loadAttendanceData(), loadNoticesData(), loadLeavesFromSheet()]);
-            updateLeaveBalanceUI();
-            updateApprovalBadges();
-
-            if (user.type === "admin") {
-                document.getElementById("editAuthNoticeBtn").classList.remove("hidden");
-                document.getElementById("trophyBanner").classList.remove("hidden");
-                document.getElementById("superAdminPanel").classList.remove("hidden");
-                document.getElementById("superAdminLateCutoffCard").classList.add("hidden");
-                document.getElementById("staffListControlTabBtn").classList.add("hidden");
-                document.getElementById("dashboardTitleText").innerText = "২য় অ্যাডমিন ড্যাশবোর্ড (রিপোর্ট ও ফাইনাল অনুমোদন)";
-                populateReportDropdown();
-                loadDailyAttendanceDashboard();
-            } else if (user.type === "superadmin") {
-                document.getElementById("editMgmtNoticeBtn").classList.remove("hidden");
-                document.getElementById("trophyBanner").classList.remove("hidden");
-                document.getElementById("superAdminPanel").classList.remove("hidden");
-                document.getElementById("superAdminLateCutoffCard").classList.remove("hidden");
-                syncLateCutoffUI();
-                document.getElementById("dashboardTitleText").innerText = "সুপার অ্যাডমিন ড্যাশবোর্ড (সম্পূর্ণ নিয়ন্ত্রণ)";
-                populateReportDropdown();
-                loadDailyAttendanceDashboard();
-                renderSeparatedAccounts();
-            } else if (user.type === "manager") {
-                document.getElementById("superAdminLateCutoffCard").classList.add("hidden");
-                document.getElementById("editMgmtNoticeBtn").classList.remove("hidden");
-                document.getElementById("staffPanel").classList.remove("hidden");
-                document.getElementById("managerLeaveTabBtn").classList.remove("hidden");
-                document.getElementById("staffMonthPicker").value = new Date().toISOString().slice(0, 7);
-                renderStaffMonthlyCalendar();
-                renderManagerPendingLeaves();
-            } else {
-                document.getElementById("superAdminLateCutoffCard").classList.add("hidden");
-                document.getElementById("staffPanel").classList.remove("hidden");
-                document.getElementById("staffMonthPicker").value = new Date().toISOString().slice(0, 7);
-                renderStaffMonthlyCalendar();
+            if (typeof SESSION_KEY !== "undefined" && SESSION_KEY) {
+                localStorage.setItem(SESSION_KEY, JSON.stringify(user));
             }
 
-            renderNotices();
-            renderMyLeaves();
-            renderFinalApprovals();
-            calculateWinner();
-            hideBikeLoader(120);
-            if (!silent) showToast("স্বাগতম", `${user.name} লগইন করেছেন`);
-        }
-function logout() {
+            const safeCall = async (fnName, ...args) => {
+                try {
+                    if (typeof window[fnName] === "function") {
+                        return await window[fnName](...args);
+                    }
+                } catch (err) {
+                    console.warn(`Safe call failed for ${fnName}:`, err);
+                }
+            };
+
+            const showEl = (id) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.remove("hidden");
+                    if (el.style.display === "none") el.style.display = "";
+                }
+            };
+
+            const hideEl = (id) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add("hidden");
+            };
+
+            hideEl("loginSection");
+            showEl("userBadge");
+            showEl("topProfileCard");
+            showEl("noticeBoardsContainer");
+
+            const roleTag = document.getElementById("roleTag");
+            if (roleTag) roleTag.innerText = user.role || user.type || "";
+
+            await safeCall("renderProfileSummaryUI", user);
+
+            await Promise.all([
+                safeCall("loadAttendanceData"),
+                safeCall("loadNoticesData"),
+                safeCall("loadLeavesFromSheet")
+            ]);
+
+            await safeCall("updateLeaveBalanceUI");
+            await safeCall("updateApprovalBadges");
+
+            if (user.type === "admin") {
+                showEl("editAuthNoticeBtn");
+                showEl("trophyBanner");
+                showEl("superAdminPanel");
+                hideEl("superAdminLateCutoffCard");
+                hideEl("staffListControlTabBtn");
+                const titleEl = document.getElementById("dashboardTitleText");
+                if (titleEl) titleEl.innerText = "২য় অ্যাডমিন ড্যাশবোর্ড (রিপোর্ট ও ফাইনাল অনুমোদন)";
+                await safeCall("populateReportDropdown");
+                await safeCall("loadDailyAttendanceDashboard");
+            } else if (user.type === "superadmin") {
+                showEl("editMgmtNoticeBtn");
+                showEl("trophyBanner");
+                showEl("superAdminPanel");
+                showEl("superAdminLateCutoffCard");
+                await safeCall("syncLateCutoffUI");
+                const titleEl = document.getElementById("dashboardTitleText");
+                if (titleEl) titleEl.innerText = "সুপার অ্যাডমিন ড্যাশবোর্ড (সম্পূর্ণ নিয়ন্ত্রণ)";
+                await safeCall("populateReportDropdown");
+                await safeCall("loadDailyAttendanceDashboard");
+                await safeCall("renderSeparatedAccounts");
+            } else if (user.type === "manager") {
+                hideEl("superAdminLateCutoffCard");
+                showEl("editMgmtNoticeBtn");
+                showEl("staffPanel");
+                showEl("managerLeaveTabBtn");
+                const picker = document.getElementById("staffMonthPicker");
+                if (picker && !picker.value) picker.value = new Date().toISOString().slice(0, 7);
+                await safeCall("renderStaffMonthlyCalendar");
+                await safeCall("renderManagerPendingLeaves");
+            } else {
+                hideEl("superAdminLateCutoffCard");
+                showEl("staffPanel");
+                const picker = document.getElementById("staffMonthPicker");
+                if (picker && !picker.value) picker.value = new Date().toISOString().slice(0, 7);
+                await safeCall("renderStaffMonthlyCalendar");
+            }
+
+            await safeCall("renderNotices");
+            await safeCall("renderMyLeaves");
+            await safeCall("renderFinalApprovals");
+            await safeCall("calculateWinner");
+
+            if (typeof hideBikeLoader === "function") {
+                hideBikeLoader(120);
+            }
+            if (!silent && typeof showToast === "function") {
+                showToast("স্বাগতম", `${user.name} লগইন করেছেন`);
+            }
+        }function logout() {
     try {
         if (typeof SESSION_KEY !== "undefined" && SESSION_KEY) {
             localStorage.removeItem(SESSION_KEY);
