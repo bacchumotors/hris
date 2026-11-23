@@ -377,28 +377,31 @@
         </div>
 
       <!-- TOP PROFILE BAR (ALWAYS AT THE TOP WHEN LOGGED IN) -->
-        <div id="topProfileCard" class="hidden surface-card rounded-3xl p-4 sm:p-5 fade-up border-2 border-teal-600/30">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div class="flex items-center gap-3.5 min-w-0">
-                    <div id="profileAvatarBox" class="w-14 h-14 rounded-2xl border-2 border-teal-600 overflow-hidden flex items-center justify-center bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 font-extrabold text-lg shrink-0 shadow">
-                        <span id="profileAvatarText">BM</span>
-                        <img id="profileAvatarImg" class="w-full h-full object-cover hidden" alt="প্রোফাইল ছবি">
-                    </div>
-                 <div class="min-w-0 flex-1 text-center">
-                        <div class="flex items-center justify-center gap-2 flex-wrap">
-                            <h2 id="headerUserName" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">নাম</h2>
-                            <span id="headerUserId" class="text-[11px] font-bold bg-teal-100 text-teal-800 px-2.5 py-0.5 rounded-full date-clear">ID</span>
-                            <span id="headerUserDept" class="text-[11px] font-bold bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full">ডিপার্টমেন্ট</span>
-                        </div>
-                        <p id="headerUserRole" class="text-xs font-semibold text-teal-700 mt-0.5">পদবি</p>
-                        <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-slate-600 mt-1 date-clear">
-                            <span><i class="fa-solid fa-phone text-teal-600 mr-1"></i><span id="headerUserPhone">ফোন যুক্ত নেই</span></span>
-                            <span class="truncate max-w-xs"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i><span id="headerUserAddress">ঠিকানা যুক্ত নেই</span></span>
-                        </div>
-                    </div>
+        <div id="topProfileCard" class="hidden w-full flex justify-center px-3 sm:px-4 mt-3">
+    <div class="w-full max-w-md bg-white/95 backdrop-blur border border-slate-200/90 rounded-2xl shadow-sm px-4 py-3 text-center">
+        <div class="flex flex-col items-center justify-center">
+            <div class="relative w-12 h-12 rounded-full overflow-hidden border-2 border-teal-600 shadow-sm bg-slate-100 mb-1.5 shrink-0">
+                <img id="headerUserPhoto" src="" alt="Profile" class="w-full h-full object-cover hidden">
+                <div id="headerUserAvatarFallback" class="w-full h-full flex items-center justify-center bg-teal-700 text-white font-extrabold text-base">
+                    <span id="headerUserInitial">U</span>
                 </div>
             </div>
+
+            <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                <h2 id="headerUserName" class="text-sm sm:text-base font-extrabold text-slate-900 truncate max-w-[180px]">নাম</h2>
+                <span id="headerUserId" class="text-[10px] font-bold bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full date-clear">ID</span>
+                <span id="headerUserDept" class="text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">ডিপার্টমেন্ট</span>
+            </div>
+
+            <p id="headerUserRole" class="text-[11px] font-semibold text-teal-700 mt-0.5">পদবি</p>
+
+            <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-0.5 text-[11px] text-slate-600 mt-1 date-clear">
+                <span><i class="fa-solid fa-phone text-teal-600 mr-1 text-[10px]"></i><span id="headerUserPhone">ফোন যুক্ত নেই</span></span>
+                <span class="truncate max-w-[190px]"><i class="fa-solid fa-location-dot text-rose-500 mr-1 text-[10px]"></i><span id="headerUserAddress">ঠিকানা যুক্ত নেই</span></span>
+            </div>
         </div>
+    </div>
+</div>
 		
         <!-- SUPER ADMIN LATE CUTOFF TIME SETTING CARD -->
         <div id="superAdminLateCutoffCard" class="hidden surface-card rounded-3xl p-4 sm:p-5 fade-up border-l-4 border-amber-500">
