@@ -1023,62 +1023,106 @@
 	<script>
 		let _bmStatusTimer = null;
 
-function setActionStatus(state, message = "") {
-    const overlay = document.getElementById("actionStatusOverlay");
-    const textEl = document.getElementById("actionStatusText") || overlay?.querySelector("p");
-    const ringEl = document.getElementById("actionStatusSpinner") || overlay?.querySelector(".status-spinner");
-    const checkEl = document.getElementById("actionStatusSuccess") || overlay?.querySelector(".status-success");
-    const errEl = document.getElementById("actionStatusError") || overlay?.querySelector(".status-error");
+let _bmStatusTimer = null;
 
+function setActionStatus(state, message = "") {
+    if (_bmStatusTimer) {
+        clearTimeout(_bmStatusTimer);
+        _bmStatusTimer = null;
+    }
+
+    const overlay = document.getElementById("actionStatusOverlay");
     if (!overlay) return;
 
+    const msgText =
+        document.getElementById("actionStatusText") ||
+        document.getElementById("actionStatusMessage") ||
+        overlay.querySelector("p");
+
+    const spinnerBox =
+        document.getElementById("actionStatusSpinner") ||
+        overlay.querySelector(".status-spinner") ||
+        overlay.querySelector("[data-status='loading']");
+
+    const successBox =
+        document.getElementById("actionStatusSuccess") ||
+        overlay.querySelector(".status-success") ||
+        overlay.querySelector("[data-status='success']");
+
+    const errorBox =
+        document.getElementById("actionStatusError") ||
+        overlay.querySelector(".status-error") ||
+        overlay.querySelector("[data-status='error']");
+
     if (state === "idle" || !state) {
+        overlay.classList.remove("is-open");
         overlay.classList.add("hidden");
+        overlay.style.display = "none";
         return;
     }
 
     overlay.classList.remove("hidden");
-    if (textEl) textEl.innerText = message || "";
-
-    if (ringEl) {
-        ringEl.classList.toggle("hidden", state !== "loading");
-        ringEl.classList.toggle("animate-spin", state === "loading");
-    }
-    if (checkEl) checkEl.classList.toggle("hidden", state !== "success");
-    if (errEl) errEl.classList.toggle("hidden", state !== "error");
-}
-
     overlay.classList.add("is-open");
     overlay.style.display = "flex";
 
-    spinnerBox.style.display = "none";
-    successBox.classList.remove("show");
-    successBox.style.display = "none";
-    errorBox.classList.remove("show");
-    errorBox.style.display = "none";
+    if (spinnerBox) {
+        spinnerBox.style.display = "none";
+        spinnerBox.classList.add("hidden");
+        spinnerBox.classList.remove("animate-spin");
+    }
+    if (successBox) {
+        successBox.style.display = "none";
+        successBox.classList.add("hidden");
+        successBox.classList.remove("show");
+    }
+    if (errorBox) {
+        errorBox.style.display = "none";
+        errorBox.classList.add("hidden");
+        errorBox.classList.remove("show");
+    }
 
     if (state === "loading") {
-        spinnerBox.style.display = "flex";
-        msgText.style.color = "#0f172a";
-        msgText.textContent = customText || "প্রোফাইল সেভ হচ্ছে...";
+        if (spinnerBox) {
+            spinnerBox.classList.remove("hidden");
+            spinnerBox.style.display = "flex";
+            spinnerBox.classList.add("animate-spin");
+            const innerSpin = spinnerBox.querySelector(".spinner-ring, .fa-spinner, svg");
+            if (innerSpin) innerSpin.classList.add("animate-spin");
+        }
+        if (msgText) {
+            msgText.style.color = "#0f172a";
+            msgText.textContent = message || "প্রোফাইল সেভ হচ্ছে...";
+        }
     } else if (state === "success") {
-        successBox.style.display = "flex";
-        successBox.classList.add("show");
-        msgText.style.color = "#15803d";
-        msgText.textContent = customText || "সফল হয়েছে";
+        if (successBox) {
+            successBox.classList.remove("hidden");
+            successBox.style.display = "flex";
+            successBox.classList.add("show");
+        }
+        if (msgText) {
+            msgText.style.color = "#15803d";
+            msgText.textContent = message || "সফল হয়েছে";
+        }
         _bmStatusTimer = setTimeout(() => {
             overlay.classList.remove("is-open");
+            overlay.classList.add("hidden");
             overlay.style.display = "none";
-        }, 1500);
+        }, 1200);
     } else if (state === "error") {
-        errorBox.style.display = "flex";
-        errorBox.classList.add("show");
-        msgText.style.color = "#dc2626";
-        msgText.textContent = customText || "সমস্যা হয়েছে আবার চেষ্টা করুন";
+        if (errorBox) {
+            errorBox.classList.remove("hidden");
+            errorBox.style.display = "flex";
+            errorBox.classList.add("show");
+        }
+        if (msgText) {
+            msgText.style.color = "#dc2626";
+            msgText.textContent = message || "সমস্যা হয়েছে আবার চেষ্টা করুন";
+        }
         _bmStatusTimer = setTimeout(() => {
             overlay.classList.remove("is-open");
+            overlay.classList.add("hidden");
             overlay.style.display = "none";
-        }, 2400);
+        }, 2200);
     }
 }
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEMllq0XFk6FLgaI1TCQRu8alHvLo3G8RCXhwi0CggzLgbkNVcKl1QUzUjEHIbxMoD4g/exec";
