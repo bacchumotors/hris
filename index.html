@@ -1478,20 +1478,129 @@ function setActionStatus(state, message = "") {
                 ic.className = "fa-solid fa-eye";
             }
         }
-
-        function showToast(title, message) {
-            const box = document.getElementById("toastBox");
-            document.getElementById("toastTitle").innerText = title;
-            document.getElementById("toastMessage").innerText = message;
-            box.classList.remove("translate-x-[130%]", "opacity-0");
-            clearTimeout(window._toastT);
-            window._toastT = setTimeout(hideToast, 3000);
+(function injectCenterToastStyles() {
+    if (document.getElementById("bmCenterToastStyle")) return;
+    const style = document.createElement("style");
+    style.id = "bmCenterToastStyle";
+    style.textContent = `
+        #bmCenterToastOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.35);
+            backdrop-filter: blur(2px);
+            padding: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s ease;
         }
-
-        function hideToast() {
-            document.getElementById("toastBox").classList.add("translate-x-[130%]", "opacity-0");
+        #bmCenterToastOverlay.show {
+            opacity: 1;
+            pointer-events: auto;
         }
+        #bmCenterToastCard {
+            width: 100%;
+            max-width: 340px;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 24px 20px;
+            text-align: center;
+            box-shadow: 0 22px 50px rgba(15, 23, 42, 0.28);
+            transform: scale(0.84) translateY(10px);
+            transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        #bmCenterToastOverlay.show #bmCenterToastCard {
+            transform: scale(1) translateY(0);
+        }
+        .bm-toast-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 14px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            font-weight: 900;
+            animation: bmPopBounce 0.45s ease;
+        }
+        .bm-toast-success {
+            background: #dcfce7;
+            color: #16a34a;
+            box-shadow: 0 0 0 8px rgba(22, 163, 74, 0.12);
+        }
+        .bm-toast-error {
+            background: #fee2e2;
+            color: #dc2626;
+            box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.12);
+        }
+        @keyframes bmPopBounce {
+            0% { transform: scale(0.3); opacity: 0; }
+            65% { transform: scale(1.12); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+})();
 
+function showToast(title, message) {
+    let overlay = document.getElementById("bmCenterToastOverlay");
+    if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.id = "bmCenterToastOverlay";
+        overlay.innerHTML = `
+            <div id="bmCenterToastCard">
+                <div id="bmToastIcon" class="bm-toast-icon bm-toast-success">✓</div>
+                <div id="bmToastTitle" class="text-base font-extrabold text-slate-900 mb-1"></div>
+                <div id="bmToastMsg" class="text-xs font-medium text-slate-600 leading-relaxed mb-4"></div>
+                <button type="button" id="bmToastCloseBtn"
+                    class="px-5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold">
+                    ঠিক আছে
+                </button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        overlay.addEventListener("click", (e) => {
+            if (e.target === overlay || e.target.id === "bmToastCloseBtn") {
+                hideCenterToast();
+            }
+        });
+    }
+
+    const tStr = String(title || "").toLowerCase();
+    const mStr = String(message || "").toLowerCase();
+    const isError =
+        tStr.includes("সতর্কতা") || tStr.includes("ভুল") || tStr.includes("error") ||
+        tStr.includes("ব্যর্থ") || mStr.includes("সমস্যা") || mStr.includes("ব্যর্থ") ||
+        mStr.includes("iterable") || mStr.includes("প্রথমে");
+
+    const iconEl = document.getElementById("bmToastIcon");
+    iconEl.className = `bm-toast-icon ${isError ? "bm-toast-error" : "bm-toast-success"}`;
+    iconEl.innerHTML = isError ? "✕" : "✓";
+
+    iconEl.style.animation = "none";
+    void iconEl.offsetWidth;
+    iconEl.style.animation = "bmPopBounce 0.45s ease";
+
+    document.getElementById("bmToastTitle").textContent = title || (isError ? "সতর্কতা" : "সফল");
+    document.getElementById("bmToastMsg").textContent = message || "";
+
+    clearTimeout(window.__bmToastTimer);
+    overlay.classList.add("show");
+    window.__bmToastTimer = setTimeout(hideCenterToast, 2600);
+}
+
+function hideCenterToast() {
+    const overlay = document.getElementById("bmCenterToastOverlay");
+    if (overlay) overlay.classList.remove("show");
+}
+
+function hideToast() {
+    hideCenterToast();
+}
         function updateLiveClock() {
             const now = new Date();
             const el = document.getElementById("liveClockDisplay");
@@ -2425,23 +2534,30 @@ async function recordAttendanceAction(type) {
         }
     }
 }
-        function renderRecentTimeHistory(myRecs) {
-            const recent = [...myRecs].slice(-5).reverse();
-            const el = document.getElementById("recentTimeHistoryList");
-            if (!el) return;
-            if (recent.length === 0) {
-                el.innerHTML = `<div class="py-6 text-center text-slate-400">কোনো সময় রেকর্ড নেই</div>`;
-                return;
-            }
-            el.innerHTML = recent.map(r => `
-                <div class="py-2 flex items-center justify-between gap-2">
-                    <span class="font-bold text-slate-700">${formatCompactDateTime(r.dateStr).split(" ").pop() || r.dateStr}</span>
-                    <span class="text-emerald-700 font-semibold">ইন: ${formatStrict12Hour(r.inTime)}</span>
-                    <span class="text-rose-700 font-semibold">আউট: ${formatStrict12Hour(r.outTime)}</span>
-                    <span class="font-extrabold text-teal-700">${calculateDutyHoursOnly(r.inTime, r.outTime, r.totalDuty)}</span>
-                </div>
-            `).join("");
-        }
+       function renderRecentTimeHistory(myRecs) {
+    const safeRecs = Array.isArray(myRecs)
+        ? myRecs
+        : (Array.isArray(globalAttendance) && typeof currentUser !== "undefined"
+            ? globalAttendance.filter(r => String(r.staffId) === String(currentUser.id))
+            : []);
+    // এর পর safeRecs ব্যবহার করবেন
+}
+		const recent = [...sourceList].slice(-5).reverse();
+    const el = document.getElementById("recentTimeHistoryList");
+    if (!el) return;
+    if (recent.length === 0) {
+        el.innerHTML = `<div class="py-6 text-center text-slate-400">কোনো সময় রেকর্ড নেই</div>`;
+        return;
+    }
+    el.innerHTML = recent.map(r => `
+        <div class="py-2 flex items-center justify-between gap-2">
+            <span class="font-bold text-slate-700">${formatCompactDateTime(r.dateStr).split(" ").pop() || r.dateStr}</span>
+            <span class="text-emerald-700 font-semibold">ইন: ${formatStrict12Hour(r.inTime)}</span>
+            <span class="text-rose-700 font-semibold">আউট: ${formatStrict12Hour(r.outTime)}</span>
+            <span class="font-extrabold text-teal-700">${calculateDutyHoursOnly(r.inTime, r.outTime, r.totalDuty)}</span>
+        </div>
+    `).join("");
+}
 function extractAppDateTimestamp(item) {
     const candidates = [
         item.startDate, item.fromDate, item.dateStr, item.date,
