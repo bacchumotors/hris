@@ -2224,29 +2224,51 @@ async function activateUserSession(user, silent = false) {
             showToast("ছবি সংগৃহীত", "ইন বা আউট বাটন চাপুন");
         }
 
-     async function compressCapturedPhoto(dataUrl, maxWidth = 640, quality = 0.65) {
+  async function compressCapturedPhoto(dataUrl, maxWidth = 600, quality = 0.6) {
     if (!dataUrl || typeof dataUrl !== "string") return "";
     if (!dataUrl.startsWith("data:image")) return dataUrl;
 
     return await new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-            const ratio = Math.min(1, maxWidth / (img.width || maxWidth));
-            const canvas = document.createElement("canvas");
-            canvas.width = Math.round((img.width || maxWidth) * ratio);
-            canvas.height = Math.round((img.height || maxWidth) * ratio);
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL("image/jpeg", quality));
+        let settled = false;
+        const done = (val) => {
+            if (!settled) {
+                settled = true;
+                resolve(val);
+            }
         };
-        img.onerror = () => resolve(dataUrl);
+
+        const safetyTimer = setTimeout(() => done(dataUrl), 3000);
+        const img = new Image();
+
+        img.onload = () => {
+            clearTimeout(safetyTimer);
+            try {
+                const w = img.naturalWidth || img.width || maxWidth;
+                const h = img.naturalHeight || img.height || maxWidth;
+                const ratio = Math.min(1, maxWidth / w);
+                const canvas = document.createElement("canvas");
+                canvas.width = Math.max(1, Math.round(w * ratio));
+                canvas.height = Math.max(1, Math.round(h * ratio));
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                done(canvas.toDataURL("image/jpeg", quality));
+            } catch (_) {
+                done(dataUrl);
+            }
+        };
+
+        img.onerror = () => {
+            clearTimeout(safetyTimer);
+            done(dataUrl);
+        };
+
         img.src = dataUrl;
     });
 }
 
 async function postAttendanceToServer(bodyObj) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 25000);
+    const timer = setTimeout(() => controller.abort(), 20000);
     try {
         const res = await fetch(SCRIPT_URL, {
             method: "POST",
@@ -2258,7 +2280,7 @@ async function postAttendanceToServer(bodyObj) {
         try {
             data = JSON.parse(rawText);
         } catch (_) {
-            data = { success: res.ok, message: rawText };
+            data = { success: res.ok, message: rawText || "সফল হয়েছে" };
         }
         if (!res.ok || data.success === false) {
             throw new Error(data.message || "সার্ভারে আপলোড ব্যর্থ হয়েছে");
@@ -2270,32 +2292,42 @@ async function postAttendanceToServer(bodyObj) {
 }
 
 async function recordAttendanceAction(type) {
-    showBikeLoader("হাজিরা সেভ হচ্ছে...", "");
+    if (typeof showBikeLoader === "function") {
+        showBikeLoader("হাজিরা সেভ হচ্ছে...", "");
+    }
+
     const now = new Date();
     const todayStr = now.toLocaleDateString();
     const t12 = formatStrict12Hour(`${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}`);
 
     try {
-        await loadAttendanceData();
-        let rec = globalAttendance.find(
+        if (typeof loadAttendanceData === "function") {
+            await loadAttendanceData();
+        }
+
+        const list = Array.isArray(globalAttendance) ? globalAttendance : [];
+        let rec = list.find(
             r => String(r.staffId) === String(currentUser.id) && String(r.dateStr) === String(todayStr)
         );
 
-        const optimizedPhoto = capturedPhotoData
-            ? await compressCapturedPhoto(capturedPhotoData, 640, 0.65)
+        const optimizedPhoto = (typeof capturedPhotoData !== "undefined" && capturedPhotoData)
+            ? await compressCapturedPhoto(capturedPhotoData, 600, 0.6)
             : "";
 
         if (type === "in") {
             if (rec) {
-                hideBikeLoader(80);
-                return showToast("তথ্য", "আজকের ইন-টাইম সম্পন্ন আছে");
+                showToast("তথ্য", "আজকের ইন-টাইম সম্পন্ন আছে");
+                return;
             }
             if (!optimizedPhoto) {
-                hideBikeLoader(80);
-                return showToast("সতর্কতা", "ইন-টাইমের জন্য ছবি তুলুন");
+                showToast("সতর্কতা", "ইন-টাইমের জন্য ছবি তুলুন");
+                return;
             }
 
-            const isLate = isLateByConfiguredCutoff(now);
+            const isLate = typeof isLateByConfiguredCutoff === "function"
+                ? isLateByConfiguredCutoff(now)
+                : false;
+
             const payload = {
                 action: "addAttendance",
                 staffId: currentUser.id,
@@ -2310,7 +2342,7 @@ async function recordAttendanceAction(type) {
                 outPhoto: "",
                 totalDuty: "",
                 diffDuty: "",
-                location: currentGpsLocation
+                location: typeof currentGpsLocation !== "undefined" ? currentGpsLocation : ""
             };
 
             globalAttendance.push(payload);
@@ -2321,15 +2353,18 @@ async function recordAttendanceAction(type) {
             showToast("সফল", "ইন-টাইম ও ছবি সফলভাবে সংরক্ষিত হয়েছে");
         } else if (type === "out") {
             if (!rec) {
-                hideBikeLoader(80);
-                return showToast("সতর্কতা", "প্রথমে ইন-টাইম দিন");
+                showToast("সতর্কতা", "প্রথমে ইন-টাইম দিন");
+                return;
             }
             if (!optimizedPhoto) {
-                hideBikeLoader(80);
-                return showToast("সতর্কতা", "আউট-টাইমের জন্য ছবি তুলুন");
+                showToast("সতর্কতা", "আউট-টাইমের জন্য ছবি তুলুন");
+                return;
             }
 
-            const duty = calculateDutyHoursOnly(rec.inTime, t12, rec.lunchOut && rec.lunchIn ? calculateDutyHoursOnly(rec.lunchOut, rec.lunchIn, "") : "");
+            const duty = typeof calculateDutyHoursOnly === "function"
+                ? calculateDutyHoursOnly(rec.inTime, t12, "")
+                : "";
+
             rec.outTime = t12;
             rec.outPhoto = optimizedPhoto;
             rec.totalDuty = duty;
@@ -2348,8 +2383,8 @@ async function recordAttendanceAction(type) {
             showToast("সফল", "আউট-টাইম ও ছবি সফলভাবে সংরক্ষিত হয়েছে");
         } else if (type === "lunchOut" || type === "lunchIn") {
             if (!rec) {
-                hideBikeLoader(80);
-                return showToast("সতর্কতা", "প্রথমে ইন-টাইম দিন");
+                showToast("সতর্কতা", "প্রথমে ইন-টাইম দিন");
+                return;
             }
 
             const field = type === "lunchOut" ? "lunchOut" : "lunchIn";
@@ -2378,12 +2413,14 @@ async function recordAttendanceAction(type) {
         if (typeof renderRecentTimeHistory === "function") renderRecentTimeHistory();
     } catch (err) {
         console.error("Attendance save failed:", err);
-        const msg = err.name === "AbortError"
-            ? "নেটওয়ার্ক সময়সীমা শেষ হয়েছে। আবার চেষ্টা করুন।"
-            : (err.message || "সার্ভারে আপলোড করতে সমস্যা হয়েছে।");
+        const msg = err && err.name === "AbortError"
+            ? "সার্ভার থেকে রেসপন্স আসতে দেরি হচ্ছে। আবার চেষ্টা করুন।"
+            : ((err && err.message) || "আপলোড করতে সমস্যা হয়েছে।");
         showToast("সতর্কতা", msg);
     } finally {
-        hideBikeLoader(120);
+        if (typeof hideBikeLoader === "function") {
+            hideBikeLoader(0);
+        }
     }
 }
             capturedPhotoData = null;
