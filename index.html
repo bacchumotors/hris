@@ -2423,13 +2423,6 @@ async function recordAttendanceAction(type) {
         }
     }
 }
-            capturedPhotoData = null;
-            document.getElementById("photoPreview").classList.add("hidden");
-            renderStaffMonthlyCalendar();
-            hideBikeLoader(100);
-            showToast("সফল", `সময় রেকর্ড হয়েছে: ${t12}`);
-        }
-
         function renderRecentTimeHistory(myRecs) {
             const recent = [...myRecs].slice(-5).reverse();
             const el = document.getElementById("recentTimeHistoryList");
