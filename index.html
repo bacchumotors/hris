@@ -34,10 +34,10 @@
     0% { transform: scale(0.6); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
 }
-@keyframes bmLanyardSwing {
-    0%   { transform: rotate(-1.8deg); }
-    50%  { transform: rotate(1.8deg); }
-    100% { transform: rotate(-1.8deg); }
+@keyframes bmCardSwing {
+    0%   { transform: rotate(-1.6deg); }
+    50%  { transform: rotate(1.6deg); }
+    100% { transform: rotate(-1.6deg); }
 }
 
 #topProfileCard.hidden {
@@ -49,67 +49,20 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 12px 6px 12px;
-    margin-top: -22px;
+    padding: 4px 12px 8px 12px;
     box-sizing: border-box;
-    overflow: visible;
 }
 
-.bm-lanyard-neck-strap {
+.bm-lanyard-wrap {
     position: relative;
-    width: 160px;
-    height: 44px;
-    margin-top: 0;
-    pointer-events: none;
-    z-index: 2;
-}
-
-.bm-lanyard-neck-strap::before,
-.bm-lanyard-neck-strap::after {
-    content: "";
-    position: absolute;
-    top: -4px;
-    width: 15px;
-    height: 46px;
-    background:
-        repeating-linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0.16) 0px,
-            rgba(255, 255, 255, 0.16) 2px,
-            transparent 2px,
-            transparent 6px
-        ),
-        linear-gradient(90deg, #0f766e, #14b8a6, #0d9488, #0f766e);
-    border-left: 1px solid rgba(255, 255, 255, 0.35);
-    border-right: 1px solid rgba(0, 0, 0, 0.45);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
-}
-
-.bm-lanyard-neck-strap::before {
-    left: 34px;
-    transform: rotate(-24deg);
+    width: 100%;
+    max-width: 315px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     transform-origin: top center;
-    border-radius: 0 0 4px 4px;
-}
-
-.bm-lanyard-neck-strap::after {
-    right: 34px;
-    transform: rotate(24deg);
-    transform-origin: top center;
-    border-radius: 0 0 4px 4px;
-}
-
-.bm-lanyard-clip {
-    position: relative;
-    width: 48px;
-    height: 14px;
-    background: #ffffff;
-    border: 2px solid #cbd5e1;
-    border-radius: 6px;
-    margin-top: -6px;
-    margin-bottom: -8px;
-    z-index: 25;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+    animation: bmCardSwing 3.8s ease-in-out infinite;
+    z-index: 20;
 }
 		.bm-profile-id-card {
     width: 100%;
@@ -565,9 +518,6 @@
       <!-- TOP PROFILE BAR (ALWAYS AT THE TOP WHEN LOGGED IN) -->
  <div id="topProfileCard" class="hidden">
     <div class="bm-lanyard-wrap">
-        <div class="bm-lanyard-neck-strap"></div>
-        <div class="bm-lanyard-clip"></div>
-
         <div class="bm-profile-id-card">
             <div class="bm-profile-photo-frame">
                 <img id="headerUserPhoto" src="" alt="Profile" class="w-full h-full object-cover hidden">
@@ -598,7 +548,7 @@
         </div>
     </div>
 </div>
-
+		
 <!-- SUPER ADMIN LATE CUTOFF TIME SETTING CARD -->
 <div id="superAdminLateCutoffCard" class="hidden surface-card rounded-3xl p-4 sm:p-5 fade-up border-l-4 border-amber-500">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -2274,48 +2224,168 @@ async function activateUserSession(user, silent = false) {
             showToast("ছবি সংগৃহীত", "ইন বা আউট বাটন চাপুন");
         }
 
-        async function recordAttendanceAction(type) {
-            showBikeLoader("হাজিরা সেভ হচ্ছে...", "");
-            const now = new Date();
-            const todayStr = now.toLocaleDateString();
-            const t12 = formatStrict12Hour(`${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}`);
-            await loadAttendanceData();
+     async function compressCapturedPhoto(dataUrl, maxWidth = 640, quality = 0.65) {
+    if (!dataUrl || typeof dataUrl !== "string") return "";
+    if (!dataUrl.startsWith("data:image")) return dataUrl;
 
-            let rec = globalAttendance.find(r => String(r.staffId) === String(currentUser.id) && String(r.dateStr) === String(todayStr));
+    return await new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const ratio = Math.min(1, maxWidth / (img.width || maxWidth));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.round((img.width || maxWidth) * ratio);
+            canvas.height = Math.round((img.height || maxWidth) * ratio);
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+    });
+}
 
-            if (type === "in") {
-                if (rec) { hideBikeLoader(80); return showToast("তথ্য", "আজকের ইন-টাইম সম্পন্ন আছে"); }
-                if (!capturedPhotoData) { hideBikeLoader(80); return showToast("সতর্কতা", "ইন-টাইমের জন্য ছবি তুলুন"); }
-                const isLate = isLateByConfiguredCutoff(now);
-                const payload = {
-                    action: "addAttendance", staffId: currentUser.id, staffName: currentUser.name,
-                    dateStr: todayStr, inTime: t12, inPhoto: capturedPhotoData,
-                    inStatus: isLate ? "Late" : "Present", lunchOut: "", lunchIn: "",
-                    outTime: "", outPhoto: "", totalDuty: "", diffDuty: "", location: currentGpsLocation
-                };
-                globalAttendance.push(payload);
-                localStorage.setItem("bm_attendance", JSON.stringify(globalAttendance));
-                try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) }); } catch {}
-            } else if (type === "out") {
-                if (!rec) { hideBikeLoader(80); return showToast("সতর্কতা", "প্রথমে ইন-টাইম দিন"); }
-                if (!capturedPhotoData) { hideBikeLoader(80); return showToast("সতর্কতা", "আউট-টাইমের জন্য ছবি তুলুন"); }
-                const duty = calculateDutyHoursOnly(rec.inTime, t12, "");
-                rec.outTime = t12;
-                rec.totalDuty = duty;
-                localStorage.setItem("bm_attendance", JSON.stringify(globalAttendance));
-                try {
-                    await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "updateAttendance", staffId: currentUser.id, dateStr: todayStr, outTime: t12, outPhoto: capturedPhotoData, totalDuty: duty }) });
-                } catch {}
-            } else if (type === "lunchOut" || type === "lunchIn") {
-                if (!rec) { hideBikeLoader(80); return showToast("সতর্কতা", "প্রথমে ইন-টাইম দিন"); }
-                const field = type === "lunchOut" ? "lunchOut" : "lunchIn";
-                rec[field] = t12;
-                localStorage.setItem("bm_attendance", JSON.stringify(globalAttendance));
-                try {
-                    await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "updateAttendance", staffId: currentUser.id, dateStr: todayStr, [field]: t12 }) });
-                } catch {}
+async function postAttendanceToServer(bodyObj) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 25000);
+    try {
+        const res = await fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify(bodyObj),
+            signal: controller.signal
+        });
+        const rawText = await res.text();
+        let data = {};
+        try {
+            data = JSON.parse(rawText);
+        } catch (_) {
+            data = { success: res.ok, message: rawText };
+        }
+        if (!res.ok || data.success === false) {
+            throw new Error(data.message || "সার্ভারে আপলোড ব্যর্থ হয়েছে");
+        }
+        return data;
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
+async function recordAttendanceAction(type) {
+    showBikeLoader("হাজিরা সেভ হচ্ছে...", "");
+    const now = new Date();
+    const todayStr = now.toLocaleDateString();
+    const t12 = formatStrict12Hour(`${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}`);
+
+    try {
+        await loadAttendanceData();
+        let rec = globalAttendance.find(
+            r => String(r.staffId) === String(currentUser.id) && String(r.dateStr) === String(todayStr)
+        );
+
+        const optimizedPhoto = capturedPhotoData
+            ? await compressCapturedPhoto(capturedPhotoData, 640, 0.65)
+            : "";
+
+        if (type === "in") {
+            if (rec) {
+                hideBikeLoader(80);
+                return showToast("তথ্য", "আজকের ইন-টাইম সম্পন্ন আছে");
+            }
+            if (!optimizedPhoto) {
+                hideBikeLoader(80);
+                return showToast("সতর্কতা", "ইন-টাইমের জন্য ছবি তুলুন");
             }
 
+            const isLate = isLateByConfiguredCutoff(now);
+            const payload = {
+                action: "addAttendance",
+                staffId: currentUser.id,
+                staffName: currentUser.name,
+                dateStr: todayStr,
+                inTime: t12,
+                inPhoto: optimizedPhoto,
+                inStatus: isLate ? "Late" : "Present",
+                lunchOut: "",
+                lunchIn: "",
+                outTime: "",
+                outPhoto: "",
+                totalDuty: "",
+                diffDuty: "",
+                location: currentGpsLocation
+            };
+
+            globalAttendance.push(payload);
+            localStorage.setItem("bm_attendance", JSON.stringify(globalAttendance));
+            await postAttendanceToServer(payload);
+
+            capturedPhotoData = "";
+            showToast("সফল", "ইন-টাইম ও ছবি সফলভাবে সংরক্ষিত হয়েছে");
+        } else if (type === "out") {
+            if (!rec) {
+                hideBikeLoader(80);
+                return showToast("সতর্কতা", "প্রথমে ইন-টাইম দিন");
+            }
+            if (!optimizedPhoto) {
+                hideBikeLoader(80);
+                return showToast("সতর্কতা", "আউট-টাইমের জন্য ছবি তুলুন");
+            }
+
+            const duty = calculateDutyHoursOnly(rec.inTime, t12, rec.lunchOut && rec.lunchIn ? calculateDutyHoursOnly(rec.lunchOut, rec.lunchIn, "") : "");
+            rec.outTime = t12;
+            rec.outPhoto = optimizedPhoto;
+            rec.totalDuty = duty;
+            localStorage.setItem("bm_attendance", JSON.stringify(globalAttendance));
+
+            await postAttendanceToServer({
+                action: "updateAttendance",
+                staffId: currentUser.id,
+                dateStr: todayStr,
+                outTime: t12,
+                outPhoto: optimizedPhoto,
+                totalDuty: duty
+            });
+
+            capturedPhotoData = "";
+            showToast("সফল", "আউট-টাইম ও ছবি সফলভাবে সংরক্ষিত হয়েছে");
+        } else if (type === "lunchOut" || type === "lunchIn") {
+            if (!rec) {
+                hideBikeLoader(80);
+                return showToast("সতর্কতা", "প্রথমে ইন-টাইম দিন");
+            }
+
+            const field = type === "lunchOut" ? "lunchOut" : "lunchIn";
+            rec[field] = t12;
+            if (optimizedPhoto) {
+                rec[`${field}Photo`] = optimizedPhoto;
+            }
+            localStorage.setItem("bm_attendance", JSON.stringify(globalAttendance));
+
+            const updatePayload = {
+                action: "updateAttendance",
+                staffId: currentUser.id,
+                dateStr: todayStr,
+                [field]: t12
+            };
+            if (optimizedPhoto) {
+                updatePayload[`${field}Photo`] = optimizedPhoto;
+            }
+
+            await postAttendanceToServer(updatePayload);
+            capturedPhotoData = "";
+            showToast("সফল", type === "lunchOut" ? "লাঞ্চ আউট সংরক্ষিত হয়েছে" : "লাঞ্চ ইন সংরক্ষিত হয়েছে");
+        }
+
+        if (typeof renderStaffMonthlyCalendar === "function") renderStaffMonthlyCalendar();
+        if (typeof renderRecentTimeHistory === "function") renderRecentTimeHistory();
+    } catch (err) {
+        console.error("Attendance save failed:", err);
+        const msg = err.name === "AbortError"
+            ? "নেটওয়ার্ক সময়সীমা শেষ হয়েছে। আবার চেষ্টা করুন।"
+            : (err.message || "সার্ভারে আপলোড করতে সমস্যা হয়েছে।");
+        showToast("সতর্কতা", msg);
+    } finally {
+        hideBikeLoader(120);
+    }
+}
             capturedPhotoData = null;
             document.getElementById("photoPreview").classList.add("hidden");
             renderStaffMonthlyCalendar();
