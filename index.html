@@ -2534,21 +2534,22 @@ async function recordAttendanceAction(type) {
         }
     }
 }
-       function renderRecentTimeHistory(myRecs) {
-    const safeRecs = Array.isArray(myRecs)
+ function renderRecentTimeHistory(myRecs) {
+    const sourceList = Array.isArray(myRecs)
         ? myRecs
-        : (Array.isArray(globalAttendance) && typeof currentUser !== "undefined"
+        : (typeof globalAttendance !== "undefined" && Array.isArray(globalAttendance) && typeof currentUser !== "undefined" && currentUser
             ? globalAttendance.filter(r => String(r.staffId) === String(currentUser.id))
             : []);
-    // এর পর safeRecs ব্যবহার করবেন
-}
-		const recent = [...sourceList].slice(-5).reverse();
+
+    const recent = [...sourceList].slice(-5).reverse();
     const el = document.getElementById("recentTimeHistoryList");
     if (!el) return;
+
     if (recent.length === 0) {
         el.innerHTML = `<div class="py-6 text-center text-slate-400">কোনো সময় রেকর্ড নেই</div>`;
         return;
     }
+
     el.innerHTML = recent.map(r => `
         <div class="py-2 flex items-center justify-between gap-2">
             <span class="font-bold text-slate-700">${formatCompactDateTime(r.dateStr).split(" ").pop() || r.dateStr}</span>
