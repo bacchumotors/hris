@@ -61,7 +61,7 @@
     flex-direction: column;
     align-items: center;
     transform-origin: top center;
-    animation: bmCardSwing 3.8s ease-in-out infinite;
+    animation: bmCardSwing 1.6s ease-in-out infinite;
     z-index: 20;
 }
 		.bm-profile-id-card {
@@ -2249,35 +2249,70 @@ async function activateUserSession(user, silent = false) {
             globalLeaves = Array.isArray(cached) ? cached.map(normalizeLeaveItem) : [];
         }
 
-        function renderNotices() {
-            const auth = globalNotices.filter(n => n.type === "authority");
-            const mgmt = globalNotices.filter(n => n.type === "management");
-
-            if (auth.length) {
-                const last = auth[auth.length - 1];
-                document.getElementById("authNoticeDisplay").innerHTML = `
-                   <div class="font-extrabold text-sm text-amber-950 text-center pb-1">${last.subject}</div>
-                    <p class="leading-relaxed text-slate-800">${last.text}</p>
-                    <div class="text-right pt-2 border-t border-amber-200 mt-2">
-                        <div class="font-bold text-amber-950">${last.sigName || "জিয়াউল হাসান"}</div>
-                        <div class="text-[11px] text-amber-800">${last.sigRole || "ম্যানেজিং ডিরেক্টর"}</div>
-                    </div>
-                `;
-            }
-
-            if (mgmt.length) {
-                const last = mgmt[mgmt.length - 1];
-                document.getElementById("mgmtNoticeDisplay").innerHTML = `
-                   <div class="font-extrabold text-sm text-teal-950 text-center pb-1">${last.subject}</div>
-                    <p class="leading-relaxed text-slate-800">${last.text}</p>
-                    <div class="text-right pt-2 border-t border-teal-200 mt-2">
-                        <div class="font-bold text-teal-950">${last.sigName || "ম্যানেজমেন্ট"}</div>
-                        <div class="text-[11px] text-teal-800">${last.sigRole || "শোরুম ম্যানেজার"}</div>
-                    </div>
-                `;
+      function formatNoticeDateDisplay(item) {
+    const raw = item.date || item.dateStr || item.noticeDate || item.createdAt || item.publishedDate || "";
+    if (raw) {
+        if (typeof formatCompactDateTime === "function") {
+            const formatted = formatCompactDateTime(raw);
+            if (formatted && formatted !== "-") return formatted;
+        }
+        if (typeof parseRecordDateObj === "function") {
+            const dt = parseRecordDateObj(raw);
+            if (dt && !isNaN(dt)) {
+                return dt.toLocaleDateString("bn-BD", { day: "2-digit", month: "2-digit", year: "numeric" });
             }
         }
+        const parsed = new Date(raw);
+        if (!isNaN(parsed)) {
+            return parsed.toLocaleDateString("bn-BD", { day: "2-digit", month: "2-digit", year: "numeric" });
+        }
+        return String(raw);
+    }
+    return new Date().toLocaleDateString("bn-BD", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
 
+function renderNotices() {
+    const auth = globalNotices.filter(n => n.type === "authority");
+    const mgmt = globalNotices.filter(n => n.type === "management");
+
+    if (auth.length) {
+        const last = auth[auth.length - 1];
+        const noticeDate = formatNoticeDateDisplay(last);
+        document.getElementById("authNoticeDisplay").innerHTML = `
+            <div class="mb-2.5 text-center">
+                <div class="font-extrabold text-sm text-amber-950 pb-1.5">${last.subject}</div>
+                <div class="mx-auto h-[3px] w-28 rounded-full bg-gradient-to-r from-transparent via-amber-500 to-transparent relative">
+                    <span class="block w-2 h-2 rounded-full bg-amber-600 mx-auto -mt-[2.5px]"></span>
+                </div>
+            </div>
+            <p class="leading-relaxed text-slate-800">${last.text}</p>
+            <div class="text-right pt-2 border-t border-amber-200 mt-2.5">
+                <div class="font-bold text-amber-950">${last.sigName || "জিয়াউল হাসান"}</div>
+                <div class="text-[11px] text-amber-800">${last.sigRole || "ম্যানেজিং ডিরেক্টর"}</div>
+                <div class="text-[10px] font-semibold text-amber-700/90 mt-0.5">তারিখ: ${noticeDate}</div>
+            </div>
+        `;
+    }
+
+    if (mgmt.length) {
+        const last = mgmt[mgmt.length - 1];
+        const noticeDate = formatNoticeDateDisplay(last);
+        document.getElementById("mgmtNoticeDisplay").innerHTML = `
+            <div class="mb-2.5 text-center">
+                <div class="font-extrabold text-sm text-teal-950 pb-1.5">${last.subject}</div>
+                <div class="mx-auto h-[3px] w-28 rounded-full bg-gradient-to-r from-transparent via-teal-500 to-transparent relative">
+                    <span class="block w-2 h-2 rounded-full bg-teal-600 mx-auto -mt-[2.5px]"></span>
+                </div>
+            </div>
+            <p class="leading-relaxed text-slate-800">${last.text}</p>
+            <div class="text-right pt-2 border-t border-teal-200 mt-2.5">
+                <div class="font-bold text-teal-950">${last.sigName || "ম্যানেজমেন্ট"}</div>
+                <div class="text-[11px] text-teal-800">${last.sigRole || "শোরুম ম্যানেজার"}</div>
+                <div class="text-[10px] font-semibold text-teal-700/90 mt-0.5">তারিখ: ${noticeDate}</div>
+            </div>
+        `;
+    }
+}
         function openNoticeModal(type) {
             activeNoticeType = type;
             document.getElementById("noticeModalTitle").innerText = type === "authority" ? "ঊর্ধ্বতন কর্তৃপক্ষ নোটিশ আপডেট" : "ম্যানেজমেন্ট নোটিশ আপডেট";
