@@ -793,17 +793,19 @@
                     <h3 class="text-base font-bold text-slate-900 mb-3">আমার আবেদনসমূহের অবস্থা</h3>
                     <div class="overflow-x-auto rounded-xl border">
                         <table class="w-full text-xs text-left">
-                            <thead class="bg-slate-100 text-slate-700">
-                                <tr>
-                                    <th class="p-3">ধরন</th>
-                                    <th class="p-3">সময় ও তারিখ</th>
-                                    <th class="p-3">মোট দিন</th>
-                                    <th class="p-3">কারণ</th>
-                                    <th class="p-3">প্রেসক্রিপশন</th>
-                                    <th class="p-3">অনুমোদন স্ট্যাটাস</th>
-                                </tr>
-                            </thead>
-                            <tbody id="myLeaveHistoryBody" class="divide-y"></tbody>
+                         <thead class="bg-slate-100 text-slate-700">
+    <tr>
+        <th class="p-3">#</th>
+        <th class="p-3">ধরন</th>
+        <th class="p-3">সময় ও তারিখ</th>
+        <th class="p-3">মোট দিন</th>
+        <th class="p-3">কারণ</th>
+        <th class="p-3">প্রেসক্রিপশন</th>
+        <th class="p-3">অনুমোদন স্ট্যাটাস</th>
+        <th class="p-3">এডিট</th>
+    </tr>
+</thead>
+<tbody id="myLeaveHistoryBody" class="divide-y"></tbody>
                         </table>
                     </div>
                 </div>
@@ -2440,7 +2442,142 @@ async function recordAttendanceAction(type) {
                 </div>
             `).join("");
         }
+function extractAppDateTimestamp(item) {
+    const candidates = [
+        item.startDate, item.fromDate, item.dateStr, item.date,
+        item.periodText, item.dateRange, item.timeRange
+    ].filter(Boolean);
 
+    for (const raw of candidates) {
+        const str = String(raw).trim();
+        if (typeof parseRecordDateObj === "function") {
+            const dt = parseRecordDateObj(str);
+            if (dt && !isNaN(dt)) return dt.getTime();
+        }
+        const m = str.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+        if (m) {
+            const day = parseInt(m[1], 10);
+            const month = parseInt(m[2], 10) - 1;
+            let year = parseInt(m[3], 10);
+            if (year < 100) year += 2000;
+            const tm = str.match(/(\d{1,2}):(\d{2})(?:\s*(AM|PM))?/i);
+            let h = 0, min = 0;
+            if (tm) {
+                h = parseInt(tm[1], 10);
+                min = parseInt(tm[2], 10);
+                const mer = (tm[3] || "").toUpperCase();
+                if (mer === "PM" && h < 12) h += 12;
+                if (mer === "AM" && h === 12) h = 0;
+            }
+            return new Date(year, month, day, h, min, 0).getTime();
+        }
+        const p = Date.parse(str);
+        if (!isNaN(p)) return p;
+    }
+    return 0;
+}
+
+function isApprovedAttendanceApplication(app, year, month, day) {
+    if (!app || app.rejected) return false;
+
+    const statusStr = String(app.status || app.approvalStatus || app.statusText || app.state || "").toLowerCase();
+    const approved = Boolean(app.finalApproved) ||
+        statusStr.includes("ফাইনাল") ||
+        statusStr.includes("final") ||
+        statusStr.includes("approved") ||
+        statusStr.includes("অনুমোদিত");
+
+    if (!approved) return false;
+
+    const targetStart = new Date(year, month - 1, day, 0, 0, 0).getTime();
+    const targetEnd = new Date(year, month - 1, day, 23, 59, 59).getTime();
+
+    const sTs = extractAppDateTimestamp({ startDate: app.startDate || app.fromDate || app.dateStr || app.periodText });
+    const eTs = extractAppDateTimestamp({ startDate: app.endDate || app.toDate || app.startDate || app.fromDate || app.dateStr || app.periodText });
+
+    if (sTs && eTs) {
+        return targetEnd >= sTs && targetStart <= eTs;
+    }
+
+    const dd = String(day).padStart(2, "0");
+    const mm = String(month).padStart(2, "0");
+    const yy = String(year).slice(-2);
+    const fullText = `${app.periodText || ""} ${app.dateStr || ""} ${app.startDate || ""}`;
+    return fullText.includes(`${dd}/${mm}/${year}`) || fullText.includes(`${dd}/${mm}/${yy}`);
+}
+function renderSortedLeaveHistory(list) {
+    const tbody = document.getElementById("myLeaveHistoryBody");
+    if (!tbody) return;
+
+    const items = Array.isArray(list) ? [...list] : [];
+    items.sort((a, b) => extractAppDateTimestamp(b) - extractAppDateTimestamp(a));
+
+    if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400">কোনো আবেদন পাওয়া যায়নি</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = items.map((item, idx) => {
+        const appId = item.id || item.requestId || item.rowIndex || idx;
+        const typeText = item.type || item.reqType || item.category || "মিসিং হাজিরা উপস্থিতি";
+        const periodText = item.periodText || item.timeRange || `${item.startDate || ""} - ${item.endDate || ""}`;
+        const daysText = item.totalDays || item.days || "১ দিন";
+        const reasonText = item.reason || item.note || "-";
+        const presText = item.prescription || item.attachment || "-";
+        const statusText = item.status || item.approvalStatus || "অপেক্ষমাণ";
+
+        return `
+            <tr class="hover:bg-slate-50">
+                <td class="p-3 font-bold text-slate-700">${idx + 1}</td>
+                <td class="p-3 font-semibold">${typeText}</td>
+                <td class="p-3">${periodText}</td>
+                <td class="p-3">${daysText}</td>
+                <td class="p-3">${reasonText}</td>
+                <td class="p-3">${presText}</td>
+                <td class="p-3">${statusText}</td>
+                <td class="p-3">
+                    <button type="button" onclick="openEditApplicationModal('${appId}')"
+                        class="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs">
+                        <i class="fa-solid fa-pen-to-square mr-1"></i>এডিট
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function openEditApplicationModal(appId) {
+    const sources = [
+        window.globalApplications,
+        window.globalLeaveRequests,
+        window.myApplications
+    ].filter(Array.isArray);
+
+    let found = null;
+    for (const arr of sources) {
+        found = arr.find((r, i) => String(r.id || r.requestId || r.rowIndex || i) === String(appId));
+        if (found) break;
+    }
+
+    if (!found) {
+        if (typeof showToast === "function") showToast("তথ্য", "আবেদনের তথ্য লোড করা যায়নি");
+        return;
+    }
+
+    const startEl = document.getElementById("leaveStartDate") || document.getElementById("startDate") || document.querySelector('input[type="datetime-local"]');
+    const endEl = document.getElementById("leaveEndDate") || document.getElementById("endDate") || document.querySelectorAll('input[type="datetime-local"]')[1];
+    const reasonEl = document.getElementById("leaveReason") || document.getElementById("reason") || document.querySelector("textarea");
+
+    if (startEl && (found.startDate || found.fromDate)) startEl.value = found.startDate || found.fromDate;
+    if (endEl && (found.endDate || found.toDate)) endEl.value = found.endDate || found.toDate;
+    if (reasonEl && (found.reason || found.note)) reasonEl.value = found.reason || found.note;
+
+    window.editingApplicationItem = found;
+    if (typeof showToast === "function") {
+        showToast("এডিট মোড", "সঠিক তারিখ/সময় বসিয়ে আবেদন জমা দিন");
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
         function renderStaffMonthlyCalendar() {
             const val = document.getElementById("staffMonthPicker").value;
             if (!val) return;
@@ -2457,57 +2594,86 @@ async function recordAttendanceAction(type) {
             let totalMins = 0;
 
             for (let d = 1; d <= daysInMonth; d++) {
-                const match = myRecs.find(r => {
-                    const dt = parseRecordDateObj(r.dateStr);
-                    return dt && dt.getDate() === d && (dt.getMonth() + 1) === month && dt.getFullYear() === year;
-                });
+    const match = myRecs.find(r => {
+        const dt = parseRecordDateObj(r.dateStr);
+        return dt && dt.getDate() === d && (dt.getMonth() + 1) === month && dt.getFullYear() === year;
+    });
 
-                const dateLabel = `${String(d).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year}`;
+    const allLeaves = typeof globalLeaves !== "undefined" && Array.isArray(globalLeaves)
+        ? globalLeaves
+        : (Array.isArray(window.globalLeaves) ? window.globalLeaves : []);
 
-                if (match) {
-                    presentDays++;
-                    const inT = formatStrict12Hour(match.inTime);
-                    const lOut = formatStrict12Hour(match.lunchOut);
-                    const lIn = formatStrict12Hour(match.lunchIn);
-                    const outT = formatStrict12Hour(match.outTime);
-                    const dutyStr = calculateDutyHoursOnly(match.inTime, match.outTime, match.totalDuty);
+    const appSources = [
+        ...allLeaves,
+        ...(Array.isArray(window.globalApplications) ? window.globalApplications : []),
+        ...(Array.isArray(window.globalLeaveRequests) ? window.globalLeaveRequests : []),
+        ...(Array.isArray(window.myApplications) ? window.myApplications : [])
+    ].filter(a => !a.staffId || String(a.staffId) === String(currentUser.id));
 
-                    const mIn = parse12HourToMinutes(inT);
-                    const mOut = parse12HourToMinutes(outT);
-                    if (mIn !== null && mOut !== null && mOut >= mIn) totalMins += (mOut - mIn);
+    const approvedMatch = appSources.find(a => isApprovedAttendanceApplication(a, year, month, d));
+    const dateLabel = `${String(d).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year}`;
 
-                    const lateFlag = isRecordLate(match);
-                    if (lateFlag) lateDays++; else onTimeDays++;
+    if (match) {
+        presentDays++;
+        const inT = formatStrict12Hour(match.inTime);
+        const lOut = formatStrict12Hour(match.lunchOut);
+        const lIn = formatStrict12Hour(match.lunchIn);
+        const outT = formatStrict12Hour(match.outTime);
+        const dutyStr = calculateDutyHoursOnly(match.inTime, match.outTime, match.totalDuty);
 
-                    const rowClass = lateFlag
-                        ? "bg-amber-100 text-amber-950 day-row-sep"
-                        : "bg-emerald-100 text-emerald-950 day-row-sep";
+        const mIn = parse12HourToMinutes(inT);
+        const mOut = parse12HourToMinutes(outT);
+        if (mIn !== null && mOut !== null && mOut >= mIn) totalMins += (mOut - mIn);
 
-                    html += `
-                        <tr class="${rowClass}">
-                            <td class="p-3">${dateLabel}</td>
-                            <td class="p-3">${inT}</td>
-                            <td class="p-3">${lOut}</td>
-                            <td class="p-3">${lIn}</td>
-                            <td class="p-3">${outT}</td>
-                            <td class="p-3 font-extrabold">${dutyStr}</td>
-                        </tr>
-                    `;
-                } else {
-                    absentDays++;
-                    html += `
-                        <tr class="bg-rose-100 text-rose-950 day-row-sep">
-                            <td class="p-3">${dateLabel}</td>
-                            <td class="p-3">-</td>
-                            <td class="p-3">-</td>
-                            <td class="p-3">-</td>
-                            <td class="p-3">-</td>
-                            <td class="p-3">-</td>
-                        </tr>
-                    `;
-                }
-            }
+        const lateFlag = isRecordLate(match);
+        if (lateFlag) lateDays++; else onTimeDays++;
 
+        const rowClass = lateFlag
+            ? "bg-amber-100 text-amber-950 day-row-sep"
+            : "bg-emerald-100 text-emerald-950 day-row-sep";
+
+        html += `
+            <tr class="${rowClass}">
+                <td class="p-3">${dateLabel}</td>
+                <td class="p-3">${inT}</td>
+                <td class="p-3">${lOut}</td>
+                <td class="p-3">${lIn}</td>
+                <td class="p-3">${outT}</td>
+                <td class="p-3 font-extrabold">${dutyStr}</td>
+            </tr>
+        `;
+    } else if (approvedMatch) {
+        presentDays++;
+        onTimeDays++;
+        const isLeave = String(approvedMatch.type || approvedMatch.category || "").includes("ছুটি");
+        const inLabel = isLeave ? "ছুটি অনুমোদিত" : "অনুমোদিত (উপস্থিত)";
+        const outLabel = isLeave ? "ছুটি অনুমোদিত" : "অনুমোদিত";
+        const dutyLabel = isLeave ? "ছুটি" : (approvedMatch.totalDays || "অনুমোদিত");
+
+        html += `
+            <tr class="bg-emerald-100 text-emerald-950 day-row-sep">
+                <td class="p-3">${dateLabel}</td>
+                <td class="p-3">${inLabel}</td>
+                <td class="p-3">-</td>
+                <td class="p-3">-</td>
+                <td class="p-3">${outLabel}</td>
+                <td class="p-3 font-extrabold">${dutyLabel}</td>
+            </tr>
+        `;
+    } else {
+        absentDays++;
+        html += `
+            <tr class="bg-rose-100 text-rose-950 day-row-sep">
+                <td class="p-3">${dateLabel}</td>
+                <td class="p-3">-</td>
+                <td class="p-3">-</td>
+                <td class="p-3">-</td>
+                <td class="p-3">-</td>
+                <td class="p-3">-</td>
+            </tr>
+        `;
+    }
+}
             document.getElementById("staffMonthlyDetailedTableBody").innerHTML = html;
 
             document.getElementById("chartBottomSummaryBar").innerHTML = `
@@ -2689,29 +2855,81 @@ async function recordAttendanceAction(type) {
             return "মিসিং হাজিরা উপস্থিতি";
         }
 
-        function renderMyLeaves() {
-            const mine = globalLeaves.filter(l => String(l.staffId) === String(currentUser.id));
-            document.getElementById("myLeaveHistoryBody").innerHTML = mine.length === 0
-                ? `<tr><td colspan="6" class="p-4 text-center text-slate-400">কোনো আবেদন নেই</td></tr>`
-                : mine.map(l => {
-                    const badgeCls = l.rejected
-                        ? "bg-rose-100 text-rose-800"
-                        : l.finalApproved
-                            ? "bg-emerald-100 text-emerald-800"
-                            : "bg-amber-100 text-amber-800";
-                    return `
-                        <tr>
-                            <td class="p-3 font-bold">${getCategoryLabel(l.category)}</td>
-                            <td class="p-3 whitespace-nowrap">${formatLeaveRangeCompact(l.startDate, l.endDate)}</td>
-                            <td class="p-3 font-extrabold text-teal-700 whitespace-nowrap">${l.days || 1} দিন</td>
-                            <td class="p-3 text-slate-700">${l.reason || "-"}</td>
-                            <td class="p-3">${l.prescription ? `<img src="${l.prescription}" class="h-10 w-10 object-cover rounded border">` : "-"}</td>
-                            <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${badgeCls}">${l.statusText}</span></td>
-                        </tr>
-                    `;
-                }).join("");
-        }
+       function getLeaveSortTime(item) {
+    const raw = item.startDate || item.dateStr || item.createdAt || "";
+    if (!raw) return 0;
+    if (typeof parseRecordDateObj === "function") {
+        const dt = parseRecordDateObj(raw);
+        if (dt && !isNaN(dt)) return dt.getTime();
+    }
+    const parsed = Date.parse(raw);
+    return isNaN(parsed) ? 0 : parsed;
+}
 
+function editMyLeaveItem(leaveKey) {
+    const list = Array.isArray(globalLeaves) ? globalLeaves : [];
+    const target = list.find((item, idx) => String(item.id || item.leaveId || idx) === String(leaveKey));
+    if (!target) {
+        if (typeof showToast === "function") showToast("তথ্য", "আবেদনটি খুঁজে পাওয়া যায়নি");
+        return;
+    }
+
+    const startInput = document.getElementById("leaveStartDate") || document.getElementById("startDate") || document.querySelector('input[type="datetime-local"], input[type="date"]');
+    const endInput = document.getElementById("leaveEndDate") || document.getElementById("endDate") || document.querySelectorAll('input[type="datetime-local"], input[type="date"]')[1];
+    const reasonInput = document.getElementById("leaveReason") || document.getElementById("reason") || document.querySelector("textarea");
+
+    if (startInput && target.startDate) startInput.value = target.startDate;
+    if (endInput && target.endDate) endInput.value = target.endDate;
+    if (reasonInput && target.reason) reasonInput.value = target.reason;
+
+    window.editingLeaveRecord = target;
+    if (typeof showToast === "function") {
+        showToast("এডিট মোড", "সঠিক তারিখ/সময় ঠিক করে আবেদন জমা দিন");
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderMyLeaves() {
+    window.globalLeaves = Array.isArray(globalLeaves) ? globalLeaves : [];
+    const mine = globalLeaves
+        .filter(l => String(l.staffId) === String(currentUser.id))
+        .sort((a, b) => getLeaveSortTime(b) - getLeaveSortTime(a));
+
+    const tbody = document.getElementById("myLeaveHistoryBody");
+    if (!tbody) return;
+
+    if (mine.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400">কোনো আবেদন নেই</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = mine.map((l, idx) => {
+        const leaveKey = l.id || l.leaveId || idx;
+        const badgeCls = l.rejected
+            ? "bg-rose-100 text-rose-800"
+            : l.finalApproved
+                ? "bg-emerald-100 text-emerald-800"
+                : "bg-amber-100 text-amber-800";
+
+        return `
+            <tr>
+                <td class="p-3 font-bold text-slate-700 whitespace-nowrap">${idx + 1}</td>
+                <td class="p-3 font-bold">${getCategoryLabel(l.category)}</td>
+                <td class="p-3 whitespace-nowrap">${formatLeaveRangeCompact(l.startDate, l.endDate)}</td>
+                <td class="p-3 font-extrabold text-teal-700 whitespace-nowrap">${l.days || 1} দিন</td>
+                <td class="p-3 text-slate-700">${l.reason || "-"}</td>
+                <td class="p-3">${l.prescription ? `<img src="${l.prescription}" class="h-10 w-10 object-cover rounded border">` : "-"}</td>
+                <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${badgeCls}">${l.statusText}</span></td>
+                <td class="p-3 whitespace-nowrap">
+                    <button type="button" onclick="editMyLeaveItem('${leaveKey}')"
+                        class="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs">
+                        <i class="fa-solid fa-pen-to-square mr-1"></i>এডিট
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
         function renderManagerPendingLeaves() {
             const list = globalLeaves.filter(l =>
                 l.applicantType === "staff" && !l.managerApproved && !l.finalApproved && !l.rejected
