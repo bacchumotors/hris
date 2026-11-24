@@ -2544,7 +2544,6 @@ async function recordAttendanceAction(type) {
     const recent = [...sourceList].slice(-5).reverse();
     const el = document.getElementById("recentTimeHistoryList");
     if (!el) return;
-
     if (recent.length === 0) {
         el.innerHTML = `<div class="py-6 text-center text-slate-400">কোনো সময় রেকর্ড নেই</div>`;
         return;
