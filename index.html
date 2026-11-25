@@ -1602,12 +1602,14 @@ function hideToast() {
     hideCenterToast();
 }
         function updateLiveClock() {
-            const now = new Date();
-            const el = document.getElementById("liveClockDisplay");
-            if (el) {
-                el.innerHTML = `<i class="fa-regular fa-clock mr-1.5"></i> ${now.toLocaleDateString("bn-BD")} | ${now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })}`;
-            }
-        }
+    const now = new Date();
+    const el = document.getElementById("liveClockDisplay");
+    if (el) {
+        const datePart = `<span style="font-family: 'Kalpurush', sans-serif; font-weight: 700;">${now.toLocaleDateString("bn-BD")}</span>`;
+        const timePart = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
+        el.innerHTML = `<i class="fa-regular fa-clock mr-1.5"></i> ${datePart} | ${timePart}`;
+    }
+}
 
         function initGPS() {
             if (navigator.geolocation) {
