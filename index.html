@@ -727,16 +727,16 @@
 
                     <div id="leaveBalanceCardsRow" class="grid grid-cols-3 gap-3 text-center">
                         <div class="p-3 rounded-2xl bg-rose-50 border border-rose-200">
-                            <p class="text-[11px] font-bold text-rose-800">অসুস্থতা ছুটি</p>
-                            <p id="balSick" class="text-xl font-extrabold text-rose-700 mt-0.5">১০ দিন</p>
+                            <p class="text-[11px] font-bold text-rose-800">মেডিকেল ছুটি</p>
+                            <p id="balSick" class="text-xl font-extrabold text-rose-700 mt-0.5">১২ দিন</p>
                         </div>
                         <div class="p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
-                            <p class="text-[11px] font-bold text-emerald-800">সাধারণ ছুটি</p>
-                            <p id="balCasual" class="text-xl font-extrabold text-emerald-700 mt-0.5">১০ দিন</p>
+                            <p class="text-[11px] font-bold text-emerald-800">পারিবারিক ছুটি</p>
+                            <p id="balCasual" class="text-xl font-extrabold text-emerald-700 mt-0.5">১২ দিন</p>
                         </div>
                         <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200">
-                            <p class="text-[11px] font-bold text-amber-800">জরুরি ছুটি</p>
-                            <p id="balEmergency" class="text-xl font-extrabold text-amber-700 mt-0.5">৬ দিন</p>
+                            <p class="text-[11px] font-bold text-amber-800">উৎসব ছুটি</p>
+                            <p id="balEmergency" class="text-xl font-extrabold text-amber-700 mt-0.5">৪ দিন</p>
                         </div>
                     </div>
 
@@ -744,9 +744,9 @@
                         <div id="leaveTypeSelectWrapper">
                             <label class="block text-xs font-bold mb-1">ছুটির ধরন</label>
                             <select id="leaveCategory" onchange="togglePrescriptionField()" class="w-full border px-3.5 py-2.5 rounded-xl text-sm bg-white font-semibold">
-                                <option value="casual">সাধারণ ছুটি (১০ দিন)</option>
-                                <option value="sick">অসুস্থতাজনিত ছুটি (১০ দিন)</option>
-                                <option value="emergency">জরুরি ছুটি (৬ দিন)</option>
+                                <option value="casual">মেডিকেল ছুটি (১২ দিন)</option>
+                                <option value="sick">পারিবারিক ছুটি (১২ দিন)</option>
+                                <option value="emergency">উৎসব ছুটি (৪ দিন)</option>
                             </select>
                         </div>
 
@@ -2956,11 +2956,11 @@ function openEditApplicationModal(appId) {
             const days = calcDayDiff(startDate, endDate);
             const bal = getLeaveBalance(currentUser.id);
 
-            if (category === "sick" && days > bal.sick) return showToast("ব্যালেন্স সীমা", `অসুস্থতার ছুটি বাকি আছে ${bal.sick} দিন`);
-            if (category === "casual" && days > bal.casual) return showToast("ব্যালেন্স সীমা", `সাধারণ ছুটি বাকি আছে ${bal.casual} দিন`);
-            if (category === "emergency" && days > bal.emergency) return showToast("ব্যালেন্স সীমা", `জরুরি ছুটি বাকি আছে ${bal.emergency} দিন`);
+            if (category === "sick" && days > bal.sick) return showToast("ব্যালেন্স সীমা", `মেডিকেল ছুটি বাকি আছে ${bal.sick} দিন`);
+            if (category === "casual" && days > bal.casual) return showToast("ব্যালেন্স সীমা", `পারিবারিক ছুটি বাকি আছে ${bal.casual} দিন`);
+            if (category === "emergency" && days > bal.emergency) return showToast("ব্যালেন্স সীমা", `উৎসব ছুটি বাকি আছে ${bal.emergency} দিন`);
 
-            showBikeLoader("আবেদন Google Sheet-এ পাঠানো হচ্ছে...", "");
+            showBikeLoader("আবেদন ম্যানেজারের নিকট পাঠানো হচ্ছে...", "");
             const isManager = currentUser.type === "manager";
             const item = normalizeLeaveItem({
                 action: "addLeave",
@@ -2978,8 +2978,8 @@ function openEditApplicationModal(appId) {
                 finalApproved: false,
                 rejected: false,
                 statusText: isManager
-                    ? "অ্যাডমিন / সুপার অ্যাডমিনের অনুমোদনের অপেক্ষায়"
-                    : "ম্যানেজারের ১ম অনুমোদনের অপেক্ষায়"
+                    ? "ফাইনাল অনুমোদনের অপেক্ষায়"
+                    : "১ম অনুমোদনের অপেক্ষায়"
             });
 
             globalLeaves.push(item);
@@ -3002,9 +3002,9 @@ function openEditApplicationModal(appId) {
         }
 
         function getCategoryLabel(cat) {
-            if (cat === "sick") return "অসুস্থতা ছুটি";
-            if (cat === "casual") return "সাধারণ ছুটি";
-            if (cat === "emergency") return "জরুরি ছুটি";
+            if (cat === "sick") return "মেডিকেল ছুটি";
+            if (cat === "casual") return "পারিবারিক ছুটি";
+            if (cat === "emergency") return "উৎসব ছুটি";
             return "মিসিং হাজিরা উপস্থিতি";
         }
 
